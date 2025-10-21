@@ -7,6 +7,8 @@ import { Route, Routes } from 'react-router-dom'
 //오서현
 
 //이예나
+import NavbarManager from './components/Navbar/NavbarManager'
+import HomeManager from './pages/Manager/HomeManager'
 
 //주현수
 
@@ -15,6 +17,15 @@ const App = () => {
     <div>
       <Routes>
        {/* 예시: <Route path='/mypage/festival' element={<MyPage/>}/> */}
+       {/* 오서현 */}
+
+
+       {/* 이예나 */}
+       {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
+       <Route path='/homemanager' element={<HomeManager/>}/>
+
+       {/* 주현수 */}
+
        
       </Routes>
     </div>
