@@ -6,6 +6,9 @@ import { Route, Routes } from "react-router-dom";
 
 //오서현
 import HomeUser from "./pages/User/HomeUser";
+import ViewShowDetail from "./pages/User/ViewShowDetail";
+import ViewTeamInfo from "./pages/User/ViewTeamInfo";
+import Login from "./pages/Login";
 
 //이예나
 import NavbarManager from "./components/Navbar/NavbarManager";
@@ -22,6 +25,9 @@ const App = () => {
         {/* 예시: <Route path='/mypage/festival' element={<MyPage/>}/> */}
         {/* 오서현 */}
         <Route path="/homeuser" element={<HomeUser />} />
+        <Route path="/viewshowdetail" element={<ViewShowDetail />} />
+        <Route path="/viewteaminfo" element={<ViewTeamInfo />} />
+        <Route path="/login" element={<Login />} />
 
         {/* 이예나 */}
         {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
