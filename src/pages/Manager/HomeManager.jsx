@@ -11,6 +11,8 @@ import myteamimg from '../../assets/homemanager/myteam.png'
 import myshowimg from '../../assets/homemanager/myshow_icon.png'
 
 const HomeManager = () => {
+
+    const navigate = useNavigate();
   return (
     <Home>
     <NavbarManager/>
@@ -29,6 +31,7 @@ const HomeManager = () => {
         </RegisterShow>
 
         <TeamInfo>
+            <MyShowContent>
             <MyShowLeft>
             <BtnName>단체 소개</BtnName>
             <BtnInfo>설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구.. 어쩌구 저쩌구..</BtnInfo>
@@ -36,11 +39,12 @@ const HomeManager = () => {
             <MyShowRight>
                 <BtnIcon src={myteamimg} alt="단체소개"/>
             </MyShowRight>
+            </MyShowContent>
         </TeamInfo>
         </FarLeft>
 
         <TopMid>
-        <MyShow>
+        <MyShow onClick={()=>navigate(`/manageshow`)}>
             <MyShowContent>
             <MyShowLeft>
                 <BtnName>내 공연 관리</BtnName>
@@ -112,6 +116,12 @@ const RegisterShow = styled.div`
     background: #FFF1F0;
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
+
+    transition: all 0.2s ease;
+    &:hover {
+        transform: translateY(-4px);
+        background-color: #fbdede;
+    }
 `
 
 const BtnName = styled.div`
@@ -184,6 +194,12 @@ const MyShow = styled.div`
     background: #FFF1F0;
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
+
+    transition: all 0.2s ease;
+    &:hover {
+        transform: translateY(-4px);
+        background-color: #fbdede;
+    }
 `
 const MyShowContent = styled.div`
     display: flex;
@@ -214,6 +230,12 @@ const UserLink = styled.div`
     background: #FFF1F0;
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
+
+    transition: all 0.2s ease;
+    &:hover {
+        transform: translateY(-4px);
+        background-color: #fbdede;
+    }
 `
 
 const TopRight = styled.div`
@@ -234,6 +256,12 @@ const MyLocation = styled.div`
     background: #FFF1F0;
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
+
+    transition: all 0.2s ease;
+    &:hover {
+        transform: translateY(-4px);
+        background-color: #fbdede;
+    }
 `
 
 const FarLeft = styled.div`
@@ -250,8 +278,16 @@ const TeamInfo = styled.div`
     flex-direction: column;
     justify-content: space-between;
 
+    z-index: 1000;
+
     border-radius: 30px;
     background: #FFF1F0;
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
+
+    transition: all 0.2s ease;
+    &:hover {
+        transform: translateY(-4px);
+        background-color: #fbdede;
+    }
 `

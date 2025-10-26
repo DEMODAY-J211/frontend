@@ -10,6 +10,8 @@ import HomeUser from "./pages/User/HomeUser";
 //이예나
 import NavbarManager from "./components/Navbar/NavbarManager";
 import HomeManager from "./pages/Manager/HomeManager";
+import ManageShow from "./pages/Manager/ManageShow/ManageShow";
+import ManageUser from "./pages/Manager/ManageShow/ManageUser";
 
 //주현수
 
@@ -24,6 +26,8 @@ const App = () => {
         {/* 이예나 */}
         {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
         <Route path="/homemanager" element={<HomeManager />} />
+        <Route path="/manageshow" element={<ManageShow/>}/>
+        <Route path="/manageshow/manageuser" element={<ManageUser/>}/>
 
         {/* 주현수 */}
       </Routes>
