@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RiInformationLine, RiArrowLeftSLine } from "react-icons/ri";
 import { IoTicket } from "react-icons/io5";
-import tikitta from "../../assets/tikitta.svg";
+import tikitta_small from "../../assets/tikitta_small.svg";
 
 export default function NavbarUser({ Backmode = false, text = "" }) {
   const navigate = useNavigate();
@@ -17,24 +17,17 @@ export default function NavbarUser({ Backmode = false, text = "" }) {
         <RiArrowLeftSLine size="32px" />
       </div>
       <MainContainer>{text ? text : "제11회 정기공연"}</MainContainer>
-      <div className="buttoncontainer">
-        <IoTicket
-          size="24px"
-          color="#FC2847"
-          onClick={() => navigate("/myticketlist")}
-        />
-      </div>
     </HeaderContainer>
   ) : (
     // 메인 헤더 (기본값) ex. <NavbarUser/>, <NavbarUser Backmode={false} />
     <HeaderContainer>
       <img
-        src={tikitta}
+        src={tikitta_small}
         alt="tikitta logo"
         onClick={() => navigate("/homeuser")}
         style={{ cursor: "pointer" }}
       />
-      <MainContainer>
+      <TextContainer>
         서강연극회
         <div className="buttoncontainer">
           <RiInformationLine
@@ -42,7 +35,7 @@ export default function NavbarUser({ Backmode = false, text = "" }) {
             onClick={() => navigate("/viewteaminfo")}
           />
         </div>
-      </MainContainer>
+      </TextContainer>
       <div className="buttoncontainer">
         <IoTicket
           size="24px"
@@ -56,12 +49,16 @@ export default function NavbarUser({ Backmode = false, text = "" }) {
 
 const HeaderContainer = styled.div`
   display: flex;
+  position: sticky;
+  top: 0; /* 화면 상단에 붙도록 */
+  z-index: 1000; /* 다른 컨텐츠 위로 올라오도록 */
   height: 80px;
   padding: 10px 20px;
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
   align-self: stretch;
+  background-color: #fff;
 
   color: #000;
   font-family: GyeonggiTitle;
@@ -80,8 +77,19 @@ const HeaderContainer = styled.div`
 `;
 
 const MainContainer = styled.div`
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  user-select: none;
+`;
+
+const TextContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 5px;
-  user-select: none;
+  gap: 10px;
+  color: #000;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 `;
