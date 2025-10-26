@@ -15,6 +15,7 @@ const HomeManager = () => {
     <Home>
     <NavbarManager/>
     <ButtonGridTop>
+        <FarLeft>
         <RegisterShow>
             <BtnName>공연 등록하기</BtnName>
             <BtnIcon src={showimg} alt="공연 등록하기"/>
@@ -27,7 +28,18 @@ const HomeManager = () => {
             </BtnWriting>
         </RegisterShow>
 
-        <TopRight>
+        <TeamInfo>
+            <MyShowLeft>
+            <BtnName>단체 소개</BtnName>
+            <BtnInfo>설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구.. 어쩌구 저쩌구..</BtnInfo>
+            </MyShowLeft>
+            <MyShowRight>
+                <BtnIcon src={myteamimg} alt="단체소개"/>
+            </MyShowRight>
+        </TeamInfo>
+        </FarLeft>
+
+        <TopMid>
         <MyShow>
             <MyShowContent>
             <MyShowLeft>
@@ -39,7 +51,8 @@ const HomeManager = () => {
             </MyShowRight>
             </MyShowContent>
         </MyShow>
-
+        
+        <TopRight>
         <UserLink>
             <MyShowContent>
                 <MyShowLeft>
@@ -51,9 +64,19 @@ const HomeManager = () => {
                 </MyShowRight>
             </MyShowContent>
         </UserLink>
+
+        <MyLocation>
+            <BtnName>내 공연장 관리</BtnName>
+            <BtnIcon src={locationimg} alt="내 공연장 관리"/>
+            <BtnInfo>설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구.. 어쩌구 저쩌구.</BtnInfo>
+        </MyLocation>
+
         </TopRight>
 
         
+        </TopMid>
+
+
 
     </ButtonGridTop>
     </Home>
@@ -142,10 +165,11 @@ const DraftNum = styled.p`
 //     font-size: 16px;
 // `
 
-const TopRight = styled.div`
+const TopMid = styled.div`
     display: flex;
     flex-direction: column;
     gap: 45px;
+    transform: translateX(-60%);
 `
 
 const MyShow = styled.div`
@@ -182,6 +206,46 @@ const UserLink = styled.div`
     display: flex;
     width: 419px;
     height: 245px;  
+    padding: 40px;
+    flex-direction: column;
+    justify-content: space-between;
+
+    border-radius: 30px;
+    background: #FFF1F0;
+    box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+`
+
+const TopRight = styled.div`
+    display: flex;
+    gap: 70px;
+`
+
+const MyLocation = styled.div`
+    display: flex;
+    width: 340px;
+    height: 545px;
+    padding: 40px;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    border-radius: 30px;
+    background: #FFF1F0;
+    box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+`
+
+const FarLeft = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 45px;
+`
+
+const TeamInfo = styled.div`
+    display: flex;
+    width: 829px;
+    height: 255px;
     padding: 40px;
     flex-direction: column;
     justify-content: space-between;
