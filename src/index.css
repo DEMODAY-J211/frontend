@@ -32,6 +32,13 @@
     font-display: swap;
 }
 
+/* 🌈 전역 색상 변수 정의 */
+:root {
+  --color-primary: #FC2847;
+  --color-secondary: #D60033;
+  --color-tertiary: #FFF1F0;
+}
+
 body{
   background: white;
   color: #333;

@@ -113,7 +113,7 @@ const RegisterShow = styled.div`
     align-items: center;
 
     border-radius: 30px;
-    background: #FFF1F0;
+    background: var(--color-tertiary);
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
 
@@ -165,7 +165,7 @@ const DraftNum = styled.p`
    cursor: pointer;
     transition: all 0.2s ease;
    &:hover{
-    color: #FC2847;
+    color: var(--color-primary);
 
    }
     
@@ -191,7 +191,7 @@ const MyShow = styled.div`
     justify-content: space-between;
 
     border-radius: 30px;
-    background: #FFF1F0;
+    background: var(--color-tertiary);
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
 
@@ -227,7 +227,7 @@ const UserLink = styled.div`
     justify-content: space-between;
 
     border-radius: 30px;
-    background: #FFF1F0;
+    background: var(--color-tertiary);
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
 
@@ -253,7 +253,7 @@ const MyLocation = styled.div`
     align-items: center;
 
     border-radius: 30px;
-    background: #FFF1F0;
+    background: var(--color-tertiary);
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
 
@@ -281,7 +281,7 @@ const TeamInfo = styled.div`
     z-index: 1000;
 
     border-radius: 30px;
-    background: #FFF1F0;
+    background:var(--color-tertiary);
     box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
     cursor: pointer;
 

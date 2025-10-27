@@ -63,6 +63,7 @@ const Title = styled.div`
     font-style: normal;
     font-weight: 500;
     line-height: normal;
+    padding-left: 5px;
 `
 
 const Shows = styled.div`
@@ -86,7 +87,7 @@ const Card = styled.div`
   height: 213px;
   padding: 36px 30px;
   border-radius: 30px;
-  background: #FFF1F0;
+  background: var(--color-tertiary);
   box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
   cursor: pointer;
