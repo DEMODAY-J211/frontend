@@ -17,7 +17,7 @@ const ManageShow = () => {
     { title: "예매자 관리", desc: "입장 현황 대한 설명글", icon: <img src={manageuser} alt="manageuser" />, path: '/manageshow/manageuser' },
     { title: "입장 현황", desc: "입장 현황 대한 설명글", icon: <img src={entrystatus} alt="entrystatus"/>, path: '/manageshow/entrystatus' },
     { title: "공연 정보 수정", desc: "공연 정보 수정에 대한 설명글", icon:  <img src={editshow} alt="editshow" />, path: '/manageshow/manageuser'  },
-    { title: "QR 코드 확인", desc: "공연 정보 수정에 대한 설명글", icon:  <img src={checkqrimg} alt="checkqrimg" />, path: '/manageshow/manageuser'  },
+    { title: "QR 코드 확인", desc: "공연 정보 수정에 대한 설명글", icon:  <img src={checkqrimg} alt="checkqrimg" />, path: '/qrmanager'  },
   ];
 
   return (

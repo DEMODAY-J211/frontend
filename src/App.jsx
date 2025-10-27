@@ -17,6 +17,7 @@ import HomeManager from "./pages/Manager/HomeManager";
 import ManageShow from "./pages/Manager/ManageShow/ManageShow";
 import ManageUser from "./pages/Manager/ManageShow/ManageUser";
 import ViewEntryStatus from "./pages/Manager/ManageShow/ViewEntryStatus";
+import QRManager from "./pages/Manager/QRManager";
 
 //주현수
 
@@ -36,6 +37,7 @@ const App = () => {
         <Route path="/homemanager" element={<HomeManager />} />
         <Route path="/manageshow" element={<ManageShow/>}/>
         <Route path="/manageshow/manageuser" element={<ManageUser/>}/>
+        <Route path="/qrmanager" element={<QRManager/>}/>
         
 
         {/* 주현수 */}
