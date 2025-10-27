@@ -8,6 +8,7 @@ import { Route, Routes } from "react-router-dom";
 import HomeUser from "./pages/User/HomeUser";
 import ViewShowDetail from "./pages/User/ViewShowDetail";
 import ViewTeamInfo from "./pages/User/ViewTeamInfo";
+import SelectSeat from "./pages/User/SelectSeat";
 import Login from "./pages/Login";
 
 //이예나
@@ -15,6 +16,7 @@ import NavbarManager from "./components/Navbar/NavbarManager";
 import HomeManager from "./pages/Manager/HomeManager";
 import ManageShow from "./pages/Manager/ManageShow/ManageShow";
 import ManageUser from "./pages/Manager/ManageShow/ManageUser";
+import ViewEntryStatus from "./pages/Manager/ManageShow/ViewEntryStatus";
 
 //주현수
 
@@ -34,8 +36,11 @@ const App = () => {
         <Route path="/homemanager" element={<HomeManager />} />
         <Route path="/manageshow" element={<ManageShow/>}/>
         <Route path="/manageshow/manageuser" element={<ManageUser/>}/>
+        
 
         {/* 주현수 */}
+        <Route path="/manageshow/entrystatus" element={<ViewEntryStatus/>}/>
+        <Route path="/selectseat/:showtimeId" element={<SelectSeat />} />
       </Routes>
     </div>
   );
