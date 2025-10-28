@@ -3,7 +3,9 @@ import styled from "styled-components";
 import TeamInfo from "./TeamInfo";
 
 export default function ShowTab({ hasGroupInfo = true }) {
-  const [activeTab, setActiveTab] = useState("공연상세");
+  const [activeTab, setActiveTab] = useState(
+    hasGroupInfo ? "공연상세" : "예매확인/취소"
+  );
   const tabs = hasGroupInfo
     ? ["공연상세", "판매정보", "단체소개"]
     : ["예매확인/취소", "지난 공연내역"];
@@ -36,7 +38,6 @@ export default function ShowTab({ hasGroupInfo = true }) {
             입금을 확인해야 하므로 티켓 발급까지 시간이 걸릴 수 있습니다. 입금
             확인 시 예매 확정 문자를 보내 드립니다.
             <br />
-            <br />
             <p>티켓 수령 안내 </p>
             티킷타 서비스를 통해 티켓을 예매하면 공연 시작 1시간 전, 서비스
             내에서 조회가능한 QR코드 형태로 티켓이 발급됩니다. 해당 티켓의
@@ -52,12 +53,6 @@ export default function ShowTab({ hasGroupInfo = true }) {
           </ContentWrapper>
         )}
         {activeTab === "단체소개" && <TeamInfo />}
-        {activeTab === "예매확인/취소" && (
-          <ContentWrapper>{"예매확인/취소 내용"}</ContentWrapper>
-        )}
-        {activeTab === "지난 공연내역" && (
-          <ContentWrapper>{"지난 공연내역 내용"}</ContentWrapper>
-        )}
       </div>
     </TabWrapper>
   );
@@ -72,7 +67,7 @@ const TabWrapper = styled.div`
 
 const TabContainer = styled.div`
   display: flex;
-  width: 393px;
+  width: 100%;
   padding: 0 20px;
   align-items: center;
   border-bottom: 1px solid #c0c0c0;
