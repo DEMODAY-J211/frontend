@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import { ToastProvider } from "./components/Toast/ToastProvider";
 
 //여기서부터 자기 이름 밑으로 import 하기!!
 // 예시: import Login from './pages/Login.jsx';
@@ -28,6 +29,7 @@ import BuyTicket from "./pages/User/BuyTicket";
 const App = () => {
   return (
     <div>
+      <ToastProvider>
       <Routes>
         {/* 예시: <Route path='/mypage/festival' element={<MyPage/>}/> */}
         {/* 오서현 */}
@@ -51,6 +53,7 @@ const App = () => {
         <Route path="/manageshow/entrystatus" element={<ViewEntryStatus />} />
         <Route path="/selectseat/:showtimeId" element={<SelectSeat />} />
       </Routes>
+      </ToastProvider>
     </div>
   );
 };
