@@ -1,11 +1,26 @@
-import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import Footerbtn from "../../components/Save/Footerbtn";
+import CancelModal from "../../components/Modal/CancelModal";
+
 // s01201
 export default function CheckTicket() {
+  const navigate = useNavigate();
+  const showid = useState(1);
+  const [isCancel, setIsCancel] = useState(false);
+
+  const handleSelectSeat = () => {
+    navigate(`/selectseat/${showid}`);
+  };
+  const handleCancel = () => {
+    setIsCancel(true);
+  };
+
   return (
     <PageWrapper>
+      {isCancel && <CancelModal onClose={() => setIsCancel(false)} />}
       <HomeUserContainer>
         <NavbarUser Backmode={true} text="예매 상세 내역" />
         <TicketWrapper>
@@ -68,8 +83,8 @@ export default function CheckTicket() {
         </TicketWrapper>
         <Footerbtn
           buttons={[
-            { text: "예매 취소", color: "red", onClick: "/" },
-            { text: "좌석 변경", color: "red", onClick: "/" },
+            { text: "예매 취소", color: "red", onClick: handleCancel },
+            { text: "좌석 변경", color: "red", onClick: handleSelectSeat },
           ]}
         />
       </HomeUserContainer>

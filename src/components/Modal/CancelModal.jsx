@@ -3,9 +3,19 @@ import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-export default function ReservationComplete({ onClose }) {
+export default function CancelModal({ onClose }) {
   const navigate = useNavigate();
   const reservationId = useState(0);
+  const [status, setStatus] = useState(false);
+
+  const onClick = () => {
+    if (!status) {
+      setStatus(true);
+    } else {
+      navigate("/homeuser");
+    }
+  };
+
   return (
     <Overlay>
       <ModalBox>
@@ -13,33 +23,19 @@ export default function ReservationComplete({ onClose }) {
           <AiOutlineClose size={32} />
         </div>
         <div className="Wrapper">
-          <p>🎉 예매가 완료되었어요!</p>
-          <br />
           <p>
-            예매 확정을 위해 <br />
-            입금자명은 ‘강길동’으로 <br />
-            17000원을 입금해주세요!{" "}
+            {status
+              ? "공연 예매가 취소되었습니다."
+              : "공연 예매를 취소하시겠습니까?"}
           </p>
           <br />
-          <p>
-            입금이 확인되면 예매가 확정됩니다.
-            <br />
-            (입금이 확인되지 않으면 <br />
-            자동으로 취소될 수 있어요.)
+          <p style={{ color: "var(--color-primary)" }}>
+            * 취소 약관을 확인해주세요.
           </p>
         </div>
-        <InfoSection>
-          <TicketInfo>
-            <Title>입금 계좌</Title>
-            <Toggle>계좌복사</Toggle>
-          </TicketInfo>
-          <Subtitle>우리 0000-000-000000 (예금주) 홍길동</Subtitle>
-        </InfoSection>
-        <div
-          className="btn btn-red"
-          onClick={() => navigate(`/checkticket/${reservationId}`)}
-        >
-          확인
+
+        <div className="btn btn-red" onClick={onClick}>
+          {status ? "확인" : "취소하기"}
         </div>
       </ModalBox>
     </Overlay>
@@ -57,16 +53,6 @@ const Overlay = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 9999;
-`;
-
-const DimmedBackground = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4); /* 회색 톤 오버레이 */
-  z-index: 1;
 `;
 
 const ModalBox = styled.div`
