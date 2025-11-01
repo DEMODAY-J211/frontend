@@ -10,9 +10,25 @@ import locationimg from '../../assets/homemanager/location_icon.png'
 import myteamimg from '../../assets/homemanager/myteam.png'
 import myshowimg from '../../assets/homemanager/myshow_icon.png'
 
+import { ToastProvider } from '../../components/Toast/ToastProvider'
+import { useToast } from '../../components/Toast/UseToast'
+
 const HomeManager = () => {
 
     const navigate = useNavigate();
+    
+    const { addToast } = useToast(); // 훅으로 토스트 가져오기
+
+    const handleCopyLink = async () => {
+        const link = "https://example.com"; // 실제 복사할 링크
+        try {
+        await navigator.clipboard.writeText(link);
+        addToast("링크를 복사했어요!", "success"); // 성공 토스트
+        } catch (err) {
+        addToast("링크 복사 실패", "error"); // 실패 토스트
+        }
+    };
+
   return (
     <Home>
     <NavbarManager/>
@@ -57,7 +73,7 @@ const HomeManager = () => {
         </MyShow>
         
         <TopRight>
-        <UserLink>
+        <UserLink onClick={handleCopyLink}>
             <MyShowContent>
                 <MyShowLeft>
                     <BtnName>예매자 링크</BtnName>

@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser.jsx";
 import { RiArrowLeftWideFill } from "react-icons/ri";
@@ -66,7 +65,7 @@ export default function HomeUser() {
   }
 
   const handleBuyTicket = () => {
-    navigate("/viewshowdetail", {
+    navigate(`/viewshowdetail/${currentShow.showId}`, {
       state: {
         managerId: currentShow.managerId,
         showId: currentShow.showId,
@@ -78,7 +77,6 @@ export default function HomeUser() {
     <PageWrapper>
       <HomeUserContainer>
         <NavbarUser />
-        {/* <NavbarUser Backmode={true} text="예매하기" /> */}
         <ShowList>
           <button
             className="buttoncontainer"
@@ -87,21 +85,15 @@ export default function HomeUser() {
           >
             <RiArrowLeftWideFill size="40px" />
           </button>
-          <ShowItemWrapper>
+          <ShowItemWrapper onClick={handleBuyTicket}>
             <ShowItemSlider index={currentIndex}>
-              {shows.map((show, idx) => {
-                const isCurrentReservable =
-                  idx === currentIndex && show.isReservable;
+              {shows.map((show) => {
                 return (
                   <ShowItem key={show.showId}>
                     <img
                       className="poster"
                       src={show.showPosterPicture}
                       alt={show.showTitle}
-                      style={{
-                        cursor: isCurrentReservable ? "pointer" : "",
-                      }}
-                      onClick={handleBuyTicket}
                     />
                     <div className="info">
                       <p>{show.showTimes}</p>
@@ -145,7 +137,6 @@ const PageWrapper = styled.div`
   background-color: #fff;
 
   color: #000;
-  font-family: GyeonggiTitle;
   font-size: 20px;
   font-style: normal;
   font-weight: 300;
@@ -213,7 +204,7 @@ const ShowItem = styled.div`
   }
 `;
 
-const Buyticketbtn = styled.button`
+const Buyticketbtn = styled.div`
   display: flex;
   padding: 10px 20px;
   justify-content: center;
@@ -225,7 +216,6 @@ const Buyticketbtn = styled.button`
   border: none;
   cursor: ${(props) => (props.reservable ? "pointer" : "")};
   color: #fff;
-  font-family: GyeonggiTitle;
   font-size: 20px;
   font-style: normal;
   font-weight: 300;

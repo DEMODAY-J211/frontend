@@ -1,25 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import NavbarManager from '../../../components/Navbar/NavbarManager';
-import { IoMdRefresh, IoMdClose } from 'react-icons/io';
-import { MdKeyboardArrowDown } from 'react-icons/md';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import NavbarManager from "../../../components/Navbar/NavbarManager";
+import { IoMdRefresh, IoMdClose } from "react-icons/io";
+import { MdKeyboardArrowDown } from "react-icons/md";
 
 const ViewEntryStatus = () => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState('seat'); 
+  const [viewMode, setViewMode] = useState("seat");
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [showSelected, setShowSelected] = useState(false);
 
-  // 리스트 
-  const [filterTab, setFilterTab] = useState('all'); // 'all', 'entered', 'notEntered'
-  const [searchQuery, setSearchQuery] = useState('');
+  // 리스트
+  const [filterTab, setFilterTab] = useState("all"); // 'all', 'entered', 'notEntered'
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
 
-  // 좌석 데이터 
+  // 좌석 데이터
   const [seatLayout, setSeatLayout] = useState([]);
   const [reservationData, setReservationData] = useState([]);
-
 
   useEffect(() => {
     loadSeatData();
@@ -38,7 +37,7 @@ const ViewEntryStatus = () => {
         ticketOptionId: 2,
         isEntered: true,
         isReserved: true,
-        reservationTime: "2025-10-02T14:25:00"
+        reservationTime: "2025-10-02T14:25:00",
       },
       {
         reservationItemId: 1002,
@@ -50,7 +49,7 @@ const ViewEntryStatus = () => {
         ticketOptionId: 2,
         isEntered: false,
         isReserved: true,
-        reservationTime: "2025-10-02T14:30:00"
+        reservationTime: "2025-10-02T14:30:00",
       },
       {
         reservationItemId: 1003,
@@ -62,7 +61,7 @@ const ViewEntryStatus = () => {
         ticketOptionId: 2,
         isEntered: false,
         isReserved: true,
-        reservationTime: "2025-10-02T14:35:00"
+        reservationTime: "2025-10-02T14:35:00",
       },
       {
         reservationItemId: 1004,
@@ -74,7 +73,7 @@ const ViewEntryStatus = () => {
         ticketOptionId: 2,
         isEntered: true,
         isReserved: true,
-        reservationTime: "2025-10-02T14:40:00"
+        reservationTime: "2025-10-02T14:40:00",
       },
       {
         reservationItemId: 1005,
@@ -86,11 +85,10 @@ const ViewEntryStatus = () => {
         ticketOptionId: 2,
         isEntered: false,
         isReserved: true,
-        reservationTime: "2025-10-02T14:45:00"
+        reservationTime: "2025-10-02T14:45:00",
       },
     ];
 
-  
     const mockSeatLayout = generateSeatLayout(mockReservationData);
 
     setReservationData(mockReservationData);
@@ -98,21 +96,20 @@ const ViewEntryStatus = () => {
   };
 
   const generateSeatLayout = (reservations) => {
-  
-    const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const rows = ["A", "B", "C", "D", "E", "F", "G", "H"];
     const cols = 10;
 
     const layout = rows.map((row, rowIndex) => {
       return Array.from({ length: cols }, (_, colIndex) => {
         const seatLabel = `${row}${colIndex + 1}`;
-        const reservation = reservations.find(r => r.seat === seatLabel);
+        const reservation = reservations.find((r) => r.seat === seatLabel);
 
         if (reservation) {
           // 예약된 좌석
           return {
             id: `seat-${rowIndex}-${colIndex}`,
             label: seatLabel,
-            ...reservation
+            ...reservation,
           };
         }
 
@@ -122,9 +119,9 @@ const ViewEntryStatus = () => {
           label: seatLabel,
           isReserved: true, // 모든 좌석을 예약된 것으로 표시
           isEntered: false, // 기본값: 미입장
-          userName: '-',
-          phone: '-',
-          reservationItemId: null
+          userName: "-",
+          phone: "-",
+          reservationItemId: null,
         };
       });
     });
@@ -134,7 +131,7 @@ const ViewEntryStatus = () => {
 
   const handleRefresh = () => {
     // 새로고침
-    console.log('Refreshing...');
+    console.log("Refreshing...");
     loadSeatData();
   };
 
@@ -142,10 +139,10 @@ const ViewEntryStatus = () => {
     if (!seat.isReserved) return; // 예약 안 된 좌석은 클릭 불가
 
     // 선택된 좌석 토글
-    const isSelected = selectedSeats.find(s => s.id === seat.id);
+    const isSelected = selectedSeats.find((s) => s.id === seat.id);
 
     if (isSelected) {
-      setSelectedSeats(selectedSeats.filter(s => s.id !== seat.id));
+      setSelectedSeats(selectedSeats.filter((s) => s.id !== seat.id));
     } else {
       setSelectedSeats([...selectedSeats, seat]);
     }
@@ -157,8 +154,8 @@ const ViewEntryStatus = () => {
     if (!seat.isReserved) return;
 
     // 좌석 상태 토글 (입장완료 <-> 미입장)
-    const newLayout = seatLayout.map(row =>
-      row.map(s => {
+    const newLayout = seatLayout.map((row) =>
+      row.map((s) => {
         if (s.id === seat.id) {
           return { ...s, isEntered: !s.isEntered };
         }
@@ -169,11 +166,11 @@ const ViewEntryStatus = () => {
     setSeatLayout(newLayout);
 
     // API 호출->상태 업데이트
-    console.log('Toggle seat status:', seat.label, !seat.isEntered);
+    console.log("Toggle seat status:", seat.label, !seat.isEntered);
   };
 
   const handleRemoveSeat = (seat) => {
-    setSelectedSeats(selectedSeats.filter(s => s.id !== seat.id));
+    setSelectedSeats(selectedSeats.filter((s) => s.id !== seat.id));
     if (selectedSeats.length <= 1) {
       setShowSelected(false);
     }
@@ -181,13 +178,13 @@ const ViewEntryStatus = () => {
 
   const handleCompleteEntry = () => {
     // 선택된 좌석들의 입장완료 처리
-    const seatIds = selectedSeats.map(s => s.reservationItemId);
-    console.log('Complete entry for:', seatIds);
+    const seatIds = selectedSeats.map((s) => s.reservationItemId);
+    console.log("Complete entry for:", seatIds);
 
     // 좌석 상태 업데이트
-    const newLayout = seatLayout.map(row =>
-      row.map(s => {
-        if (selectedSeats.find(selected => selected.id === s.id)) {
+    const newLayout = seatLayout.map((row) =>
+      row.map((s) => {
+        if (selectedSeats.find((selected) => selected.id === s.id)) {
           return { ...s, isEntered: true };
         }
         return s;
@@ -207,18 +204,19 @@ const ViewEntryStatus = () => {
     let filtered = reservationData;
 
     // 탭 필터 적용
-    if (filterTab === 'entered') {
-      filtered = filtered.filter(r => r.isEntered);
-    } else if (filterTab === 'notEntered') {
-      filtered = filtered.filter(r => !r.isEntered);
+    if (filterTab === "entered") {
+      filtered = filtered.filter((r) => r.isEntered);
+    } else if (filterTab === "notEntered") {
+      filtered = filtered.filter((r) => !r.isEntered);
     }
 
     // 검색 필터 적용
     if (searchQuery.trim()) {
-      filtered = filtered.filter(r =>
-        r.userName.includes(searchQuery) ||
-        r.seat.includes(searchQuery) ||
-        r.phone.includes(searchQuery)
+      filtered = filtered.filter(
+        (r) =>
+          r.userName.includes(searchQuery) ||
+          r.seat.includes(searchQuery) ||
+          r.phone.includes(searchQuery)
       );
     }
 
@@ -226,10 +224,16 @@ const ViewEntryStatus = () => {
   };
 
   const handleRowCheckbox = (reservation) => {
-    const isSelected = selectedRows.find(r => r.reservationItemId === reservation.reservationItemId);
+    const isSelected = selectedRows.find(
+      (r) => r.reservationItemId === reservation.reservationItemId
+    );
 
     if (isSelected) {
-      setSelectedRows(selectedRows.filter(r => r.reservationItemId !== reservation.reservationItemId));
+      setSelectedRows(
+        selectedRows.filter(
+          (r) => r.reservationItemId !== reservation.reservationItemId
+        )
+      );
     } else {
       setSelectedRows([...selectedRows, reservation]);
     }
@@ -244,7 +248,7 @@ const ViewEntryStatus = () => {
   };
 
   const handleToggleEntryStatus = (reservation) => {
-    const newData = reservationData.map(r => {
+    const newData = reservationData.map((r) => {
       if (r.reservationItemId === reservation.reservationItemId) {
         return { ...r, isEntered: !r.isEntered };
       }
@@ -254,8 +258,8 @@ const ViewEntryStatus = () => {
     setReservationData(newData);
 
     // 좌석 레이아웃도 업데이트
-    const newLayout = seatLayout.map(row =>
-      row.map(s => {
+    const newLayout = seatLayout.map((row) =>
+      row.map((s) => {
         if (s.reservationItemId === reservation.reservationItemId) {
           return { ...s, isEntered: !s.isEntered };
         }
@@ -264,21 +268,29 @@ const ViewEntryStatus = () => {
     );
     setSeatLayout(newLayout);
 
-    console.log('Toggle entry status:', reservation.seat, !reservation.isEntered);
+    console.log(
+      "Toggle entry status:",
+      reservation.seat,
+      !reservation.isEntered
+    );
   };
 
   const handleCancelSeat = (reservation) => {
-    if (window.confirm(`${reservation.userName}님의 ${reservation.seat} 좌석을 취소하시겠습니까?`)) {
-      console.log('Cancel seat:', reservation);
+    if (
+      window.confirm(
+        `${reservation.userName}님의 ${reservation.seat} 좌석을 취소하시겠습니까?`
+      )
+    ) {
+      console.log("Cancel seat:", reservation);
       // API 호출
-      alert('좌석이 취소되었습니다.');
+      alert("좌석이 취소되었습니다.");
     }
   };
 
   const handleSaveChanges = () => {
-    console.log('Save changes');
+    console.log("Save changes");
     // API 호출
-    alert('변경사항이 저장되었습니다.');
+    alert("변경사항이 저장되었습니다.");
   };
 
   return (
@@ -310,14 +322,14 @@ const ViewEntryStatus = () => {
 
           <ViewToggle>
             <ToggleOption
-              active={viewMode === 'seat'}
-              onClick={() => setViewMode('seat')}
+              active={viewMode === "seat"}
+              onClick={() => setViewMode("seat")}
             >
               좌석표
             </ToggleOption>
             <ToggleOption
-              active={viewMode === 'list'}
-              onClick={() => setViewMode('list')}
+              active={viewMode === "list"}
+              onClick={() => setViewMode("list")}
             >
               리스트
             </ToggleOption>
@@ -335,7 +347,7 @@ const ViewEntryStatus = () => {
                   <IoMdClose
                     size={12}
                     color="#D60033"
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                     onClick={() => handleRemoveSeat(seat)}
                   />
                 </SeatTag>
@@ -348,7 +360,7 @@ const ViewEntryStatus = () => {
         )}
 
         {/* 좌석표 뷰 */}
-        {viewMode === 'seat' && (
+        {viewMode === "seat" && (
           <>
             <SeatMapContainer>
               <SeatMapGrid>
@@ -359,14 +371,16 @@ const ViewEntryStatus = () => {
                         {seat && seat.isReserved ? (
                           <SeatButton
                             isEntered={seat.isEntered}
-                            isSelected={selectedSeats.some(s => s.id === seat.id)}
+                            isSelected={selectedSeats.some(
+                              (s) => s.id === seat.id
+                            )}
                             onClick={() => handleSeatClick(seat)}
                             onDoubleClick={() => handleToggleSeatStatus(seat)}
                           >
                             {seat.label}
                           </SeatButton>
                         ) : (
-                          <EmptySeat>{seat ? seat.label : ''}</EmptySeat>
+                          <EmptySeat>{seat ? seat.label : ""}</EmptySeat>
                         )}
                       </SeatCell>
                     ))}
@@ -390,26 +404,26 @@ const ViewEntryStatus = () => {
         )}
 
         {/* 리스트 뷰 */}
-        {viewMode === 'list' && (
+        {viewMode === "list" && (
           <ListViewContainer>
             {/* 필터 및 검색 영역 */}
             <FilterSearchArea>
               <TabFilters>
                 <TabButton
-                  active={filterTab === 'all'}
-                  onClick={() => setFilterTab('all')}
+                  active={filterTab === "all"}
+                  onClick={() => setFilterTab("all")}
                 >
                   전체
                 </TabButton>
                 <TabButton
-                  active={filterTab === 'entered'}
-                  onClick={() => setFilterTab('entered')}
+                  active={filterTab === "entered"}
+                  onClick={() => setFilterTab("entered")}
                 >
                   입장 완료
                 </TabButton>
                 <TabButton
-                  active={filterTab === 'notEntered'}
-                  onClick={() => setFilterTab('notEntered')}
+                  active={filterTab === "notEntered"}
+                  onClick={() => setFilterTab("notEntered")}
                 >
                   미입장
                 </TabButton>
@@ -435,7 +449,11 @@ const ViewEntryStatus = () => {
                       <Checkbox
                         type="checkbox"
                         onChange={(e) => handleSelectAllRows(e.target.checked)}
-                        checked={selectedRows.length === getFilteredReservations().length && getFilteredReservations().length > 0}
+                        checked={
+                          selectedRows.length ===
+                            getFilteredReservations().length &&
+                          getFilteredReservations().length > 0
+                        }
                       />
                     </HeaderCell>
                     <HeaderCell width="99px">좌석번호</HeaderCell>
@@ -451,7 +469,11 @@ const ViewEntryStatus = () => {
                       <TableCell>
                         <Checkbox
                           type="checkbox"
-                          checked={selectedRows.some(r => r.reservationItemId === reservation.reservationItemId)}
+                          checked={selectedRows.some(
+                            (r) =>
+                              r.reservationItemId ===
+                              reservation.reservationItemId
+                          )}
                           onChange={() => handleRowCheckbox(reservation)}
                         />
                       </TableCell>
@@ -462,21 +484,29 @@ const ViewEntryStatus = () => {
                         <StatusButtonGroup>
                           <StatusButton
                             active={!reservation.isEntered}
-                            onClick={() => !reservation.isEntered || handleToggleEntryStatus(reservation)}
+                            onClick={() =>
+                              !reservation.isEntered ||
+                              handleToggleEntryStatus(reservation)
+                            }
                           >
                             미입장
                           </StatusButton>
                           <StatusButton
                             active={reservation.isEntered}
                             inactive={!reservation.isEntered}
-                            onClick={() => reservation.isEntered || handleToggleEntryStatus(reservation)}
+                            onClick={() =>
+                              reservation.isEntered ||
+                              handleToggleEntryStatus(reservation)
+                            }
                           >
                             입장 완료
                           </StatusButton>
                         </StatusButtonGroup>
                       </TableCell>
                       <TableCell>
-                        <CancelButton onClick={() => handleCancelSeat(reservation)}>
+                        <CancelButton
+                          onClick={() => handleCancelSeat(reservation)}
+                        >
                           좌석 취소
                         </CancelButton>
                       </TableCell>
@@ -491,13 +521,9 @@ const ViewEntryStatus = () => {
 
       {/* 하단 버튼 */}
       <BottomButtons>
-        <BackButton onClick={() => navigate('/manageshow')}>
-          ←이전
-        </BackButton>
-        {viewMode === 'list' && (
-          <SaveButton onClick={handleSaveChanges}>
-            저장하기
-          </SaveButton>
+        <BackButton onClick={() => navigate("/manageshow")}>←이전</BackButton>
+        {viewMode === "list" && (
+          <SaveButton onClick={handleSaveChanges}>저장하기</SaveButton>
         )}
       </BottomButtons>
     </Container>
@@ -508,7 +534,7 @@ export default ViewEntryStatus;
 
 const Container = styled.div`
   min-height: 100vh;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
 `;
@@ -540,8 +566,8 @@ const ShowSelector = styled.div`
   align-items: center;
   gap: 10px;
   padding: 5px 20px 7px 20px;
-  background-color: #FFFFFF;
-  border: 1px solid #FC2847;
+  background-color: #ffffff;
+  border: 1px solid #fc2847;
   border-radius: 15px;
   cursor: pointer;
 `;
@@ -555,13 +581,13 @@ const ShowInfo = styled.div`
 const ShowName = styled.span`
   font-size: 20px;
   font-weight: 500;
-  color: #FC2847;
+  color: #fc2847;
 `;
 
 const ShowDateTime = styled.span`
   font-size: 15px;
   font-weight: 500;
-  color: #FC2847;
+  color: #fc2847;
 `;
 
 const StatusHeader = styled.div`
@@ -600,8 +626,8 @@ const RefreshButton = styled.button`
 `;
 
 const OnSiteButton = styled.button`
-  background-color: #FC2847;
-  color: #FFFFFF;
+  background-color: #fc2847;
+  color: #ffffff;
   font-size: 15px;
   font-weight: 300;
   padding: 7px 15px;
@@ -610,15 +636,15 @@ const OnSiteButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #D60033;
+    background-color: #d60033;
   }
 `;
 
 const ViewToggle = styled.div`
   display: flex;
   align-items: center;
-  background-color: #FFFFFF;
-  border: 1px solid #D60033;
+  background-color: #ffffff;
+  border: 1px solid #d60033;
   border-radius: 20px;
   padding: 5px;
 `;
@@ -626,9 +652,9 @@ const ViewToggle = styled.div`
 const ToggleOption = styled.div`
   padding: 5px 15px;
   font-size: 20px;
-  font-weight: ${props => props.active ? '500' : '300'};
-  color: #D60033;
-  background-color: ${props => props.active ? '#FFF1F0' : 'transparent'};
+  font-weight: ${(props) => (props.active ? "500" : "300")};
+  color: #d60033;
+  background-color: ${(props) => (props.active ? "#FFF1F0" : "transparent")};
   border-radius: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -639,8 +665,8 @@ const SelectedSeatsArea = styled.div`
   align-items: center;
   gap: 10px;
   padding: 10px;
-  background-color: #FFFFFF;
-  border: 1px solid #FC2847;
+  background-color: #ffffff;
+  border: 1px solid #fc2847;
   border-radius: 15px;
 `;
 
@@ -664,8 +690,8 @@ const SeatTag = styled.div`
   align-items: center;
   gap: 5px;
   padding: 3px 7px;
-  background-color: #FFF1F0;
-  color: #D60033;
+  background-color: #fff1f0;
+  color: #d60033;
   font-size: 13px;
   font-weight: 300;
   border-radius: 10px;
@@ -673,8 +699,8 @@ const SeatTag = styled.div`
 
 const CompleteButton = styled.button`
   padding: 3px 7px;
-  background-color: #FC2847;
-  color: #FFFFFF;
+  background-color: #fc2847;
+  color: #ffffff;
   font-size: 13px;
   font-weight: 300;
   border: none;
@@ -683,7 +709,7 @@ const CompleteButton = styled.button`
   white-space: nowrap;
 
   &:hover {
-    background-color: #D60033;
+    background-color: #d60033;
   }
 `;
 
@@ -691,7 +717,7 @@ const SeatMapContainer = styled.div`
   width: 100%;
   max-width: 1240px;
   margin: 0 auto;
-  background-color: #F5F5F5;
+  background-color: #f5f5f5;
   border-radius: 10px;
   padding: 30px;
   overflow: auto;
@@ -728,11 +754,13 @@ const SeatButton = styled.button`
   transition: all 0.2s ease;
 
   /* 입장완료: 회색, 미입장: 노란색 */
-  background-color: ${props => props.isEntered ? '#333333' : '#FFCC00'};
-  color: ${props => props.isEntered ? '#FFFFFF' : '#000000'};
+  background-color: ${(props) => (props.isEntered ? "#333333" : "#FFCC00")};
+  color: ${(props) => (props.isEntered ? "#FFFFFF" : "#000000")};
 
   /* 선택된 좌석 */
-  ${props => props.isSelected && `
+  ${(props) =>
+    props.isSelected &&
+    `
     outline: 3px solid #FC2847;
     outline-offset: 2px;
   `}
@@ -754,7 +782,7 @@ const EmptySeat = styled.div`
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  color: #CCCCCC;
+  color: #cccccc;
 `;
 
 const Legend = styled.div`
@@ -772,7 +800,7 @@ const LegendItem = styled.div`
 const ColorBox = styled.div`
   width: 16px;
   height: 16px;
-  background-color: ${props => props.color};
+  background-color: ${(props) => props.color};
   border-radius: 2px;
 `;
 
@@ -790,8 +818,8 @@ const BottomButtons = styled.div`
 
 const BackButton = styled.button`
   padding: 10px 20px;
-  background-color: #FC2847;
-  color: #FFFFFE;
+  background-color: #fc2847;
+  color: #fffffe;
   font-size: 20px;
   font-weight: 300;
   border: none;
@@ -799,14 +827,14 @@ const BackButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #D60033;
+    background-color: #d60033;
   }
 `;
 
 const SaveButton = styled.button`
   padding: 10px 20px;
-  background-color: #FC2847;
-  color: #FFFFFE;
+  background-color: #fc2847;
+  color: #fffffe;
   font-size: 20px;
   font-weight: 300;
   border: none;
@@ -814,7 +842,7 @@ const SaveButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: #D60033;
+    background-color: #d60033;
   }
 `;
 
@@ -842,15 +870,15 @@ const TabButton = styled.button`
   padding: 10px;
   font-size: 20px;
   font-weight: 500;
-  color: ${props => props.active ? '#FC2847' : '#737373'};
+  color: ${(props) => (props.active ? "#FC2847" : "#737373")};
   background-color: transparent;
   border: none;
-  border-bottom: ${props => props.active ? '2px solid #FC2847' : 'none'};
+  border-bottom: ${(props) => (props.active ? "2px solid #FC2847" : "none")};
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    color: #FC2847;
+    color: #fc2847;
   }
 `;
 
@@ -859,9 +887,9 @@ const SearchBox = styled.div`
   align-items: center;
   gap: 10px;
   padding: 10px 15px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 10px;
-  border: 1px solid #E0E0E0;
+  border: 1px solid #e0e0e0;
 `;
 
 const SearchInput = styled.input`
@@ -897,7 +925,7 @@ const TableHeader = styled.thead`
 const HeaderRow = styled.tr``;
 
 const HeaderCell = styled.th`
-  width: ${props => props.width || 'auto'};
+  width: ${(props) => props.width || "auto"};
   padding: 10px;
   font-size: 20px;
   font-weight: 300;
@@ -908,10 +936,10 @@ const HeaderCell = styled.th`
 const TableBody = styled.tbody``;
 
 const TableRow = styled.tr`
-  border-bottom: 1px solid #F0F0F0;
+  border-bottom: 1px solid #f0f0f0;
 
   &:hover {
-    background-color: #F9F9F9;
+    background-color: #f9f9f9;
   }
 `;
 
@@ -945,10 +973,13 @@ const StatusButton = styled.button`
   cursor: pointer;
   transition: all 0.2s ease;
 
-  ${props => props.active ? `
+  ${(props) =>
+    props.active
+      ? `
     background-color: #FC2847;
     color: #FFFFFE;
-  ` : `
+  `
+      : `
     background-color: #FFFEFB;
     color: #121212;
   `}
@@ -962,7 +993,7 @@ const CancelButton = styled.button`
   padding: 7px 10px;
   font-size: 13px;
   font-weight: 300;
-  background-color: #FFFEFB;
+  background-color: #fffefb;
   color: #121212;
   border: none;
   border-radius: 10px;
@@ -970,6 +1001,6 @@ const CancelButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: #F0F0F0;
+    background-color: #f0f0f0;
   }
 `;

@@ -35,7 +35,6 @@ const PageWrapper = styled.div`
   transition: background-color 0.3s ease;
 
   color: #000;
-  font-family: GyeonggiTitle;
   font-size: 20px;
   font-style: normal;
   font-weight: 300;
@@ -85,7 +84,6 @@ const LoginContainer = styled.div`
     align-self: stretch;
     color: #fc2847;
     text-align: center;
-    font-family: GyeonggiTitle;
     font-size: 20px;
     font-style: normal;
     font-weight: 500;

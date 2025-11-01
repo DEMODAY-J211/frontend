@@ -2,21 +2,35 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 
 // <Footerbtn buttons={[{ text: "예매하기", color: "red", to: "/buyticket" }]} />
+{
+  /* <Footerbtn
+          buttons={[{ text: "예매하기", color: "red", to: "/buyticket" }]}
+          text="위 내용을 확인하였으며 결제에 동의합니다."
+        /> */
+}
 // color : ["red", "white"]
-export default function Footerbtn({ buttons = [] }) {
+export default function Footerbtn({ buttons = [], text = "" }) {
   const navigate = useNavigate();
-  console.log("footerbtn");
+
+  const handleClick = (btn) => {
+    if (btn.onClick) {
+      // 상위에서 onClick 넘겨주면 그거 실행
+      btn.onClick();
+    } else if (btn.to) {
+      // onClick이 없고 to만 있으면 navigate
+      navigate(btn.to);
+    }
+  };
   return (
     <Footer>
-      {buttons.map((btn, idx) => (
-        <Button
-          key={idx}
-          color={btn.color}
-          onClick={() => btn.to && navigate(btn.to)}
-        >
-          {btn.text}
-        </Button>
-      ))}
+      {text && <p>{text}</p>}
+      <div className="Wrapper">
+        {buttons.map((btn, idx) => (
+          <Button key={idx} color={btn.color} onClick={() => handleClick(btn)}>
+            {btn.text}
+          </Button>
+        ))}
+      </div>
     </Footer>
   );
 }
@@ -24,19 +38,38 @@ export default function Footerbtn({ buttons = [] }) {
 const Footer = styled.div`
   display: flex;
   position: sticky;
+  min-height: 70px;
   bottom: 0; /* 화면 상단에 붙도록 */
-  z-index: 1000; /* 다른 컨텐츠 위로 올라오도록 */
+  z-index: 900; /* 다른 컨텐츠 위로 올라오도록 */
   padding: 10px;
   align-self: stretch;
   background-color: #fff;
   // width: 393px;
   align-items: flex-start;
   gap: 10px;
+  flex-direction: column;
+
+  p {
+    color: var(--primary, #fc2847);
+    text-align: center;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    width: 100%;
+  }
+
+  .Wrapper {
+    display: flex;
+    align-self: stretch;
+    align-items: flex-start;
+    gap: 10px;
+  }
 `;
 
 const Button = styled.div`
   display: flex;
-  // height: 50px;
+  height: 50px;
   padding: 10px 20px;
   justify-content: center;
   align-items: center;

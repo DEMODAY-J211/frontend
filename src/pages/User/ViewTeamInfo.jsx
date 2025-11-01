@@ -28,7 +28,6 @@ const PageWrapper = styled.div`
   background-color: #fff;
 
   color: #000;
-  font-family: GyeonggiTitle;
   font-size: 20px;
   font-style: normal;
   font-weight: 300;
