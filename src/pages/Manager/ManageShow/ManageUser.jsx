@@ -6,11 +6,152 @@ import { MdOutlineUnfoldMore } from "react-icons/md";
 import { BiSearch } from "react-icons/bi";
 import { AiOutlineClose } from "react-icons/ai";
 import { useState } from "react";
+import { formatKoreanDate } from "../../../utils/dateFormat";
 
 const ManageUser = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("입금대기");
+  const [activeTab, setActiveTab] = useState("전체");
   const [activeStatus, setActiveStatus] = useState("입금대기");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+
+  const [reservationData, setReservationData] = useState([
+    {
+      reservationId: 101,
+      showtimeId: 45,
+      kakaoId: 1,
+      reservationNumber: "10010010",
+      name: "홍길동",
+      phone: "010-1234-5678",
+      reservationTime: "2025-10-06T14:30:00",
+      status: "입금확정",
+      isReserved: true,
+      detailed: {
+        ticketOptionId: 3,
+        ticketOptionName: "일반예매",
+        ticketPrice: 9000,
+        quantity: 2,
+      },
+    },
+    {
+      reservationId: 102,
+      showtimeId: 45,
+      kakaoId: 2,
+      reservationNumber: "10010011",
+      name: "김철수",
+      phone: "010-2345-6789",
+      reservationTime: "2025-10-06T14:35:00",
+      status: "입금대기",
+      isReserved: true,
+      detailed: {
+        ticketOptionId: 3,
+        ticketOptionName: "일반예매",
+        ticketPrice: 9000,
+        quantity: 3,
+      },
+    },
+    {
+      reservationId: 103,
+      showtimeId: 45,
+      kakaoId: 3,
+      reservationNumber: "10010012",
+      name: "이영희",
+      phone: "010-3456-7890",
+      reservationTime: "2025-10-06T14:40:00",
+      status: "환불대기",
+      isReserved: true,
+      detailed: {
+        ticketOptionId: 3,
+        ticketOptionName: "일반예매",
+        ticketPrice: 9000,
+        quantity: 1,
+      },
+    },
+    {
+      reservationId: 104,
+      showtimeId: 45,
+      kakaoId: 4,
+      reservationNumber: "10010013",
+      name: "박민수",
+      phone: "010-4567-8901",
+      reservationTime: "2025-10-06T14:45:00",
+      status: "취소완료",
+      isReserved: true,
+      detailed: {
+        ticketOptionId: 3,
+        ticketOptionName: "일반예매",
+        ticketPrice: 9000,
+        quantity: 4,
+      },
+    },
+    {
+      reservationId: 105,
+      showtimeId: 45,
+      kakaoId: 5,
+      reservationNumber: "10010014",
+      name: "정수진",
+      phone: "010-5678-9012",
+      reservationTime: "2025-10-06T14:50:00",
+      status: "입금확정",
+      isReserved: true,
+      detailed: {
+        ticketOptionId: 3,
+        ticketOptionName: "일반예매",
+        ticketPrice: 9000,
+        quantity: 2,
+      },
+    },
+  ]);
+
+
+  // ✅ 검색 기능
+    const filteredData = reservationData.filter((data) => {
+    const matchesSearch =
+        data.name.includes(searchQuery) || data.phone.includes(searchQuery);
+
+    if (activeTab === "전체") return matchesSearch;
+    return data.status === activeTab && matchesSearch;
+    });
+
+
+  // ✅ 체크박스 선택
+  const handleCheckboxChange = (user) => {
+    setSelectedUsers((prev) => {
+      if (prev.find((u) => u.reservationId === user.reservationId)) {
+        return prev.filter((u) => u.reservationId !== user.reservationId);
+      } else {
+        return [...prev, user];
+      }
+    });
+  };
+
+  // ✅ 전체 선택
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedUsers(filteredData);
+    } else {
+      setSelectedUsers([]);
+    }
+  };
+
+  const [isChanged, setIsChanged] = useState(false);
+
+// ✅ 예매자별 상태 변경
+  const handleStatusChange = (id, newStatus) => {
+  setReservationData((prev) =>
+    prev.map((item) =>
+      item.reservationId === id ? { ...item, status: newStatus } : item
+    )
+  );
+  setIsChanged(true); // ✅ 변경사항 감지
+};
+
+const handleSave = () => {
+  // 이 자리에 API 요청 코드 들어갈 수도 있음
+  console.log("저장 완료:", reservationData);
+  setIsChanged(false); // ✅ 저장 후 변경상태 리셋
+};
 
   return (
     <Content>
@@ -28,52 +169,63 @@ const ManageUser = () => {
           </SelectTime>
         </Header>
 
+
+        {/* 탭 */}
+        <TabContainer>
+          {["전체", "입금대기", "입금확정", "환불대기", "취소완료"].map(
+            (tab) => (
+              <TabItem
+                key={tab}
+                $active={activeTab === tab}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </TabItem>
+            )
+          )}
+        </TabContainer>
+
         {/* 유저 검색 */}
         <SearchWrapper>
           <InputWrapper>
-            <SearchInput type="text" placeholder="예매자 검색하기" />
+            <SearchInput
+            type="text"
+            placeholder="예매자 검색하기"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            />
+
             <SearchIcon />
           </InputWrapper>
 
           <Result>
-            {/* 더미데이터 */}
-            <User>
-              홍길동
-              <CloseIcon />
+            {selectedUsers.map((user) => (
+            <User key={user.reservationId}>
+            {user.name}
+            <CloseIcon onClick={() => handleCheckboxChange(user)} />
             </User>
+  ))}
           </Result>
         </SearchWrapper>
 
-        {/* 탭 */}
-        <TabContainer>
-          <TabItem
-            $active={activeTab === "입금대기"}
-            onClick={() => setActiveTab("입금대기")}
-          >
-            입금대기
-          </TabItem>
-          <TabItem
-            $active={activeTab === "입금확정"}
-            onClick={() => setActiveTab("입금확정")}
-          >
-            입금확정
-          </TabItem>
-          <TabItem
-            $active={activeTab === "환불대기"}
-            onClick={() => setActiveTab("환불대기")}
-          >
-            환불대기
-          </TabItem>
-          <TabItem
-            $active={activeTab === "취소완료"}
-            onClick={() => setActiveTab("취소완료")}
-          >
-            취소완료
-          </TabItem>
-        </TabContainer>
-
         {/* 전체선택, 선택적용, 검색, 엑셀 내보내기 */}
-        <ControlContainer>잡다한것들...</ControlContainer>
+        <ControlContainer>
+            <ControlLeft>
+            <Label>
+                  <BoxLabel>
+                    <CtrlCheckbox
+                    type="checkbox"
+                    checked={selectedUsers.length === filteredData.length && filteredData.length > 0}
+                    onChange={handleSelectAll}
+                    />
+                </BoxLabel>전체 선택 
+            </Label>
+
+            <Btn>선택 적용하기</Btn>
+            </ControlLeft>
+
+            <Btn>Excel 내보내기</Btn>
+        </ControlContainer>
 
         {/* 예매자 테이블 영역 */}
         <TableSection>
@@ -88,54 +240,59 @@ const ManageUser = () => {
           </TableHeader>
 
           {/* 더미데이터!! */}
-          {[...Array(15)].map((_, i) => (
-            <TableRow key={i}>
-              <Checkbox type="checkbox" />
-              <TableData>00000000</TableData>
-              <TableData>홍길동</TableData>
-              <TableData>010-1234-5678</TableData>
-              <TableData>2025.09.25 19:23</TableData>
-              <StatusContainer>
-                <Status
-                  $active={activeStatus === "입금대기"}
-                  onClick={() => setActiveStatus("입금대기")}
-                >
-                  입금대기
-                </Status>
-                <Status
-                  $active={activeStatus === "입금완료"}
-                  onClick={() => setActiveStatus("입금완료")}
-                >
-                  입금완료
-                </Status>
-                <Status
-                  $active={activeStatus === "환불대기"}
-                  onClick={() => setActiveStatus("환불대기")}
-                >
-                  환불대기
-                </Status>
-                <Status
-                  $active={activeStatus === "취소완료"}
-                  onClick={() => setActiveStatus("취소완료")}
-                >
-                  취소완료
-                </Status>
-              </StatusContainer>
+          {filteredData.length > 0 ? (
+            filteredData.map((data) => (
+            <TableRow key={data.reservationId}>
+            <Checkbox type="checkbox" checked={selectedUsers.some(u => u.reservationId === data.reservationId)}
+        onChange={() => handleCheckboxChange(data)}/>
 
-              <TableDataDetail>일반예매(9000원) · 3매</TableDataDetail>
+            <TableData>{data.reservationNumber}</TableData>
+            <TableData>{data.name}</TableData>
+            <TableData>{data.phone}</TableData>
+            {/* ✅ 여기에서 formatKoreanDate 사용 */}
+          <TableData>{formatKoreanDate(data.reservationTime)}</TableData>
+
+              {/* ✅ 각 행별 상태 변경 */}
+                <StatusContainer>
+                  {["입금대기", "입금확정", "환불대기", "취소완료"].map(
+                    (status) => (
+                      <Status
+                        key={status}
+                        $active={data.status === status}
+                        onClick={() =>
+                          handleStatusChange(data.reservationId, status)
+                        }
+                      >
+                        {status}
+                      </Status>
+                    )
+                  )}
+                </StatusContainer>
+
+              <TableDataDetail>
+                {data.detailed.ticketOptionName} ({data.detailed.ticketPrice.toLocaleString()}원) ·{" "}
+            {data.detailed.quantity}매
+            </TableDataDetail>
             </TableRow>
-          ))}
+          ))
+        ) : (
+            <TableRow>
+              <NoDataRow>검색 결과가 없습니다.</NoDataRow>
+            </TableRow>
+          )}
         </TableSection>
+
+     
 
         {/* footer */}
         <Footer>
           <PrevButton onClick={() => navigate(-1)}>←이전</PrevButton>
-          <SaveContainer>
-            <WarningText>
-              변경사항이 있습니다. 저장하기를 눌러 변경상태를 확정해주세요!
-            </WarningText>
-            <SaveButton>저장하기</SaveButton>
-          </SaveContainer>
+          
+            <SaveContainer>
+            <WarningText $visible={isChanged}>변경사항이 있습니다. 저장하기를 눌러 변경상태를 확정해주세요!</WarningText>
+            <SaveButton onClick={handleSave} disabled={!isChanged}>저장하기</SaveButton>
+            </SaveContainer>
+        
         </Footer>
       </ManageUserContent>
     </Content>
@@ -212,7 +369,8 @@ const SearchWrapper = styled.div`
 
 const SearchInput = styled.input`
   width: 220px;
-  padding: 7px 35px 7px 10px; /* 오른쪽 여백을 아이콘 공간만큼 확보 */
+  padding: 7px 30px 7px 10px; /* 오른쪽 여백 30px 확보 */
+
   border-radius: 10px;
   border: 1px solid #c5c5c5;
   background: #fff;
@@ -239,16 +397,17 @@ const SearchIcon = styled(BiSearch)`
   font-size: 18px;
   position: absolute;
   top: 50%;
+  right: 10px; /* input 안쪽에서 10px 떨어진 위치 */
   transform: translateY(-50%);
-
-  right: 10px;
   color: #aaa;
-
-  pointer-events: none; /* 아이콘 눌러도 input 포커스 가능 */
+  pointer-events: none;
 `;
+
 
 const Result = styled.div`
   margin-left: 10px;
+  display: flex;
+  gap: 10px;
 `;
 
 const User = styled.div`
@@ -264,6 +423,18 @@ const User = styled.div`
 `;
 
 const CloseIcon = styled(AiOutlineClose)``;
+
+const NoDataRow = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;       /* grid 대신 전체 폭 사용 */
+  padding: 20px 0;
+  font-size: 18px;
+  color: #333;
+  grid-column: span 7;  /* 기존 TableRow의 grid span 제거 */
+`;
+
 
 /* ---------------- 탭 ---------------- */
 const TabContainer = styled.div`
@@ -292,10 +463,51 @@ const TabItem = styled.div`
 /* ---------------- 전체선택, 선택적용, 검색, 엑셀내보내기 ---------------- */
 const ControlContainer = styled.div`
   height: 30px;
-
   align-self: stretch;
-  background-color: var(--color-tertiary);
+  justify-content: space-between;
+  display: flex;
+  
 `;
+
+const ControlLeft = styled.div`
+    display: flex;
+    gap: 23px;
+`
+
+const CtrlCheckbox = styled.input`
+    width: 16px;
+    height: 16px;
+
+`
+
+const BoxLabel = styled.div`
+    padding: 4px;
+    display: flex;
+`
+
+const Label = styled.div`
+    font-size: 20px;
+    font-weight: 200;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    
+`
+
+const Btn = styled.button`
+    display: flex;
+    padding: 7px 10px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 10px;
+    border: none;
+    background: var(--color-primary);
+    color: #FFFFFE;
+    
+    font-size: 13px;
+    font-weight: 300;
+`
 
 /* ====================== Table Section ====================== */
 
@@ -334,6 +546,7 @@ const TableRow = styled.div`
 const Checkbox = styled.input`
   width: 18px;
   height: 18px;
+  
 `;
 
 const ColumnTitle = styled.div`
@@ -359,15 +572,17 @@ const StatusContainer = styled.div`
   justify-content: center;
   gap: 12px;
 `;
+
 const Status = styled.button`
   font-size: 13px;
-  font-weight: 700;
   display: flex;
   padding: 7px 10px;
   justify-content: center;
   align-items: center;
   gap: 10px;
+
   color: ${({ $active }) => ($active ? "#fff" : "#121212")};
+  font-weight: ${({ $active }) => ($active ? "700" : "300")};
 
   border-radius: 10px;
   border: none;
@@ -375,6 +590,7 @@ const Status = styled.button`
   background-color: ${({ $active }) =>
     $active ? "var(--color-primary)" : "#fff"};
 `;
+
 
 /* ====================== Footer  ====================== */
 
@@ -392,6 +608,10 @@ const WarningText = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  visibility: ${({ $visible }) => ($visible ? "visible" : "hidden")};
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 `;
 
 const PrevButton = styled.button`
@@ -416,17 +636,23 @@ const SaveContainer = styled.div`
 `;
 
 const SaveButton = styled.button`
-  background-color: var(--color-primary);
+  background-color: ${({ disabled }) =>
+    disabled ? "#d3d3d3" : "var(--color-primary)"};
   color: #fffffe;
   border: none;
 
   border-radius: 20px;
   font-size: 15px;
   font-weight: 300;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 
   padding: 10px 20px;
   justify-content: center;
   align-items: center;
   gap: 10px;
+
+  transition: all 0.3s ease;
+
+
 `;
+

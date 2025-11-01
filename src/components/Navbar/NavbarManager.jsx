@@ -3,8 +3,7 @@ import styled from "styled-components";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/tikitta_logo.png";
-import loginbtn from "../../assets/login.png";
-import logoutbtn from "../../assets/logout.png";
+
 
 const NavbarManager = () => {
   const navigate = useNavigate();
@@ -24,9 +23,9 @@ const NavbarManager = () => {
       </NavbarLeft>
       <NavbarRight>
         {login === true ? (
-          <Button src={logoutbtn} alt="로그아웃" />
+          <Button>로그아웃</Button>
         ) : (
-          <Button src={loginbtn} alt="로그인" />
+          <Button>로그인</Button>
         )}
       </NavbarRight>
     </Navbar>
@@ -70,11 +69,18 @@ const NavbarRight = styled.div`
   align-items: center;
 `;
 
-const Button = styled.img`
+const Button = styled.button`
   cursor: pointer;
   display: flex;
-  padding: 10px 0;
+  padding: 10px 20px;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  
+  border-radius: 20px;
+  border: none;
+  background-color: var(--color-primary);
+
+  color: #FFFFFE;
+  font-size: 20px;
+  font-weight: 700;
 `;
