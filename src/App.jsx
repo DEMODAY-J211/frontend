@@ -45,12 +45,13 @@ const App = () => {
             element={<MobileTicket />}
           />
 
-          {/* 이예나 */}
-          {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
-          <Route path="/homemanager" element={<HomeManager />} />
-          <Route path="/manageshow" element={<ManageShow />} />
-          <Route path="/manageshow/manageuser" element={<ManageUser />} />
-          <Route path="/qrmanager" element={<QRManager />} />
+        {/* 이예나 */}
+        {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
+        <Route path="/homemanager" element={<HomeManager />} />
+        <Route path="/manageshow" element={<ManageShow/>}/>
+        <Route path="/manageshow/manageuser" element={<ManageUser/>}/>
+         <Route path="/qrmanager" element={<QRManager />} />
+        
 
           {/* 주현수 */}
           <Route path="/manageshow/entrystatus" element={<ViewEntryStatus />} />
@@ -60,5 +61,6 @@ const App = () => {
     </div>
   );
 };
+
 
 export default App;
