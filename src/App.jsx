@@ -30,29 +30,32 @@ const App = () => {
   return (
     <div>
       <ToastProvider>
-      <Routes>
-        {/* 예시: <Route path='/mypage/festival' element={<MyPage/>}/> */}
-        {/* 오서현 */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/homeuser" element={<HomeUser />} />
-        <Route path="/viewshowdetail" element={<ViewShowDetail />} />
-        <Route path="/buyticket" element={<BuyTicket />} />
-        <Route path="/viewteaminfo" element={<ViewTeamInfo />} />
-        <Route path="/myticketlist" element={<MyTicketList />} />
-        <Route path="/checkticket" element={<CheckTicket />} />
-        <Route path="/mobileticket" element={<MobileTicket />} />
+        <Routes>
+          {/* 예시: <Route path='/mypage/festival' element={<MyPage/>}/> */}
+          {/* 오서현 */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/homeuser" element={<HomeUser />} />
+          <Route path="/viewshowdetail/:showId" element={<ViewShowDetail />} />
+          <Route path="/payment" element={<BuyTicket />} />
+          <Route path="/viewteaminfo" element={<ViewTeamInfo />} />
+          <Route path="/myticketlist" element={<MyTicketList />} />
+          <Route path="/checkticket/:reservationId" element={<CheckTicket />} />
+          <Route
+            path="/mobileticket/:reservationId"
+            element={<MobileTicket />}
+          />
 
-        {/* 이예나 */}
-        {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
-        <Route path="/homemanager" element={<HomeManager />} />
-        <Route path="/manageshow" element={<ManageShow />} />
-        <Route path="/manageshow/manageuser" element={<ManageUser />} />
-        <Route path="/qrmanager" element={<QRManager />} />
+          {/* 이예나 */}
+          {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
+          <Route path="/homemanager" element={<HomeManager />} />
+          <Route path="/manageshow" element={<ManageShow />} />
+          <Route path="/manageshow/manageuser" element={<ManageUser />} />
+          <Route path="/qrmanager" element={<QRManager />} />
 
-        {/* 주현수 */}
-        <Route path="/manageshow/entrystatus" element={<ViewEntryStatus />} />
-        <Route path="/selectseat/:showtimeId" element={<SelectSeat />} />
-      </Routes>
+          {/* 주현수 */}
+          <Route path="/manageshow/entrystatus" element={<ViewEntryStatus />} />
+          <Route path="/selectseat/:showtimeId" element={<SelectSeat />} />
+        </Routes>
       </ToastProvider>
     </div>
   );

@@ -40,7 +40,7 @@ const Footer = styled.div`
   position: sticky;
   min-height: 70px;
   bottom: 0; /* 화면 상단에 붙도록 */
-  z-index: 1000; /* 다른 컨텐츠 위로 올라오도록 */
+  z-index: 900; /* 다른 컨텐츠 위로 올라오도록 */
   padding: 10px;
   align-self: stretch;
   background-color: #fff;

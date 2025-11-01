@@ -22,7 +22,7 @@ const mockData = [
     reservationId: 102,
     showtimeId: 14,
     showTitle: "제12회 정기공연",
-    showtimeStart: "2025-10-31T18:00:00",
+    showtimeStart: "2025-12-31T18:00:00",
     ticketOptionName: "학생할인",
     reservationQuantity: 2,
     reservationNumber: "000001",
