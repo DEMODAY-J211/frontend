@@ -7,11 +7,14 @@ import { BiSearch } from "react-icons/bi";
 import { AiOutlineClose } from "react-icons/ai";
 import { useState } from "react";
 import { formatKoreanDate } from "../../../utils/dateFormat";
+import SelectUserModal from "../../../components/Modal/SelectUserModal";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 const ManageUser = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("전체");
-  const [activeStatus, setActiveStatus] = useState("입금대기");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
 
@@ -138,19 +141,78 @@ const ManageUser = () => {
   const [isChanged, setIsChanged] = useState(false);
 
 // ✅ 예매자별 상태 변경
-  const handleStatusChange = (id, newStatus) => {
+ const handleStatusChange = (id, newStatus) => {
   setReservationData((prev) =>
-    prev.map((item) =>
-      item.reservationId === id ? { ...item, status: newStatus } : item
-    )
+    prev.map((item) => {
+      // 선택된 유저가 없으면 클릭한 행만 변경
+      if (selectedUsers.length === 0 && item.reservationId === id) {
+        return { ...item, status: newStatus };
+      }
+      // 선택된 유저가 있으면 선택된 모든 유저 변경
+      if (selectedUsers.some(u => u.reservationId === item.reservationId)) {
+        return { ...item, status: newStatus };
+      }
+      return item;
+    })
   );
-  setIsChanged(true); // ✅ 변경사항 감지
+  setIsChanged(true);
 };
+
+
+
 
 const handleSave = () => {
   // 이 자리에 API 요청 코드 들어갈 수도 있음
   console.log("저장 완료:", reservationData);
   setIsChanged(false); // ✅ 저장 후 변경상태 리셋
+};
+
+const handleExportExcel = () => {
+  // 1. 내보낼 데이터 선택 (선택된 유저가 있으면 선택된 유저, 없으면 전체)
+  const dataToExport = selectedUsers.length > 0 ? selectedUsers : filteredData;
+
+  // 2. 엑셀용 데이터 형식 맞추기
+  const excelData = dataToExport.map((item) => ({
+    "예매번호": item.reservationNumber,
+    "이름": item.name,
+    "전화번호": item.phone,
+    "예매 시간": formatKoreanDate(item.reservationTime),
+    "예매 현황": item.status,
+    "티켓 종류": item.detailed.ticketOptionName,
+    "티켓 가격": item.detailed.ticketPrice,
+    "수량": item.detailed.quantity,
+  }));
+
+  // 3. 내보낸 시점 추가 (맨 위 행으로)
+  const exportTime = new Date();
+  const exportTimeStr = `${exportTime.getFullYear()}-${String(exportTime.getMonth() + 1).padStart(2, '0')}-${String(exportTime.getDate()).padStart(2, '0')} ${String(exportTime.getHours()).padStart(2,'0')}:${String(exportTime.getMinutes()).padStart(2,'0')}:${String(exportTime.getSeconds()).padStart(2,'0')}`;
+  
+  excelData.unshift({ "예매번호": `엑셀 내보내기 시점: ${exportTimeStr}` });
+
+  // 4. 워크북 생성
+  const worksheet = XLSX.utils.json_to_sheet(excelData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "예매자 관리");
+
+  // 5. 파일로 저장
+  XLSX.writeFile(workbook, `예매자관리_${exportTimeStr}.xlsx`);
+};
+
+
+const [showModal, setShowModal] = useState(false);
+// 모달 열기
+const openModal = () => {
+  if (selectedUsers.length === 0) {
+    alert("상태를 변경할 예매자를 선택해주세요.");
+    return;
+  }
+  setShowModal(true);
+};
+
+
+// 모달 닫기
+const closeModal = () => {
+setShowModal(false);
 };
 
   return (
@@ -221,10 +283,10 @@ const handleSave = () => {
                 </BoxLabel>전체 선택 
             </Label>
 
-            <Btn>선택 적용하기</Btn>
+            <Btn onClick={openModal}>선택 적용하기</Btn>
             </ControlLeft>
 
-            <Btn>Excel 내보내기</Btn>
+            <Btn onClick={handleExportExcel}>Excel 내보내기</Btn>
         </ControlContainer>
 
         {/* 예매자 테이블 영역 */}
@@ -294,6 +356,27 @@ const handleSave = () => {
             </SaveContainer>
         
         </Footer>
+
+            {showModal && (
+  <SelectUserModal
+    onClose={closeModal}
+    selectedUsers={selectedUsers} // 선택된 사용자 전달
+    onConfirm={(newStatus) => {
+      setReservationData((prev) =>
+        prev.map((item) =>
+          selectedUsers.some(u => u.reservationId === item.reservationId)
+            ? { ...item, status: newStatus }
+            : item
+        )
+      );
+      setIsChanged(true);
+      setShowModal(false);
+    }}
+  />
+)}
+
+
+
       </ManageUserContent>
     </Content>
   );
@@ -507,6 +590,7 @@ const Btn = styled.button`
     
     font-size: 13px;
     font-weight: 300;
+    cursor: pointer;
 `
 
 /* ====================== Table Section ====================== */
