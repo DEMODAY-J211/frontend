@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import NavbarManager from "../../../components/Navbar/NavbarManager";
 import { IoMdRefresh, IoMdClose } from "react-icons/io";
 import { MdKeyboardArrowDown } from "react-icons/md";
+import { MdOutlineUnfoldMore } from "react-icons/md";
 
 const ViewEntryStatus = () => {
   const navigate = useNavigate();
@@ -299,16 +300,16 @@ const ViewEntryStatus = () => {
 
       <MainContent>
         {/* 상단 타이틀 섹션 */}
-        <TopSection>
-          <PageTitle>입장 현황</PageTitle>
-          <ShowSelector>
-            <ShowInfo>
-              <ShowName>제00회 정기공연</ShowName>
-              <ShowDateTime>2025.10.14 15:00</ShowDateTime>
-            </ShowInfo>
-            <MdKeyboardArrowDown size={16} color="#FC2847" />
-          </ShowSelector>
-        </TopSection>
+        <Header>
+          <Title>예매자 관리</Title>
+          <SelectTime>
+            <ShowName>제21회 정기공연</ShowName>
+            <Time>
+              <ShowTime>2025.10.14 15:00</ShowTime>
+              <MdOutlineUnfoldMore size={16} color="var(--color-primary)" />
+            </Time>
+          </SelectTime>
+        </Header>
 
         {/* 좌석 현황 헤더 */}
         <StatusHeader>
@@ -547,48 +548,47 @@ const MainContent = styled.div`
   flex: 1;
 `;
 
-const TopSection = styled.div`
+const Header = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 36px;
+  align-self: stretch;
+  gap: 30px;
 `;
 
-const PageTitle = styled.h1`
+const Title = styled.div`
+  align-self: stretch;
   font-size: 30px;
   font-weight: 500;
-  color: #000000;
-  margin: 0;
+  padding-left: 5px;
 `;
 
-const ShowSelector = styled.div`
+const SelectTime = styled.div`
+  display: flex;
+  border-radius: 15px;
+  border: 1px solid var(--color-primary);
+  background: #fff;
+  padding: 5px 20px;
+  gap: 40px;
+`;
+
+const ShowName = styled.div`
+  color: var(--color-primary);
+  font-size: 20px;
+  font-weight: 500;
+`;
+
+const ShowTime = styled.div`
+  color: var(--color-primary);
+  font-size: 20px;
+  font-weight: 500;
+`;
+
+const Time = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 5px 20px 7px 20px;
-  background-color: #ffffff;
-  border: 1px solid #fc2847;
-  border-radius: 15px;
   cursor: pointer;
 `;
 
-const ShowInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const ShowName = styled.span`
-  font-size: 20px;
-  font-weight: 500;
-  color: #fc2847;
-`;
-
-const ShowDateTime = styled.span`
-  font-size: 15px;
-  font-weight: 500;
-  color: #fc2847;
-`;
 
 const StatusHeader = styled.div`
   display: flex;
