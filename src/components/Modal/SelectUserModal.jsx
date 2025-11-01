@@ -197,6 +197,7 @@ const ConfirmButton = styled.button`
   border: none;
   border-radius: 10px;
   font-size: 16px;
+  font-weight: 300;
   padding: 10px;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   transition: all 0.2s ease;

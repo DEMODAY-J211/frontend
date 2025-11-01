@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import NavbarManager from "../../../components/Navbar/NavbarManager";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdOutlineUnfoldMore } from "react-icons/md";
 import { BiSearch } from "react-icons/bi";
@@ -8,6 +9,7 @@ import { AiOutlineClose } from "react-icons/ai";
 import { useState } from "react";
 import { formatKoreanDate } from "../../../utils/dateFormat";
 import SelectUserModal from "../../../components/Modal/SelectUserModal";
+import ChangeUserStatusModal from "../../../components/Modal/ChangeUserStatusModal";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
@@ -18,8 +20,15 @@ const ManageUser = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
 
+  
 
-  const [reservationData, setReservationData] = useState([
+const [reservationData, setReservationData] = useState([]);
+const [initialData, setInitialData] = useState([]); // 초기 데이터 저장
+
+// 🔹 초기 데이터 불러올 때 한번만 복제해서 저장
+useEffect(() => {
+
+  const data =[
     {
       reservationId: 101,
       showtimeId: 45,
@@ -105,7 +114,11 @@ const ManageUser = () => {
         quantity: 2,
       },
     },
-  ]);
+  ];
+    
+   setReservationData(data);
+  setInitialData(JSON.parse(JSON.stringify(data))); // 깊은 복사 (원본 보존)
+}, []);
 
 
   // ✅ 검색 기능
@@ -140,23 +153,39 @@ const ManageUser = () => {
 
   const [isChanged, setIsChanged] = useState(false);
 
-// ✅ 예매자별 상태 변경
- const handleStatusChange = (id, newStatus) => {
-  setReservationData((prev) =>
-    prev.map((item) => {
-      // 선택된 유저가 없으면 클릭한 행만 변경
-      if (selectedUsers.length === 0 && item.reservationId === id) {
-        return { ...item, status: newStatus };
-      }
-      // 선택된 유저가 있으면 선택된 모든 유저 변경
-      if (selectedUsers.some(u => u.reservationId === item.reservationId)) {
-        return { ...item, status: newStatus };
-      }
-      return item;
-    })
-  );
+// 1️⃣ 초기 상태 저장
+
+const [changedUsers, setChangedUsers] = useState([]);
+
+// 2️⃣ 상태 변경 함수
+const handleStatusChange = (id, newStatus) => {
+  const updatedData = reservationData.map((item) => {
+    if (selectedUsers.length === 0 && item.reservationId === id) {
+      return { ...item, status: newStatus };
+    }
+    if (selectedUsers.some((u) => u.reservationId === item.reservationId)) {
+      return { ...item, status: newStatus };
+    }
+    return item;
+  });
+
+  setReservationData(updatedData);
   setIsChanged(true);
+
+  // 3️⃣ changedUsers 계산: 초기값과 다른 것만
+  const changed = updatedData.filter((item) => {
+    const original = initialData.find(
+      (u) => u.reservationId === item.reservationId
+    );
+    return original.status !== item.status;
+  });
+
+  setChangedUsers(changed);
+
 };
+
+  console.log(changedUsers);
+
 
 
 
@@ -195,24 +224,38 @@ const handleExportExcel = () => {
   XLSX.utils.book_append_sheet(workbook, worksheet, "예매자 관리");
 
   // 5. 파일로 저장
-  XLSX.writeFile(workbook, `예매자관리_${exportTimeStr}.xlsx`);
+  const safeTimeStr = exportTimeStr.replace(/:/g, '-');
+XLSX.writeFile(workbook, `예매자관리_${safeTimeStr}.xlsx`);
+
 };
 
 
-const [showModal, setShowModal] = useState(false);
+const [showSelectUserModal, setShowSelectUserModal] = useState(false);
+const [showChangeStatusModal, setShowChangeStatusModal] = useState(false);
+
 // 모달 열기
 const openModal = () => {
   if (selectedUsers.length === 0) {
     alert("상태를 변경할 예매자를 선택해주세요.");
     return;
   }
-  setShowModal(true);
+  setShowSelectUserModal(true);
 };
 
 
 // 모달 닫기
 const closeModal = () => {
-setShowModal(false);
+setShowSelectUserModal(false);
+};
+
+const openSaveModal = () => {
+  setShowChangeStatusModal(true);
+};
+
+
+// 모달 닫기
+const closeSaveModal = () => {
+setShowChangeStatusModal(false);
 };
 
   return (
@@ -351,29 +394,51 @@ setShowModal(false);
           <PrevButton onClick={() => navigate(-1)}>←이전</PrevButton>
           
             <SaveContainer>
-            <WarningText $visible={isChanged}>변경사항이 있습니다. 저장하기를 눌러 변경상태를 확정해주세요!</WarningText>
-            <SaveButton onClick={handleSave} disabled={!isChanged}>저장하기</SaveButton>
+           <WarningText $visible={isChanged && changedUsers.length > 0}>
+            변경사항이 있습니다. 저장하기를 눌러 변경상태를 확정해주세요!
+            </WarningText>
+
+
+            <SaveButton
+                onClick={openSaveModal}
+                disabled={!isChanged || changedUsers.length === 0}
+            >
+                저장하기
+            </SaveButton>
+
             </SaveContainer>
         
         </Footer>
 
-            {showModal && (
-  <SelectUserModal
-    onClose={closeModal}
-    selectedUsers={selectedUsers} // 선택된 사용자 전달
-    onConfirm={(newStatus) => {
-      setReservationData((prev) =>
-        prev.map((item) =>
-          selectedUsers.some(u => u.reservationId === item.reservationId)
-            ? { ...item, status: newStatus }
-            : item
-        )
-      );
-      setIsChanged(true);
-      setShowModal(false);
-    }}
-  />
-)}
+        {showSelectUserModal && (
+        <SelectUserModal
+            onClose={closeModal}
+            selectedUsers={selectedUsers} // 선택된 사용자 전달
+            onConfirm={(newStatus) => {
+            setReservationData((prev) =>
+                prev.map((item) =>
+                selectedUsers.some(u => u.reservationId === item.reservationId)
+                    ? { ...item, status: newStatus }
+                    : item
+                )
+            );
+            setIsChanged(true);
+            setShowSelectUserModal(false);
+            }}
+        />
+        )}
+        {showChangeStatusModal && (
+        <ChangeUserStatusModal
+            onClose={closeSaveModal}
+            changedUsers={changedUsers}
+            onConfirm={(newStatus) => {
+            handleStatusChange(null, newStatus);
+            handleSave();
+            setShowChangeStatusModal(false);
+            }}
+        />
+        )}
+
 
 
 
