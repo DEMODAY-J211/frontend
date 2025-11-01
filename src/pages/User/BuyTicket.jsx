@@ -4,6 +4,7 @@ import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import Footerbtn from "../../components/Save/Footerbtn";
 import ReservationComplete from "../../components/Modal/ReservationComplete";
+
 // s01101
 export default function BuyTicket() {
   // 공연 정보 (이전 페이지에서 전달받음)
@@ -16,11 +17,27 @@ export default function BuyTicket() {
   });
   // 예매 성공 팝업
   const [isComplete, setIsComplete] = useState(false);
-
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [isOptionOpen, setIsOptionOpen] = useState(false);
+  const backOptions = [
+    { id: 1, name: "국민은행" },
+    { id: 2, name: "기업은행" },
+    { id: 3, name: "농협은행" },
+    { id: 4, name: "신한은행" },
+    { id: 5, name: "하나은행" },
+    { id: 6, name: "우리은행" },
+    { id: 7, name: "우체국" },
+    { id: 8, name: "카카오뱅크" },
+    { id: 9, name: "토스뱅크" },
+  ];
   const handleBooking = () => {
     setIsComplete(true);
   };
 
+  const handleSelectOption = (option) => {
+    setSelectedOption(option);
+    setIsOptionOpen(false);
+  };
   return (
     <PageWrapper>
       {isComplete && (
@@ -52,26 +69,36 @@ export default function BuyTicket() {
             <Title>환불정보</Title>
             <Subtitle>예매 취소 시 환불받을 계좌를 입력해주세요.</Subtitle>
             <Subtitle>은행</Subtitle>
-            <SelectWrapper>
-              <div class="selectBox ">
-                <button class="label">----계좌선택----</button>
-                <ul class="optionList">
-                  <li class="optionItem">국민은행</li>
-                  <li class="optionItem">기업은행</li>
-                  <li class="optionItem">농협은행</li>
-                  <li class="optionItem">신한은행</li>
-                  <li class="optionItem">우체국</li>
-                  <li class="optionItem">하나은행</li>
-                  <li class="optionItem">우리은행</li>
-                  <li class="optionItem">카카오뱅크</li>
-                  <li class="optionItem">토스뱅크</li>
-                </ul>
-              </div>
-            </SelectWrapper>
+            <Container>
+              <DropdownButton onClick={() => setIsOptionOpen(!isOptionOpen)}>
+                {selectedOption
+                  ? `${selectedOption.name}`
+                  : "---- 계좌선택 ----"}
+                <Arrow open={isOptionOpen}>▼</Arrow>
+              </DropdownButton>
+
+              <>
+                {isOptionOpen && (
+                  <div key="option-list">
+                    <DropdownList>
+                      {backOptions.map((option) => (
+                        <DropdownItem
+                          key={option.id}
+                          onClick={() => handleSelectOption(option)}
+                          selected={selectedOption === option.id}
+                        >
+                          {option.name}
+                        </DropdownItem>
+                      ))}
+                    </DropdownList>
+                  </div>
+                )}
+              </>
+            </Container>
             <Subtitle>계좌번호</Subtitle>
             <InputWrapper placeholder="-을 제외하고 작성해주세요." />
             <Subtitle>예금주</Subtitle>
-            <InputWrapper placeholder="(예금주) 홍길동" />
+            <InputWrapper placeholder="홍길동" />
           </InfoSection>
           {/* 결제 정보 */}
           <InfoSection>
@@ -253,117 +280,79 @@ const TotalPrice = styled.span`
 `;
 
 const InputWrapper = styled.input`
-  display: flex;
-  padding: 10px;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  align-self: stretch;
-  border-radius: 8px;
+  padding: 9px 16px;
+  // padding: 7px 35px 7px 10px; /* 오른쪽 여백을 아이콘 공간만큼 확보 */
+  border-radius: 10px;
   border: 1px solid #c5c5c5;
   background: #fff;
+  font-size: 14px;
+  color: #000;
+  outline: none;
+
+  &::placeholder {
+    color: #aaa;
+  }
 
   &:focus {
-    border: 1px solid #c5c5c5;
-    background: #fff;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(252, 40, 71, 0.1);
   }
 `;
 
-const SelectWrapper = styled.div`
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  align-self: stretch;
-  flex: 1 0 0;
-  color: #000;
+const Container = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const DropdownButton = styled.button`
+  width: 100%;
   font-size: 15px;
-  font-style: normal;
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 10px;
+  border: 1px solid #c5c5c5;
+  background: #fff;
   font-weight: 300;
-  line-height: normal;
 
-  .selectBox * {
-    box-sizing: border-box;
+  font-family: GyeonggiMillenniumTitle;
+  list-style: none;
+  // overflow: hidden;
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(252, 40, 71, 0.1);
   }
-  .selectBox {
-    position: relative;
-    height: 35px;
-    border-radius: 8px;
-    border: 1px solid #c5c5c5;
-    background: #fff;
-    background: url("https://freepikpsd.com/media/2019/10/down-arrow-icon-png-7-Transparent-Images.png")
-      calc(100% - 7px) center no-repeat;
-    background-size: 20px;
-    cursor: pointer;
-  }
+`;
 
-  .selectBox:after {
-    content: "";
-    display: block;
-    width: 2px;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    right: 35px;
-    background: lightcoral;
-  }
+const Arrow = styled.span`
+  transform: ${({ open }) => (open ? "rotate(180deg)" : "rotate(0deg)")};
+  transition: 0.2s;
+`;
 
-  .selectBox .label {
-    display: flex;
-    align-items: center;
-    width: inherit;
-    height: inherit;
-    border: 0 none;
-    outline: 0 none;
-    padding-left: 15px;
-    background: transparent;
-    cursor: pointer;
-  }
+const DropdownList = styled.ul`
+  font-size: 15px;
+  font-weight: 300;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  border-radius: 10px;
+  border: 1px solid #c5c5c5;
+  background: #fff;
 
-  .selectBox .optionList {
-    position: absolute;
-    top: 28px;
-    left: 0;
-    width: 100%;
-    background: lightcoral;
-    color: #fff;
-    list-style-type: none;
-    padding: 0;
-    border-radius: 6px;
-    overflow: hidden;
-    max-height: 0;
-    transition: 0.3s ease-in;
-  }
+  list-style: none;
+  margin-top: 8px;
+  overflow: hidden;
+`;
 
-  .selectBox .optionList::-webkit-scrollbar {
-    width: 6px;
-  }
-  .selectBox .optionList::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .selectBox .optionList::-webkit-scrollbar-thumb {
-    background: #303030;
-    border-radius: 45px;
-  }
-  .selectBox .optionList::-webkit-scrollbar-thumb:hover {
-    background: #303030;
-  }
-
-  .selectBox.active .optionList {
-    max-height: 500px;
-  }
-
-  .selectBox .optionItem {
-    border-bottom: 1px dashed rgb(170, 72, 72);
-    padding: 5px 15px 5px;
-    transition: 0.1s;
-  }
-
-  .selectBox .optionItem:hover {
-    background: rgb(175, 93, 93);
-  }
-
-  .selectBox .optionItem:last-child {
-    border-bottom: 0 none;
+const DropdownItem = styled.li`
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: ${({ selected }) =>
+    selected ? "var(--color-tertiary)" : "transparent"};
+  &:hover {
+    background: #f5f5f5;
   }
 `;
 

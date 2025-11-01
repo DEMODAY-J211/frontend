@@ -65,7 +65,7 @@ export default function HomeUser() {
   }
 
   const handleBuyTicket = () => {
-    navigate("/viewshowdetail", {
+    navigate(`/viewshowdetail/${currentShow.showId}`, {
       state: {
         managerId: currentShow.managerId,
         showId: currentShow.showId,
@@ -85,21 +85,15 @@ export default function HomeUser() {
           >
             <RiArrowLeftWideFill size="40px" />
           </button>
-          <ShowItemWrapper>
+          <ShowItemWrapper onClick={handleBuyTicket}>
             <ShowItemSlider index={currentIndex}>
-              {shows.map((show, idx) => {
-                const isCurrentReservable =
-                  idx === currentIndex && show.isReservable;
+              {shows.map((show) => {
                 return (
                   <ShowItem key={show.showId}>
                     <img
                       className="poster"
                       src={show.showPosterPicture}
                       alt={show.showTitle}
-                      style={{
-                        cursor: isCurrentReservable ? "pointer" : "",
-                      }}
-                      onClick={handleBuyTicket}
                     />
                     <div className="info">
                       <p>{show.showTimes}</p>

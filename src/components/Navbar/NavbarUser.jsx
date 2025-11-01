@@ -51,7 +51,7 @@ const HeaderContainer = styled.div`
   display: flex;
   position: sticky;
   top: 0; /* 화면 상단에 붙도록 */
-  z-index: 1000; /* 다른 컨텐츠 위로 올라오도록 */
+  z-index: 800; /* 다른 컨텐츠 위로 올라오도록 */
   height: 80px;
   padding: 10px 20px;
   justify-content: space-between;
