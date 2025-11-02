@@ -46,7 +46,7 @@ const ViewEntryStatus = () => {
 
       const token = localStorage.getItem('accessToken');
       const response = await fetch(
-        `/manager/shows/${showId}/checkin?showtimeId=${showtimeId}`,
+        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin?showtimeId=${showtimeId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -499,7 +499,7 @@ const ViewEntryStatus = () => {
 
       const token = localStorage.getItem('accessToken');
       const response = await fetch(
-        `/manager/shows/${showId}/checkin?showtimeId=${showtimeId}`,
+        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin?showtimeId=${showtimeId}`,
         {
           method: 'PATCH',
           headers: {
