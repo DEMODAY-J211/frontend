@@ -10,7 +10,6 @@ import Login from "./pages/Login";
 import HomeUser from "./pages/User/HomeUser";
 import ViewShowDetail from "./pages/User/ViewShowDetail";
 import ViewTeamInfo from "./pages/User/ViewTeamInfo";
-import SelectSeat from "./pages/User/SelectSeat";
 import MyTicketList from "./pages/User/MyTicketList";
 import CheckTicket from "./pages/User/CheckTicket";
 import MobileTicket from "./pages/User/MobileTicket";
@@ -20,11 +19,13 @@ import NavbarManager from "./components/Navbar/NavbarManager";
 import HomeManager from "./pages/Manager/HomeManager";
 import ManageShow from "./pages/Manager/ManageShow/ManageShow";
 import ManageUser from "./pages/Manager/ManageShow/ManageUser";
-import ViewEntryStatus from "./pages/Manager/ManageShow/ViewEntryStatus";
 import QRManager from "./pages/Manager/QRManager";
 import BuyTicket from "./pages/User/BuyTicket";
 
 //주현수
+import SelectSeat from "./pages/User/SelectSeat";
+import ViewEntryStatus from "./pages/Manager/ManageShow/ViewEntryStatus";
+
 
 const App = () => {
   return (
