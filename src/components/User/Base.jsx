@@ -96,11 +96,10 @@ const Sheet = styled.div`
   // padding: 10px 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
   font-size: 18px;
   display: flex;
   border-radius: 20px 20px 0 0;
-  background: #fff;
+  // background: #fff;
 
   h3 {
     color: #000;
@@ -118,7 +117,7 @@ const Header = styled.div`
   align-items: center;
   gap: 10px;
   align-self: stretch;
-
+  padding: 10px;
   div {
     display: flex;
     width: 50%;
