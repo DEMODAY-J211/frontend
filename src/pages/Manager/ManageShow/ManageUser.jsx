@@ -25,6 +25,10 @@ const ManageUser = () => {
 const [reservationData, setReservationData] = useState([]);
 const [initialData, setInitialData] = useState([]); // 초기 데이터 저장
 
+
+
+  
+
 // 🔹 초기 데이터 불러올 때 한번만 복제해서 저장
 useEffect(() => {
 
@@ -258,6 +262,57 @@ const closeSaveModal = () => {
 setShowChangeStatusModal(false);
 };
 
+//api
+// const [userlist, setUserlist] = useState([]);
+
+// const [loading, setLoading] = useState(false);
+// const [error, setError] = useState("");
+//     const viewUsers = async() => {
+//       try{
+//         setError("");
+    
+//         const response = await fetch(
+//           `https://asdf/manager/shows/${showId}/customers` ,
+//           {
+//             method: "GET",
+//             headers: {
+//               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+//               Accept: "application/json",
+//               "Content-type": "application/json",
+//             },
+//           }
+//         );
+    
+    
+    
+//         const result = await response.json();
+      
+//         if(!response.ok || result.success !== true) {
+//           throw new Error(result.message || "예매자 리스트 조회에 실패했습니다.");
+//         }
+        
+//         setUserlist(result.data ?? []);
+//         console.log(result.data);
+//       }catch(error){
+//         console.error("Error fetching applied labors:", error);
+//         setError(error.message);
+//       }
+//     };
+    	
+
+
+//     useEffect(() => {
+//   const fetchData = async () => {
+//     setLoading(true);
+//     await viewUsers(); // ✅ 실제 API 호출
+//     setLoading(false);
+//   };
+
+//   fetchData();
+// }, [userlist]); // festivalId가 바뀌면 새로 호출
+
+// if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
+// if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
   return (
     <Content>
       <NavbarManager />
