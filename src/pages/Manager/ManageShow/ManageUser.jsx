@@ -267,12 +267,14 @@ setShowChangeStatusModal(false);
 
 // const [loading, setLoading] = useState(false);
 // const [error, setError] = useState("");
+
+// const showId = 2;
 //     const viewUsers = async() => {
 //       try{
 //         setError("");
     
 //         const response = await fetch(
-//           `https://asdf/manager/shows/${showId}/customers` ,
+//           `http://15.164.218.55:8080/manager/shows/${showId}/customers` ,
 //           {
 //             method: "GET",
 //             headers: {

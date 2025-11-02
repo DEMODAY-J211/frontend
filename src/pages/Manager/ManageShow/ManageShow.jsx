@@ -39,11 +39,13 @@ const ManageShow = () => {
     { title: "제15회 정기공연", color: "#f0f0f0" },
     { title: "제16회 정기공연", color: "#e8e8e8" },
     { title: "제16회 정기공연", color: "#e8e8e8" },
+    { title: "제20회 정기공연", color: "#e8e8e8" },
   ];
 
   const [selectedIndex, setSelectedIndex] = useState(0); // ✅ 선택된 카드 인덱스 (기본 0)
   const [startIndex, setStartIndex] = useState(0); // 보여지는 첫 카드 인덱스
-const visibleCount = 7; // 한 화면에 보여줄 카드 수
+const visibleCount = Math.min(7, posters.length); // 카드 수가 7개 이하이면 그대로
+
 
   const handleCardClick = (index) => {
         setSelectedIndex(index); // ✅ 클릭된 카드 인덱스로 업데이트
@@ -52,16 +54,24 @@ const visibleCount = 7; // 한 화면에 보여줄 카드 수
     const scrollRef = useRef(null);
 
 const handleScroll = (direction) => {
+  if (posters.length <= visibleCount) return; // 카드가 7개 이하이면 스크롤 안함
+
   if (direction === "left") {
     setStartIndex((prev) => (prev - 1 + posters.length) % posters.length);
   } else {
     setStartIndex((prev) => (prev + 1) % posters.length);
   }
 };
+
 const visiblePosters = Array.from({ length: visibleCount }, (_, i) => {
+  // posters가 visibleCount보다 적으면 slice 사용
+  if (posters.length <= visibleCount) {
+    return posters[i];
+  }
   const index = (startIndex + i) % posters.length;
   return posters[index];
 });
+
 
 
 
@@ -167,7 +177,7 @@ const Arrow = styled.div`
 
 const CardList = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   overflow-x: auto;
   gap: 50px;
@@ -178,6 +188,7 @@ const CardList = styled.div`
   }
 width: 100%;
 height: 100%;
+  padding-left: 20px; // 좌측 여백 조금 추가 가능
 `;
 
 const CardContainer = styled.div`
