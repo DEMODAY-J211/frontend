@@ -2,7 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import TeamInfo from "./TeamInfo";
 
-export default function ShowTab({ hasGroupInfo = true }) {
+export default function ShowTab({ hasGroupInfo = true, showDetailText = "" }) {
   const [activeTab, setActiveTab] = useState(
     hasGroupInfo ? "공연상세" : "예매확인/취소"
   );
@@ -24,11 +24,7 @@ export default function ShowTab({ hasGroupInfo = true }) {
       </TabContainer>
       <div>
         {activeTab === "공연상세" && (
-          <ContentWrapper>
-            {
-              "공연상세 내용공연상세 내용공연상세 내용공연상세 내용공연상세 내용공연상세 내용공연상세 내용공연상세 내용공연상세 내용공연상세 내용공연상세 내용"
-            }
-          </ContentWrapper>
+          <ContentWrapper>{showDetailText}</ContentWrapper>
         )}
         {activeTab === "판매정보" && (
           <ContentWrapper>

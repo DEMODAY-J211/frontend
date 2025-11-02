@@ -1,28 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
+import { formatKoreanDate } from "../../utils/dateFormat";
+import Footerbtn from "../Save/Footerbtn";
+const MockData = [
+  {
+    showId: 12,
+    showTitle: "제11회 정기공연",
+    showtimeList: [
+      {
+        showtimeId: 1,
+        showtimeStart: "2025-10-28T15:00",
+        availableSeats: 0,
+      },
+      {
+        showtimeId: 2,
+        showtimeStart: "2025-10-28T15:00",
+        availableSeats: 20,
+      },
+    ],
+    ticketOptionList: [
+      {
+        ticketoptionName: "학생할인",
+        ticketoptionPrice: 8000,
+      },
+      {
+        ticketoptionName: "학생할인",
+        ticketoptionPrice: 8000,
+      },
+    ],
+  },
+];
 
-export default function ShowtimeSelector() {
-  const [selectedShowtime, setSelectedShowtime] = useState(null);
-  const [selectedOption, setSelectedOption] = useState(null);
+export default function ShowtimeSelector({
+  showtimes = [],
+  ticketOptionList = [],
+  selectedShowtime,
+  setSelectedShowtime,
+  selectedOption,
+  setSelectedOption,
+  quantity,
+  setQuantity,
+  handlebtn,
+}) {
   const [isShowtimeOpen, setIsShowtimeOpen] = useState(false);
   const [isOptionOpen, setIsOptionOpen] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  console.log("showtime", showtimes);
+  console.log("ticketoptionlist", ticketOptionList);
+  console.log("selectedoption", selectedOption);
+  // const showtimes = [
+  //   { id: 1, time: "2025-11-10 18:00" },
+  //   { id: 2, time: "2025-11-11 19:00" },
+  //   { id: 3, time: "2025-11-12 19:00" },
+  // ];
 
-  const showtimes = [
-    { id: 1, time: "2025-11-10 18:00" },
-    { id: 2, time: "2025-11-11 19:00" },
-    { id: 3, time: "2025-11-12 19:00" },
-  ];
-
-  const ticketOptions = [
-    { id: 1, name: "일반", price: 20000 },
-    { id: 2, name: "중/고등학생", price: 10000 },
-    { id: 3, name: "대학생", price: 15000 },
-  ];
+  // const ticketOptions = [
+  //   { id: 1, name: "일반", price: 20000 },
+  //   { id: 2, name: "중/고등학생", price: 10000 },
+  //   { id: 3, name: "대학생", price: 15000 },
+  // ];
 
   const handleSelectShowtime = (show) => {
+    console.log("선택된 회차:", show);
     setSelectedShowtime(show);
     setIsShowtimeOpen(false);
     setSelectedOption(null);
@@ -37,111 +77,164 @@ export default function ShowtimeSelector() {
     setQuantity((prev) => Math.max(1, prev + change));
   };
 
-  const totalPrice = selectedOption ? selectedOption.price * quantity : 0;
+  const totalPrice = selectedOption
+    ? selectedOption.ticketoptionPrice * quantity
+    : 0;
+
+  const handleDelete = () => {
+    setSelectedShowtime(null);
+    setSelectedOption(null);
+    setQuantity(1);
+    setIsShowtimeOpen(false);
+    setIsOptionOpen(false);
+  };
+
+  useEffect(() => {
+    console.log("selectedShowtime 변경됨:", selectedShowtime);
+  }, [selectedShowtime]);
 
   return (
-    <Wrapper>
-      <h3>예매 회차 선택</h3>
-      <Container>
-        <DropdownButton onClick={() => setIsShowtimeOpen(!isShowtimeOpen)}>
-          {selectedShowtime ? selectedShowtime.time : "회차를 선택하세요"}
-          <Arrow open={isShowtimeOpen}>▼</Arrow>
-        </DropdownButton>
+    <TopWrapper>
+      <Wrapper>
+        <h3>예매 회차 선택</h3>
+        <Container>
+          <DropdownButton onClick={() => setIsShowtimeOpen(!isShowtimeOpen)}>
+            {selectedShowtime
+              ? selectedShowtime.showtimeStart
+              : "회차를 선택하세요"}
+            <Arrow open={isShowtimeOpen}>▼</Arrow>
+          </DropdownButton>
 
-        <AnimatePresence initial={false}>
-          {isShowtimeOpen && (
-            <motion.div
-              key="showtime-list"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <DropdownList>
-                {showtimes.map((show) => (
-                  <DropdownItem
-                    key={show.id}
-                    onClick={() => handleSelectShowtime(show)}
-                    selected={selectedShowtime?.id === show.id}
+          <AnimatePresence initial={false}>
+            {isShowtimeOpen && (
+              <motion.div
+                key="showtime-list"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+              >
+                <DropdownList>
+                  {showtimes?.map((show) => (
+                    <DropdownItem
+                      key={show.showtimeId}
+                      onClick={() => handleSelectShowtime(show)}
+                      selected={
+                        selectedShowtime?.showtimeId === show.showtimeId
+                      }
+                    >
+                      {show.showtimeStart}
+                    </DropdownItem>
+                  ))}
+                </DropdownList>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Container>
+
+        {/*  티켓 옵션 선택 */}
+        {selectedShowtime && (
+          <>
+            <h3 style={{ marginTop: "16px" }}>티켓 옵션 선택</h3>
+            <Container>
+              <DropdownButton onClick={() => setIsOptionOpen(!isOptionOpen)}>
+                {selectedOption
+                  ? `${selectedOption?.ticketoptionName} (${selectedOption?.ticketoptionPrice}원)`
+                  : "티켓 옵션을 선택하세요"}
+                <Arrow open={isOptionOpen}>▼</Arrow>
+              </DropdownButton>
+
+              <AnimatePresence initial={false}>
+                {isOptionOpen && (
+                  <motion.div
+                    key="option-list"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
                   >
-                    {show.time}
-                  </DropdownItem>
-                ))}
-              </DropdownList>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </Container>
-
-      {/*  티켓 옵션 선택 */}
-      {selectedShowtime && (
-        <>
-          <h3 style={{ marginTop: "16px" }}>티켓 옵션 선택</h3>
-          <Container>
-            <DropdownButton onClick={() => setIsOptionOpen(!isOptionOpen)}>
-              {selectedOption
-                ? `${
-                    selectedOption.name
-                  } (${selectedOption.price.toLocaleString()}원)`
-                : "티켓 옵션을 선택하세요"}
-              <Arrow open={isOptionOpen}>▼</Arrow>
-            </DropdownButton>
-
-            <AnimatePresence initial={false}>
-              {isOptionOpen && (
-                <motion.div
-                  key="option-list"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <DropdownList>
-                    {ticketOptions.map((option) => (
-                      <DropdownItem
-                        key={option.id}
-                        onClick={() => handleSelectOption(option)}
-                        selected={selectedOption === option.id}
-                      >
-                        {option.name} ({option.price.toLocaleString()}원)
-                      </DropdownItem>
-                    ))}
-                  </DropdownList>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </Container>
-        </>
-      )}
-      {selectedShowtime && selectedOption && (
-        <>
-          <h3 style={{ marginTop: "16px" }}>매수 선택</h3>
-          <TicketContainer>
-            <TotalPrice>
-              <strong>{selectedShowtime.id}회차</strong>
-              <strong>{selectedOption.name}</strong>
-              <strong>{selectedOption.price.toLocaleString()}원</strong>
-            </TotalPrice>
-            <QuantityContainer>
-              <QtyButton onClick={() => handleQuantityChange(-1)}>-</QtyButton>
-              <QuantityText>{quantity}</QuantityText>
-              <QtyButton onClick={() => handleQuantityChange(1)}>+</QtyButton>
-            </QuantityContainer>
-            <AiOutlineClose />
-          </TicketContainer>
-        </>
-      )}
-    </Wrapper>
+                    <DropdownList>
+                      {ticketOptionList.map((option, idx) => (
+                        <DropdownItem
+                          key={idx}
+                          onClick={() => handleSelectOption(option)}
+                          selected={
+                            selectedOption?.ticketoptionName ===
+                            option.ticketoptionName
+                          }
+                        >
+                          {option.ticketoptionName} ({option.ticketoptionPrice}
+                          원)
+                        </DropdownItem>
+                      ))}
+                    </DropdownList>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Container>
+          </>
+        )}
+        {selectedShowtime && selectedOption && (
+          <>
+            <h3 style={{ marginTop: "16px" }}>매수 선택</h3>
+            <TicketContainer>
+              <TotalPrice>
+                <strong>{selectedShowtime.showtimeId}회차</strong>
+                <strong>{selectedOption.ticketoptionName}</strong>
+                <strong>{selectedOption.ticketoptionPrice}원</strong>
+              </TotalPrice>
+              <QuantityContainer>
+                <QtyButton onClick={() => handleQuantityChange(-1)}>
+                  -
+                </QtyButton>
+                <QuantityText>{quantity}</QuantityText>
+                <QtyButton onClick={() => handleQuantityChange(1)}>+</QtyButton>
+              </QuantityContainer>
+              <AiOutlineClose
+                onClick={handleDelete}
+                style={{ cursor: "pointer" }}
+              />
+            </TicketContainer>
+          </>
+        )}
+      </Wrapper>
+      <Footerbtn
+        buttons={[{ text: "예매하기", color: "red", onClick: handlebtn }]}
+      />
+    </TopWrapper>
   );
 }
-
-const Wrapper = styled.div`
+const TopWrapper = styled.div`
+  width: 80%;
+  min-width: 375px;
+  max-width: 430px;
+  width: 100vw;
+  background: #fff;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.25);
+  padding: 10px 20px;
   display: flex;
-  padding: 0 10px;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 15px;
-  align-self: stretch;
+  gap: 10px;
+  font-size: 18px;
+  display: flex;
+  border-radius: 20px 20px 0 0;
+  background: #fff;
+
+  h3 {
+    color: #000;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+`;
+const Wrapper = styled.div`
+  // display: flex;
+  // padding: 0 10px;
+  // flex-direction: column;
+  // align-items: flex-start;
+  // gap: 15px;
+  // align-self: stretch;
 `;
 
 const Container = styled.div`
