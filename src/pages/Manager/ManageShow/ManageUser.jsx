@@ -274,7 +274,7 @@ setShowChangeStatusModal(false);
 //         setError("");
     
 //         const response = await fetch(
-//           `http://15.164.218.55:8080/manager/shows/${showId}/customers` ,
+//          `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/customers`,
 //           {
 //             method: "GET",
 //             headers: {

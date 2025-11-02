@@ -92,10 +92,7 @@ const visiblePosters = Array.from({ length: visibleCount }, (_, i) => {
                   $selected={selectedIndex === index} // ✅ 선택 상태 전달
                   style={{ backgroundColor: "var(--color-tertiary)" }}
                 >
-                    <More>
-                        <AiOutlineMore size={20} />
-                        <button>공연 삭제</button> {/* 👈 여기에 버튼을 같이 넣어줘야 hover로 작동 */}
-                    </More>
+
                   <Poster 
                     src={poster.img ? poster.img : defaultimg} 
                     alt={poster.title} 
@@ -224,66 +221,6 @@ const Card = styled.div`
 `;
 
 
-const More = styled.div`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  cursor: pointer;
-  color: #555;
-  transition: 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-
-  /* 기본: 아이콘 보이고 버튼 숨김 */
-  svg {
-    opacity: 1;
-    visibility: visible;
-    transition: all 0.2s ease;
-  }
-
-  button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.2s ease;
-
-    border: none;
-    border-radius: 5px;
-background: #FFF;
-box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.15);
-    padding: 5px 10px;
-    font-size: 15px;
-    font-weight: 500;
-    color: #333;
-
-    cursor: pointer;
-
-    display: flex;
-height: 32px;
-width: 77px;
-
-justify-content: center;
-align-items: center;
-gap: 10px;
-  }
-
-  /* hover 시 아이콘 사라지고 버튼 나타남 */
-  &:hover svg {
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  &:hover button {
-    opacity: 1;
-    visibility: visible;
-    
-  }
-
-
-`;
 
 const Poster = styled.img`
   width: 100%;
