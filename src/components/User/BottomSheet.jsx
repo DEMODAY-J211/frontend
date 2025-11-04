@@ -1,46 +1,49 @@
 import { useState, useEffect } from "react";
-import styled from "styled-components";
-import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import Base from "./Base";
-import Footerbtn from "../Save/Footerbtn";
 import ShowtimeSelector from "./ShowtimeSelector";
 
-const MockData = [
-  {
-    showId: 12,
-    showTitle: "제11회 정기공연",
-    showtimeList: [
-      {
-        showtimeId: 1,
-        showtimeStart: "2025-10-28T15:00",
-        availableSeats: 0,
-      },
-      {
-        showtimeId: 2,
-        showtimeStart: "2025-10-28T15:00",
-        availableSeats: 20,
-      },
-    ],
-    ticketOptionList: [
-      {
-        ticketoptionName: "학생할인",
-        ticketoptionPrice: 8000,
-      },
-      {
-        ticketoptionName: "학생할인",
-        ticketoptionPrice: 8000,
-      },
-    ],
-  },
-];
-export default function BottomSheet({ onClose, showData = {} }) {
+// const MockData = [
+//   {
+//     showId: 12,
+//     showTitle: "제11회 정기공연",
+//     showtimeList: [
+//       {
+//         showtimeId: 1,
+//         showtimeStart: "2025-10-28T15:00",
+//         availableSeats: 0,
+//       },
+//       {
+//         showtimeId: 2,
+//         showtimeStart: "2025-10-28T15:00",
+//         availableSeats: 20,
+//       },
+//     ],
+//     ticketOptionList: [
+//       {
+//         ticketoptionName: "학생할인",
+//         ticketoptionPrice: 8000,
+//       },
+//       {
+//         ticketoptionName: "학생할인",
+//         ticketoptionPrice: 8000,
+//       },
+//     ],
+//   },
+// ];
+const managerId = 1;
+// const serverUrl = import.meta.env.VITE_API_URL;
+// const serverUrl = "http://15.164.218.55:8080";
+
+export default function BottomSheet({ onClose, showData = {}, onNeedModal }) {
+  const navigate = useNavigate();
   const [selectedShowtime, setSelectedShowtime] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!selectedShowtime || !selectedOption) {
-      alert("회차와 티켓 옵션을 선택해주세요!");
+      onNeedModal?.();
       return;
     }
     // 다음 페이지 이동 로직
@@ -49,7 +52,58 @@ export default function BottomSheet({ onClose, showData = {} }) {
       selectedOption,
       quantity,
     });
+
+    try {
+      const payload = {
+        showtimeId: selectedShowtime.showtimeId,
+        ticketOptionId: selectedOption.ticketOptionId,
+        quantity: quantity,
+      };
+
+      const response = await fetch(
+        `${serverUrl}/user/${managerId}/booking/start`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("서버 응답:", result);
+
+      // 성공 시 다음 페이지 이동
+      // navigate(`../selectseat/${showData.showId}`, {
+      //   selectedShowtime,
+      //   selectedOption,
+      //   quantity,
+      // });
+      navigate(`../payment`, {
+        state: {
+          selectedShowtime,
+          selectedOption,
+          quantity,
+          showData,
+        },
+      });
+    } catch (error) {
+      console.error("예약 요청 실패:", error);
+      alert("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
+      // 연결하고 지우기
+      navigate(`../payment`, {
+        state: {
+          selectedShowtime,
+          selectedOption,
+          quantity,
+          showData,
+        },
+      });
+    }
   };
+
   return (
     <Base onClose={onClose}>
       <ShowtimeSelector
@@ -67,5 +121,3 @@ export default function BottomSheet({ onClose, showData = {} }) {
     </Base>
   );
 }
-
-const SelectedItem = styled.div``;
