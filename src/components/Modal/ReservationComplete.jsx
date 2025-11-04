@@ -1,11 +1,82 @@
 import styled from "styled-components";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// const serverUrl = import.meta.env.VITE_API_URL;
+// const serverUrl = "http://15.164.218.55:8080";
 
 export default function ReservationComplete({ onClose }) {
   const navigate = useNavigate();
-  const reservationId = useState(0);
+  const [resData, setResData] = useState([]);
+
+  const fetchResData = async () => {
+    try {
+      // const token = localStorage.getItem('accessToken');
+      // const response = await fetch(`${serverUrl}/user/${managerId}/booking/confirm-info`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${token}`,
+      //     'Content-Type': 'application/json'
+      //   }
+      // });
+      // if (!response.ok) throw new Error("네트워크 응답 실패");
+      // const res = await response.json();
+      const mockData = {
+        success: true,
+        code: 200,
+        message: "success",
+        data: {
+          showTitle: "테스트 공연 1",
+          showtimeStart: "...", // 예매 선택한 회차 시작 시간 (LocalDateTime)
+          ticketOptionName: "S석",
+          quantity: 1,
+          totalPrice: 40000,
+          userName: "테스트유저", // 로그인된 사용자 이름
+          managerBankName: "KAKAO",
+          managerAccountNumber: "123-456-789",
+          managerDepositorName: "테스트매니저",
+        },
+      };
+
+      if (mockData.success) {
+        setResData(mockData.data);
+        console.log("mockdata", mockData);
+        console.log("resData입니다", resData);
+      }
+    } catch (error) {
+      console.error("공연 조회 실패:", error);
+      alert("해당 공연 단체를 찾을 수 없습니다.");
+    }
+  };
+
+  const handleConfirm = async () => {
+    // const response = await fetch(
+    //   `${serverUrl}/user/${managerId}/booking/confirm`,
+    //   {
+    //     method: "POST",
+    //     header: { "Content-Type": "application/json" },
+    //   }
+    // );
+    // if (!response.ok) {
+    //   throw new Error(`HTTP error! status: ${response.status}`);
+    // }
+
+    // const data = await response.json();
+    const mdata = {
+      success: true,
+      code: 200,
+      message: "success",
+      data: 2, // 새로 생성된 Reservation ID (DataInitializer가 1번 생성)
+    };
+    const reservationId = mdata.data;
+    console.log("예매 완료 응답:", mdata);
+    navigate(`/checkticket/${reservationId}`);
+  };
+
+  useEffect(() => {
+    fetchResData();
+  }, []);
+
   return (
     <Overlay>
       <ModalBox>
@@ -17,8 +88,8 @@ export default function ReservationComplete({ onClose }) {
           <br />
           <p>
             예매 확정을 위해 <br />
-            입금자명은 ‘강길동’으로 <br />
-            17000원을 입금해주세요!{" "}
+            입금자명은 {resData.userName}으로 <br />
+            {resData.totalPrice.toLocaleString()}원을 입금해주세요!{" "}
           </p>
           <br />
           <p>
@@ -33,12 +104,12 @@ export default function ReservationComplete({ onClose }) {
             <Title>입금 계좌</Title>
             <Toggle>계좌복사</Toggle>
           </TicketInfo>
-          <Subtitle>우리 0000-000-000000 (예금주) 홍길동</Subtitle>
+          <Subtitle>
+            {resData.managerBankName} {resData.managerAccountNumber} (예금주){" "}
+            {resData.managerDepositorName}
+          </Subtitle>
         </InfoSection>
-        <div
-          className="btn btn-red"
-          onClick={() => navigate(`/checkticket/${reservationId}`)}
-        >
+        <div className="btn btn-red" onClick={handleConfirm}>
           확인
         </div>
       </ModalBox>

@@ -6,6 +6,7 @@ import ShowTab from "../../components/User/ShowTab";
 import LoginRequiredModal from "../../components/Modal/LoginRequiredModal";
 import Footerbtn from "../../components/Save/Footerbtn";
 import BottomSheet from "../../components/User/BottomSheet";
+import AlertModal from "../../components/Modal/AlertModal";
 import { formatKoreanDate } from "../../utils/dateFormat";
 // s01001
 const managerId = 1;
@@ -19,6 +20,7 @@ export default function ViewShowDetail({}) {
   const [showModal, setShowModal] = useState(false);
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [showData, setShowData] = useState({});
+  const [showAlert, setShowAlert] = useState(false);
 
   const handlebtn = () => {
     if (!login) {
@@ -98,7 +100,7 @@ export default function ViewShowDetail({}) {
   // };
 
   useEffect(() => {
-    fetch(`${serverUrl}/user/${managerId}/detail/${managerId}`, {
+    fetch(`${serverUrl}/user/${managerId}/detail/${showId}`, {
       headers: {},
     })
       .then((res) => {
@@ -223,9 +225,12 @@ export default function ViewShowDetail({}) {
       {login && showBottomSheet && (
         <BottomSheet
           onClose={() => setShowBottomSheet(false)}
+          onNeedModal={() => setShowAlert(true)}
           showData={showData}
         />
       )}
+
+      {showAlert && <AlertModal onClose={() => setShowAlert(false)} />}
     </PageWrapper>
   );
 }

@@ -4,6 +4,7 @@ import { RiArrowLeftWideFill } from "react-icons/ri";
 import { RiArrowRightWideFill } from "react-icons/ri";
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatKoreanDate } from "../../utils/dateFormat.js";
 
 // s00104
 const managerId = 1;
@@ -11,6 +12,7 @@ const managerId = 1;
 const serverUrl = "http://15.164.218.55:8080";
 
 export default function HomeUser() {
+  const [login, setLogin] = useState(false); //true: 로그인 상태 , false: 로그아웃 상태
   const [shows, setShows] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userReservations, setUserReservations] = useState([]);
@@ -23,7 +25,7 @@ export default function HomeUser() {
   function handlePrev() {
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   }
-
+  console.log(login);
   const handleBuyTicket = () => {
     if (!currentShow) return;
     navigate(`/viewshowdetail/${currentShow.showId}`, {
@@ -138,7 +140,7 @@ export default function HomeUser() {
                         alt={show.showTitle}
                       />
                       <div className="info">
-                        <p>{show.showTimes}</p>
+                        <p>{formatKoreanDate(show.showTimes).split(" ")[0]}</p>
                         <h3>{show.showTitle}</h3>
                         <p>{show.showLocation}</p>
                       </div>
@@ -147,7 +149,7 @@ export default function HomeUser() {
                 })}
               </ShowItemSlider>
               <Buyticketbtn
-                reservable={currentShow.isReservable}
+                reservable={!login || (login && currentShow.isReservable)}
                 onClick={handleBuyTicket}
               >
                 {userReservations.includes(currentShow.showId)

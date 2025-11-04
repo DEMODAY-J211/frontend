@@ -1,23 +1,29 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import Footerbtn from "../../components/Save/Footerbtn";
 import ReservationComplete from "../../components/Modal/ReservationComplete";
+import { formatKoreanDate } from "../../utils/dateFormat";
 
 // s01101
+// const serverUrl = import.meta.env.VITE_API_URL;
+// const serverUrl = "http://15.164.218.55:8080";
+
 export default function BuyTicket() {
-  // 공연 정보 (이전 페이지에서 전달받음)
-  const [showInfo, setShowInfo] = useState({
-    showName: "제11회정기공연",
-    showtimeName: "1회차(15:00)",
-    ticketType: "일반예매",
-    quantity: 2,
-    totalPrice: 18000,
-  });
+  const location = useLocation();
+  const { selectedShowtime, selectedOption, quantity, showData } =
+    location.state || {};
+  // console.log(selectedShowtime, selectedOption, quantity, showData);
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  // const [accountBank, setAccountBank] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountHolder, setAccountHolder] = useState("");
+
   // 예매 성공 팝업
   const [isComplete, setIsComplete] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedBank, setSelectedBank] = useState(null);
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   const backOptions = [
     { id: 1, name: "국민은행" },
@@ -30,14 +36,49 @@ export default function BuyTicket() {
     { id: 8, name: "카카오뱅크" },
     { id: 9, name: "토스뱅크" },
   ];
-  const handleBooking = () => {
-    setIsComplete(true);
+
+  const handleBooking = async () => {
+    try {
+      const payload = {
+        phone: phoneNumber,
+        refundBank: selectedBank,
+        refundAccount: accountNumber,
+        refundHolder: accountHolder,
+      };
+      console.log(payload);
+
+      const response = await fetch(
+        `${serverUrl}/user/${managerId}/booking/details`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) throw new Error("서버 오류");
+      const result = await response.json();
+      console.log("서버 응답:", result);
+      setIsComplete(true);
+    } catch (error) {
+      console.error("전송 실패:", error);
+      // api 연결 후 삭제하기
+      setIsComplete(true);
+    }
   };
 
   const handleSelectOption = (option) => {
-    setSelectedOption(option);
+    setSelectedBank(option);
     setIsOptionOpen(false);
   };
+
+  const totalPrice = selectedOption
+    ? selectedOption.ticketoptionPrice * quantity
+    : 0;
+  // console.log(totalPrice);
+
   return (
     <PageWrapper>
       {isComplete && (
@@ -49,20 +90,34 @@ export default function BuyTicket() {
           {/* 공연 정보 */}
           <InfoSection>
             <ShowInfoHeader>
-              <ShowTitle>{showInfo.showName}</ShowTitle>
-              <ShowTime>{showInfo.showtimeName}</ShowTime>
+              <ShowTitle>{showData.showTitle}</ShowTitle>
+              <ShowTime>
+                {selectedShowtime.showtimeId}회차(
+                {formatKoreanDate(selectedShowtime.showtimeStart).split(" ")[1]}
+                )
+              </ShowTime>
             </ShowInfoHeader>
             <TicketInfo>
               <TicketType>
-                {showInfo.ticketType}·{showInfo.quantity}매
+                {selectedOption.ticketoptionName}·{quantity}매
               </TicketType>
             </TicketInfo>
           </InfoSection>
           {/* 예매 정보 */}
           <InfoSection>
             <Title>예매정보</Title>
+            <Subtitle>예매 안내를 위해 성함을 입력해주세요.</Subtitle>
+            <InputWrapper
+              placeholder="홍길동"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <Subtitle>예매 안내를 위해 전화번호를 입력해주세요.</Subtitle>
-            <InputWrapper placeholder="-을 제외하고 작성해주세요." />
+            <InputWrapper
+              placeholder="-을 제외하고 작성해주세요."
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
           </InfoSection>
           {/* 환불 정보 */}
           <InfoSection>
@@ -71,9 +126,7 @@ export default function BuyTicket() {
             <Subtitle>은행</Subtitle>
             <Container>
               <DropdownButton onClick={() => setIsOptionOpen(!isOptionOpen)}>
-                {selectedOption
-                  ? `${selectedOption.name}`
-                  : "---- 계좌선택 ----"}
+                {selectedBank ? `${selectedBank.name}` : "---- 계좌선택 ----"}
                 <Arrow open={isOptionOpen}>▼</Arrow>
               </DropdownButton>
 
@@ -85,7 +138,7 @@ export default function BuyTicket() {
                         <DropdownItem
                           key={option.id}
                           onClick={() => handleSelectOption(option)}
-                          selected={selectedOption === option.id}
+                          selected={selectedBank === option.id}
                         >
                           {option.name}
                         </DropdownItem>
@@ -96,20 +149,28 @@ export default function BuyTicket() {
               </>
             </Container>
             <Subtitle>계좌번호</Subtitle>
-            <InputWrapper placeholder="-을 제외하고 작성해주세요." />
+            <InputWrapper
+              placeholder="-을 제외하고 작성해주세요."
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value)}
+            />
             <Subtitle>예금주</Subtitle>
-            <InputWrapper placeholder="홍길동" />
+            <InputWrapper
+              placeholder="홍길동"
+              value={accountHolder}
+              onChange={(e) => setAccountHolder(e.target.value)}
+            />
           </InfoSection>
           {/* 결제 정보 */}
-          <InfoSection>
+          {/* <InfoSection>
             <Title>결제정보</Title>
-            <Subtitle>입금자명은 '강길동'으로 해주세요.</Subtitle>
+            <Subtitle>입금자명은 {"강길동"}으로 해주세요.</Subtitle>
             <TicketInfo>
               <Title>입금 계좌</Title>
               <Toggle>계좌복사</Toggle>
             </TicketInfo>
             <Subtitle>우리 0000-000-000000 (예금주) 홍길동</Subtitle>
-          </InfoSection>
+          </InfoSection> */}
           {/* 판매 정보 */}
           <InfoSection className="gray">
             <Title>판매정보</Title>
@@ -139,23 +200,27 @@ export default function BuyTicket() {
           <InfoSection>
             <ShowInfoHeader>
               <ShowTitle>내 티켓 확인하기</ShowTitle>
-              <ShowTime>{showInfo.showtimeName}</ShowTime>
+              <ShowTime>
+                {selectedShowtime.showtimeId}회차(
+                {formatKoreanDate(selectedShowtime.showtimeStart).split(" ")[1]}
+                )
+              </ShowTime>
             </ShowInfoHeader>
             <TicketInfo>
               <TicketType>
-                {showInfo.ticketType}·{showInfo.quantity}매
+                {selectedOption.ticketoptionName}·{quantity}매
               </TicketType>
-              <TotalPrice>{showInfo.totalPrice.toLocaleString()}원</TotalPrice>
+              <TotalPrice>{totalPrice.toLocaleString()}원</TotalPrice>
             </TicketInfo>
             <PriceInfo>
               총 결제금액
-              <span>{showInfo.totalPrice.toLocaleString()}원</span>
+              <span>{totalPrice.toLocaleString()}원</span>
             </PriceInfo>
           </InfoSection>
           <Footerbtn
             buttons={[
               {
-                text: "18,000원 결제하기",
+                text: `${totalPrice.toLocaleString()}원 결제하기`,
                 color: "red",
                 onClick: handleBooking,
               },
@@ -400,12 +465,11 @@ const ContentWrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   align-self: stretch;
   text-align: justify;
   font-size: 12px;
   font-weight: 300;
-  line-height: 1.2;
 
   p {
     align-self: stretch;
