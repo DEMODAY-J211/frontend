@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import tikitta_big from "../assets/tikitta_big.svg";
 import KakaoLogin from "../components/Modal/KakaoLogin.jsx";
-
+import KakaoCallback from "./Auth/KakaoCallback.jsx";
 const serverUrl = import.meta.env.VITE_API_URL;
 const authorization_code = "176F530BC2413E63A36A93E2C2663037";
 
@@ -41,7 +41,6 @@ export default function Login() {
   //       alert("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
   //     }
   // };
-
   return (
     <PageWrapper>
       <HomeUserContainer>
