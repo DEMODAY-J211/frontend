@@ -2,8 +2,45 @@ import styled from "styled-components";
 import tikitta_big from "../assets/tikitta_big.svg";
 import KakaoLogin from "../components/Modal/KakaoLogin.jsx";
 
+const serverUrl = import.meta.env.VITE_API_URL;
+const authorization_code = "176F530BC2413E63A36A93E2C2663037";
+
 export default function Login() {
-  const handlelogin = () => {};
+  // const handlelogin = () => {
+  //   window.location.href = `${serverUrl}/oauth2/authorization/kakao`;
+  // };
+
+  //   const handlelogin = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `${serverUrl}/auth/kakao/callback?code=${authorization_code}`,
+  //         {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //         }
+  //       );
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! status: ${response.status}`);
+  //       }
+
+  //       const result = await response.json();
+  //       console.log("서버 응답:", result);
+  //       // 성공 시 다음 페이지 이동
+  //       // navigate(`../payment`, {
+  //       //   state: {
+  //       //     selectedShowtime,
+  //       //     selectedOption,
+  //       //     quantity,
+  //       //     showData,
+  //       //   },
+  //       // });
+  //     } catch (error) {
+  //       console.error("예약 요청 실패:", error);
+  //       alert("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
+  //     }
+  // };
 
   return (
     <PageWrapper>
@@ -19,7 +56,7 @@ export default function Login() {
             <br />
             '좌석-결제-QR 입장'까지 한번에!
           </a>
-          <KakaoLogin onClick={handlelogin} />
+          <KakaoLogin />
         </LoginContainer>
       </HomeUserContainer>
     </PageWrapper>

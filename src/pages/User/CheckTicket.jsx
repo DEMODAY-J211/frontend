@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import Footerbtn from "../../components/Save/Footerbtn";
 import CancelModal from "../../components/Modal/CancelModal";
+import { formatKoreanDate } from "../../utils/dateFormat";
 
 // s01201
+// const serverUrl = import.meta.env.VITE_API_URL;
+// const serverUrl = "http://15.164.218.55:8080";
+
 export default function CheckTicket() {
   const navigate = useNavigate();
   const showid = useState(1);
   const [isCancel, setIsCancel] = useState(false);
+  const [showData, setShowData] = useState([]);
 
   const handleSelectSeat = () => {
     navigate(`/selectseat/${showid}`);
@@ -18,6 +23,63 @@ export default function CheckTicket() {
     setIsCancel(true);
   };
 
+  const fetchShowData = async () => {
+    try {
+      // const token = localStorage.getItem('accessToken');
+      // const response = await fetch(`${serverUrl}/user/${managerId}/booking/${reservationId}`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${token}`,
+      //     'Content-Type': 'application/json'
+      //   }
+      // });
+      // if (!response.ok) throw new Error("네트워크 응답 실패");
+      // const res = await response.json();
+      const mockData = {
+        success: true,
+        code: 200,
+        message: "success",
+        data: {
+          showTitle: "제11회 정기공연",
+          showPoster: "https://example.com/poster.png",
+          showtimeStart: "2025-09-25T15:00:00",
+          showLocation: "서강대학교 메리홀 소극장",
+          reservationNumber: "US25102220112",
+          seatList: ["J4", "J5"],
+          userName: "강길동",
+          userPhone: "010-0000-0000",
+          reservationDate: "2025-09-24T22:23:00",
+          ticketOptionName: "일반예매가",
+          price: 9000,
+          quantity: 2,
+          reservationstatus: "PENDING_PAYMENT",
+          totalAmount: 18000,
+          refundInfo: {
+            refundBank: "SHINHAN", // DomainEnums.Bank 값 중 하나
+            refundAccount: "444-555-666666",
+            refundHolder: "김철수",
+          },
+        },
+      };
+
+      if (mockData.success) {
+        setShowData(mockData.data);
+        console.log("mockdata", mockData);
+        console.log("showData입니다", showData);
+      }
+    } catch (error) {
+      console.error("공연 조회 실패:", error);
+      alert("해당 공연 단체를 찾을 수 없습니다.");
+    }
+  };
+
+  useEffect(() => {
+    fetchShowData();
+  }, []);
+
+  useEffect(() => {
+    console.log("showData 업데이트:", showData);
+  }, [showData]);
+
   return (
     <PageWrapper>
       {isCancel && <CancelModal onClose={() => setIsCancel(false)} />}
@@ -25,11 +87,13 @@ export default function CheckTicket() {
         <NavbarUser Backmode={true} text="예매 상세 내역" />
         <TicketWrapper>
           <ShowContainer>
-            <img className="poster" />
+            <img className="poster" src={showData.showPoster} />
             <div className="showcontent">
-              <Title>제11회 정기공연</Title>
-              <Subcontent>2025.09.25 (목) 15:00</Subcontent>
-              <Subcontent>서강대학교 메리홀 소극장</Subcontent>
+              <Title>{showData.showTitle}</Title>
+              <Subcontent>
+                {formatKoreanDate(showData.showtimeStart)}
+              </Subcontent>
+              <Subcontent>{showData.showLocation}</Subcontent>
             </div>
           </ShowContainer>
           {/* 예매정보 */}
@@ -37,23 +101,25 @@ export default function CheckTicket() {
             <Title>예매정보</Title>
             <Content>
               <p>예매번호</p>
-              <p>000000</p>
+              <p>{showData.reservationNumber}</p>
             </Content>
             <Content>
               <p>좌석번호</p>
-              <p>J4,J5 (2매)</p>
+              <p>
+                {showData.seatList} ({showData.quantity}매)
+              </p>
             </Content>
             <Content>
               <p>예매자명</p>
-              <p>강길동</p>
+              <p>{showData.userName}</p>
             </Content>
             <Content>
               <p>예매자 연락처</p>
-              <p>000-0000-0000</p>
+              <p>{showData.userPhone}</p>
             </Content>
             <Content>
               <p>예매일시</p>
-              <p>2025.09.24 (수) 22:23</p>
+              <p>{formatKoreanDate(showData.reservationDate)}</p>
             </Content>
           </Wrapper>
           {/* 결제정보 */}
@@ -61,11 +127,11 @@ export default function CheckTicket() {
             <Title>결제정보</Title>
             <Content>
               <p>결제상태</p>
-              <p>승인대기중</p>
+              <p>{showData.reservationstatus}승인대기중</p>
             </Content>
             <Content>
               <p>결제금액</p>
-              <p>18,000원</p>
+              <p>{showData?.totalAmount?.toLocaleString()}원</p>
             </Content>
           </Wrapper>
           {/* 환불정보 */}
@@ -73,11 +139,14 @@ export default function CheckTicket() {
             <Title>환불정보</Title>
             <Content>
               <p>환불 계좌</p>
-              <p>우리 0000-000-000000</p>
+              <p>
+                {showData?.refundInfo?.refundBank}{" "}
+                {showData?.refundInfo?.refundAccount}
+              </p>
             </Content>
             <Content>
               <p>예금주</p>
-              <p>강길동</p>
+              <p>{showData?.refundInfo?.refundHolder}</p>
             </Content>
           </Wrapper>
         </TicketWrapper>
