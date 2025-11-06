@@ -22,8 +22,7 @@ const KakaoCallback = () => {
           {
             method: "GET",
             headers: {
-              "Content-Type": "application/json",
-            },
+
           }
         );
 
@@ -38,7 +37,8 @@ const KakaoCallback = () => {
           throw new Error(result.message || "로그인에 실패했습니다.");
         }
 
-        const { isNewUser, user, token } = result.data;
+        const { isNewUser, user } = result.data;
+        // 세션 기반 로그인: 쿠키는 credentials: 'include'로 자동 저장됨
 
         // 신규 유저인 경우
         if (isNewUser) {
@@ -50,12 +50,9 @@ const KakaoCallback = () => {
         }
 
         // 기존 유저인 경우 - 로그인 성공
-        if (token) {
-          localStorage.setItem("accessToken", token);
-          console.log("token login~");
-        }
 
-        // 사용자 정보 저장
+
+        // 사용자 정보만 저장 (UI 표시용)
         if (user) {
           localStorage.setItem("user", JSON.stringify(user));
         }

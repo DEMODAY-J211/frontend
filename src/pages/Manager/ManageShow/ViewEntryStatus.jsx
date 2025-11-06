@@ -44,16 +44,24 @@ const ViewEntryStatus = () => {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem('accessToken');
+      // 세션 기반 로그인: 쿠키로 인증
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin?showtimeId=${showtimeId}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          credentials: 'include' // 세션 쿠키 자동 전송
         }
       );
+
+      // 401 Unauthorized - 세션 만료 또는 인증 실패
+      if (response.status === 401) {
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
+      }
 
       if (!response.ok) {
         throw new Error('예매 데이터를 불러오는데 실패했습니다.');
