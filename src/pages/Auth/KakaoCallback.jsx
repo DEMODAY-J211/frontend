@@ -21,8 +21,7 @@ const KakaoCallback = () => {
           `${import.meta.env.VITE_API_URL}/kakao/callback?code=${code}`,
           {
             method: "GET",
-            headers: {
-
+            headers: { credentials: "include" },
           }
         );
 
@@ -31,7 +30,7 @@ const KakaoCallback = () => {
         }
 
         const result = await response.json();
-
+        console.log("result입니다", result);
         // API 응답 확인
         if (!result.success) {
           throw new Error(result.message || "로그인에 실패했습니다.");
@@ -50,7 +49,6 @@ const KakaoCallback = () => {
         }
 
         // 기존 유저인 경우 - 로그인 성공
-
 
         // 사용자 정보만 저장 (UI 표시용)
         if (user) {

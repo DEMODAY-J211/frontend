@@ -5,7 +5,7 @@ import ShowListItem from "../../components/User/ShowListItem";
 import { useNavigate } from "react-router-dom";
 
 // const serverUrl = import.meta.env.VITE_API_URL;
-// const serverUrl = "http://15.164.218.55:8080";
+const serverUrl = "http://15.164.218.55:8080";
 
 // const mockData = [
 //   {
@@ -33,68 +33,85 @@ import { useNavigate } from "react-router-dom";
 //       "data:image/jpeg;base64,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",
 //   },
 // ];
+// const managerId = 1;
 
 export default function MyTicketList() {
   const [activeTab, setActiveTab] = useState("예매확인/취소");
   const tabs = ["예매확인/취소", "지난 공연내역"];
   const navigate = useNavigate();
   const [reservationlist, setReservationlist] = useState([]);
-
+  const [managerData, setManagerData] = useState(null);
+  const [managerId, setManagerId] = useState();
   const fetchShowList = async () => {
     try {
-      // const token = localStorage.getItem('accessToken');
-      // const response = await fetch(`${serverUrl}/user/${managerId}/myshow/`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
-      // if (!response.ok) throw new Error("네트워크 응답 실패");
-      // const res = await response.json();
-      const mockData = {
-        success: true,
-        code: 200,
-        message: "success",
-        data: [
-          {
-            reservationId: 101,
-            showtimeId: 12,
-            showTitle: "제11회 정기공연",
-            showtimeStart: "2025-09-25T15:00:00",
-            ticketOptionName: "일반예매",
-            reservationQuantity: 1,
-            reservationNumber: "000000",
-            status: "CONFIRMED",
-            showPosterPicture: "https://example.com/poster.png",
-          },
-          {
-            reservationId: 102,
-            showtimeId: 14,
-            showTitle: "제12회 정기공연",
-            showtimeStart: "2025-10-01T18:00:00",
-            ticketOptionName: "학생할인",
-            reservationQuantity: 2,
-            reservationNumber: "000001",
-            status: "CONFIRMED",
-            showPosterPicture: "https://example.com/poster2.png",
-          },
-        ],
-      };
+      const token = localStorage.getItem("accessToken");
 
-      if (mockData.success) {
-        setReservationlist(mockData.data);
-        console.log("mockdata", mockData);
+      const response = await fetch(`${serverUrl}/user/${managerId}/myshow/`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Credentials": "true",
+        },
+      });
+
+      if (!response.ok) throw new Error("네트워크 응답 실패");
+      const res = await response.json();
+      // const mockData = {
+      //   success: true,
+      //   code: 200,
+      //   message: "success",
+      //   data: [
+      //     {
+      //       reservationId: 101,
+      //       showtimeId: 12,
+      //       showTitle: "제11회 정기공연",
+      //       showtimeStart: "2025-09-25T15:00:00",
+      //       ticketOptionName: "일반예매",
+      //       reservationQuantity: 1,
+      //       reservationNumber: "000000",
+      //       status: "CONFIRMED",
+      //       showPosterPicture: "https://example.com/poster.png",
+      //     },
+      //     {
+      //       reservationId: 102,
+      //       showtimeId: 14,
+      //       showTitle: "제12회 정기공연",
+      //       showtimeStart: "2025-10-01T18:00:00",
+      //       ticketOptionName: "학생할인",
+      //       reservationQuantity: 2,
+      //       reservationNumber: "000001",
+      //       status: "CONFIRMED",
+      //       showPosterPicture: "https://example.com/poster2.png",
+      //     },
+      //   ],
+      // };
+
+      if (res.success) {
+        setReservationlist(res.data);
+        console.log("mockdata", res);
         console.log("showData입니다", reservationlist);
       }
     } catch (error) {
-      console.error("공연 조회 실패:", error);
-      alert("해당 공연 단체를 찾을 수 없습니다.");
+      console.error("예매한 공연 조회 실패:", error);
+      alert("예매한 공연을 찾을 수 없습니다.");
     }
   };
 
   useEffect(() => {
-    fetchShowList();
+    // ✅ 세션 스토리지에서 불러오기
+    const storedData = localStorage.getItem("managerData");
+    if (storedData) {
+      setManagerData(JSON.parse(storedData));
+      setManagerId(JSON.parse(storedData)?.managerId);
+    }
   }, []);
+
+  useEffect(() => {
+    if (managerId) {
+      fetchShowList();
+    }
+  }, [managerId]);
   return (
     <PageWrapper>
       <HomeUserContainer>

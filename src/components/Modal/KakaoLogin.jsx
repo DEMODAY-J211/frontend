@@ -9,6 +9,7 @@ export default function KakaoLogin() {
     }/oauth2/authorization/kakao`;
     window.location.href = KAKAO_AUTH_URL;
     console.log(KAKAO_AUTH_URL);
+    console.log("handlekakaologin");
   };
 
   return (
