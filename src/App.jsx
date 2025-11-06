@@ -29,6 +29,7 @@ import RegisterShowStep3 from "./pages/Manager/ManageShow/RegisterShowStep3";
 import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
 import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
+import KakaoCallback from "./pages/Auth/KakaoCallback";
 
 
 const App = () => {
@@ -65,6 +66,7 @@ const App = () => {
           <Route path="/register-venue/step1" element={<RegisterVenue1 />} />
           <Route path="/register-venue/step2" element={<RegisterVenue2 />} />
           <Route path="/register-venue/step3" element={<RegisterVenue3 />} />
+          <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
         </Routes>
       </ToastProvider>
     </div>

@@ -3,12 +3,8 @@ import Kakaologo from "../../assets/Kakaologo.svg";
 
 const serverUrl = import.meta.env.VITE_API_URL;
 export default function KakaoLogin() {
-  const handlelogin = () => {
-    window.location.href = `${serverUrl}/oauth2/authorization/kakao`;
-    console.log("kakao component");
-  };
   return (
-    <KakaoWrapper onClick={handlelogin}>
+    <KakaoWrapper>
       <div>
         <img src={Kakaologo} alt="Kakaologo" size={18} />
         <p>카카오로 시작하기</p>
