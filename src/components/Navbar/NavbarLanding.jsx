@@ -7,8 +7,6 @@ import logo from "../../assets/tikitta_logo.png";
 
 const NavbarLanding = () => {
   const navigate = useNavigate();
-  const [login, setLogin] = useState(false); //true: 로그인 상태 , false: 로그아웃 상태
-
   return (
     <Navbar>
       <NavbarLeft>
@@ -19,11 +17,7 @@ const NavbarLanding = () => {
         ></Logo>
       </NavbarLeft>
       <NavbarRight>
-        {login === true ? (
-          <Button>로그아웃</Button>
-        ) : (
-          <Button>로그인</Button>
-        )}
+          <Button onClick={()=>navigate("/login")}>로그인</Button>
       </NavbarRight>
     </Navbar>
   );

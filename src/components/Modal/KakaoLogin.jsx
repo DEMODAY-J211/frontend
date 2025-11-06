@@ -45,7 +45,6 @@ const KakaoWrapper = styled.div`
   }
   p {
     color: var(--kakao-text, rgba(0, 0, 0, 0.85));
-    font-family: GyeonggiTitle;
     font-size: 20px;
     font-style: normal;
     font-weight: 500;
