@@ -573,13 +573,13 @@ const ViewEntryStatus = () => {
 
           <ViewToggle>
             <ToggleOption
-              active={viewMode === "seat"}
+              $active={viewMode === "seat"}
               onClick={() => setViewMode("seat")}
             >
               좌석표
             </ToggleOption>
             <ToggleOption
-              active={viewMode === "list"}
+              $active={viewMode === "list"}
               onClick={() => setViewMode("list")}
             >
               리스트
@@ -661,19 +661,19 @@ const ViewEntryStatus = () => {
             <FilterTabsArea>
               <TabFilters>
                 <TabButton
-                  active={filterTab === "all"}
+                  $active={filterTab === "all"}
                   onClick={() => setFilterTab("all")}
                 >
                   전체
                 </TabButton>
                 <TabButton
-                  active={filterTab === "entered"}
+                  $active={filterTab === "entered"}
                   onClick={() => setFilterTab("entered")}
                 >
                   입장 완료
                 </TabButton>
                 <TabButton
-                  active={filterTab === "notEntered"}
+                  $active={filterTab === "notEntered"}
                   onClick={() => setFilterTab("notEntered")}
                 >
                   미입장
@@ -754,7 +754,7 @@ const ViewEntryStatus = () => {
                       <TableCell>
                         <StatusButtonGroup>
                           <StatusButton
-                            active={!reservation.isEntered}
+                            $active={!reservation.isEntered}
                             onClick={() =>
                               !reservation.isEntered ||
                               handleToggleEntryStatus(reservation)
@@ -763,8 +763,8 @@ const ViewEntryStatus = () => {
                             미입장
                           </StatusButton>
                           <StatusButton
-                            active={reservation.isEntered}
-                            inactive={!reservation.isEntered}
+                            $active={reservation.isEntered}
+                            $inactive={!reservation.isEntered}
                             onClick={() =>
                               reservation.isEntered ||
                               handleToggleEntryStatus(reservation)
