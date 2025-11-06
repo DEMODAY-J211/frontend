@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/tikitta_logo.png";
 
 
-const NavbarManager = () => {
+const NavbarLanding = () => {
   const navigate = useNavigate();
-  const [login, setLogin] = useState(true); //true: 로그인 상태 , false: 로그아웃 상태
+  const [login, setLogin] = useState(false); //true: 로그인 상태 , false: 로그아웃 상태
 
   return (
     <Navbar>
@@ -17,9 +17,6 @@ const NavbarManager = () => {
           src={logo}
           alt="로고"
         ></Logo>
-        <NavItem onClick={() => navigate("/homemanager")}>메인 홈</NavItem>
-        <NavItem onClick={() => navigate("/manageshow")}>내 공연 관리</NavItem>
-        <NavItem onClick={() => navigate("/qrmanager")}>QR 입장 확인</NavItem>
       </NavbarLeft>
       <NavbarRight>
         {login === true ? (
@@ -32,7 +29,7 @@ const NavbarManager = () => {
   );
 };
 
-export default NavbarManager;
+export default NavbarLanding;
 
 const Navbar = styled.div`
   display: flex;
@@ -75,18 +72,6 @@ const Logo = styled.img`
   }
 `;
 
-const NavItem = styled.div`
-  margin-left: 20px;
-  font-size: 18px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-
-  @media (max-width: 768px) {
-    margin-left: 10px;
-    font-size: 14px;
-  }
-`;
 
 const NavbarRight = styled.div`
   display: flex;

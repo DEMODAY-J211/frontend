@@ -21,6 +21,7 @@ import ManageShow from "./pages/Manager/ManageShow/ManageShow";
 import ManageUser from "./pages/Manager/ManageShow/ManageUser";
 import QRManager from "./pages/Manager/QRManager";
 import BuyTicket from "./pages/User/BuyTicket";
+import Landing from "./pages/Landing";
 
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
@@ -30,6 +31,7 @@ import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
 import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
+
 
 
 const App = () => {
@@ -57,6 +59,7 @@ const App = () => {
         <Route path="/manageshow" element={<ManageShow/>}/>
         <Route path="/manageshow/manageuser" element={<ManageUser/>}/>
          <Route path="/qrmanager" element={<QRManager />} />
+         <Route path="/landing" element={<Landing />} />
         
 
           {/* 주현수 */}
