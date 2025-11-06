@@ -25,7 +25,7 @@ const NavbarManager = () => {
         {login === true ? (
           <Button>로그아웃</Button>
         ) : (
-          <Button>로그인</Button>
+          <Button onClick={()=>navigate("/login")}>로그인</Button>
         )}
       </NavbarRight>
     </Navbar>
