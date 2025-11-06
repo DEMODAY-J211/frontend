@@ -1,3 +1,4 @@
+import React from "react";
 import styled from "styled-components";
 import tikitta_big from "../assets/tikitta_big.svg";
 import KakaoLogin from "../components/Modal/KakaoLogin.jsx";
