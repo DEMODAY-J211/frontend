@@ -89,7 +89,7 @@ export default function ReservationComplete({ onClose }) {
           <p>
             예매 확정을 위해 <br />
             입금자명은 {resData.userName}으로 <br />
-            {resData.totalPrice.toLocaleString()}원을 입금해주세요!{" "}
+            {resData?.totalPrice?.toLocaleString()}원을 입금해주세요!{" "}
           </p>
           <br />
           <p>

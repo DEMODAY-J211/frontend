@@ -32,7 +32,7 @@ import ShowtimeSelector from "./ShowtimeSelector";
 //   },
 // ];
 const managerId = 1;
-// const serverUrl = import.meta.env.VITE_API_URL;
+const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
 
 export default function BottomSheet({ onClose, showData = {}, onNeedModal }) {
@@ -74,7 +74,6 @@ export default function BottomSheet({ onClose, showData = {}, onNeedModal }) {
 
       const result = await response.json();
       console.log("서버 응답:", result);
-
       // 성공 시 다음 페이지 이동
       // navigate(`../selectseat/${showData.showId}`, {
       //   selectedShowtime,
@@ -93,14 +92,14 @@ export default function BottomSheet({ onClose, showData = {}, onNeedModal }) {
       console.error("예약 요청 실패:", error);
       alert("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
       // 연결하고 지우기
-      navigate(`../payment`, {
-        state: {
-          selectedShowtime,
-          selectedOption,
-          quantity,
-          showData,
-        },
-      });
+      // navigate(`../payment`, {
+      //   state: {
+      //     selectedShowtime,
+      //     selectedOption,
+      //     quantity,
+      //     showData,
+      //   },
+      // });
     }
   };
 

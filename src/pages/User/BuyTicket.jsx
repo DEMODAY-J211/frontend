@@ -7,8 +7,9 @@ import ReservationComplete from "../../components/Modal/ReservationComplete";
 import { formatKoreanDate } from "../../utils/dateFormat";
 
 // s01101
-// const serverUrl = import.meta.env.VITE_API_URL;
+const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
+const managerId = 1;
 
 export default function BuyTicket() {
   const location = useLocation();
