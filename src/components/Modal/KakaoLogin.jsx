@@ -2,8 +2,14 @@ import styled from "styled-components";
 import Kakaologo from "../../assets/Kakaologo.svg";
 
 export default function KakaoLogin() {
+  const handleKakaoLogin = () => {
+    // 백엔드 카카오 OAuth 로그인 URL로 리다이렉트
+    const KAKAO_AUTH_URL = `${import.meta.env.VITE_API_URL}/oauth2/authorization/kakao`;
+    window.location.href = KAKAO_AUTH_URL;
+  };
+
   return (
-    <KakaoWrapper>
+    <KakaoWrapper onClick={handleKakaoLogin}>
       <div>
         <img src={Kakaologo} alt="Kakaologo" size={18} />
         <p>카카오로 시작하기</p>

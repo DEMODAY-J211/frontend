@@ -25,6 +25,11 @@ import BuyTicket from "./pages/User/BuyTicket";
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
 import ViewEntryStatus from "./pages/Manager/ManageShow/ViewEntryStatus";
+import RegisterShowStep3 from "./pages/Manager/ManageShow/RegisterShowStep3";
+import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
+import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
+import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
+import KakaoCallback from "./pages/Auth/KakaoCallback";
 
 
 const App = () => {
@@ -57,6 +62,11 @@ const App = () => {
           {/* 주현수 */}
           <Route path="/manageshow/entrystatus" element={<ViewEntryStatus />} />
           <Route path="/selectseat/:showtimeId" element={<SelectSeat />} />
+          <Route path="/register-show/step3" element={<RegisterShowStep3 />} />
+          <Route path="/register-venue/step1" element={<RegisterVenue1 />} />
+          <Route path="/register-venue/step2" element={<RegisterVenue2 />} />
+          <Route path="/register-venue/step3" element={<RegisterVenue3 />} />
+          <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
         </Routes>
       </ToastProvider>
     </div>

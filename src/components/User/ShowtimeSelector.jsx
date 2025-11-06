@@ -100,7 +100,7 @@ export default function ShowtimeSelector({
         <Container>
           <DropdownButton onClick={() => setIsShowtimeOpen(!isShowtimeOpen)}>
             {selectedShowtime
-              ? selectedShowtime.showtimeStart
+              ? formatKoreanDate(selectedShowtime.showtimeStart)
               : "회차를 선택하세요"}
             <Arrow open={isShowtimeOpen}>▼</Arrow>
           </DropdownButton>
@@ -123,7 +123,7 @@ export default function ShowtimeSelector({
                         selectedShowtime?.showtimeId === show.showtimeId
                       }
                     >
-                      {show.showtimeStart}
+                      {formatKoreanDate(show.showtimeStart)}
                     </DropdownItem>
                   ))}
                 </DropdownList>
@@ -179,7 +179,10 @@ export default function ShowtimeSelector({
             <h3 style={{ marginTop: "16px" }}>매수 선택</h3>
             <TicketContainer>
               <TotalPrice>
-                <strong>{selectedShowtime.showtimeId}회차</strong>
+                <strong>
+                  {selectedShowtime.showtimeId}회차{" "}
+                  {formatKoreanDate(selectedShowtime.showtimeStart)}
+                </strong>
                 <strong>{selectedOption.ticketoptionName}</strong>
                 <strong>{selectedOption.ticketoptionPrice}원</strong>
               </TotalPrice>
@@ -209,16 +212,13 @@ const TopWrapper = styled.div`
   min-width: 375px;
   max-width: 430px;
   width: 100vw;
-  background: #fff;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.25);
-  padding: 10px 20px;
+  // padding: 10px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   font-size: 18px;
   display: flex;
   border-radius: 20px 20px 0 0;
-  background: #fff;
 
   h3 {
     color: #000;
@@ -229,12 +229,12 @@ const TopWrapper = styled.div`
   }
 `;
 const Wrapper = styled.div`
-  // display: flex;
-  // padding: 0 10px;
-  // flex-direction: column;
-  // align-items: flex-start;
-  // gap: 15px;
-  // align-self: stretch;
+  display: flex;
+  padding: 10px 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+  align-self: stretch;
 `;
 
 const Container = styled.div`
