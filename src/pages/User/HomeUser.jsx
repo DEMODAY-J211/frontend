@@ -10,7 +10,7 @@ import { formatKoreanDate } from "../../utils/dateFormat.js";
 const managerId = 1;
 // const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
-const sercerUrl = "https://back-tikitta.duckdns.org";
+const serverUrl = "https://back-tikitta.duckdns.org";
 
 export default function HomeUser() {
   const [login, setLogin] = useState(false); //true: 로그인 상태 , false: 로그아웃 상태
@@ -43,11 +43,18 @@ export default function HomeUser() {
   const fetchShows = async () => {
     try {
       // const token = localStorage.getItem("accessToken");
-      const response = await fetch(`${serverUrl}/user/${managerId}/main`, {
-        headers: {
-          // "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/user/${managerId}/main`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Accept: "application/json",
+            "Content-type": "application/json",
+          },
+        }
+      );
       const result = await response.json();
 
       if (result.success) {
@@ -66,15 +73,20 @@ export default function HomeUser() {
     // 유저가 예매한 공연
     try {
       // const token = localStorage.getItem("accessToken");
-      const response = await fetch(`${serverUrl}/user/${managerId}/main`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      // const response = await fetch(
+      //   `${import.meta.env.VITE_API_URL}/user/${managerId}/main`,
+      //   {
+      //     method: "GET",
+      //     credentials: "include",
+      //     headers: {
+      //       // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      //       Accept: "application/json",
+      //       "Content-type": "application/json",
+      //     },
+      //   }
+      // );
 
-      const result = await response.json();
+      // const result = await response.json();
 
       // Mock 데이터
       // const mockData = {

@@ -5,10 +5,17 @@ import Kakaologo from "../../assets/Kakaologo.svg";
 export default function KakaoLogin() {
   const handleKakaoLogin = () => {
     // 백엔드 카카오 OAuth 로그인 URL로 리다이렉트
+    // const KAKAO_AUTH_URL = `${
+    //   import.meta.env.VITE_API_URL
+    // }/oauth2/authorization/kakao`;
+    // window.location.href = KAKAO_AUTH_URL;
     const KAKAO_AUTH_URL = `${
       import.meta.env.VITE_API_URL
-    }/oauth2/authorization/kakao`;
+    }/oauth2/authorization/kakao?redirect_uri=${encodeURIComponent(
+      import.meta.env.VITE_FRONTEND_URL + "/auth/kakao/callback"
+    )}`;
     window.location.href = KAKAO_AUTH_URL;
+
     console.log(KAKAO_AUTH_URL);
     console.log("handlekakaologin");
   };
