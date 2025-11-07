@@ -4,8 +4,8 @@ import NavbarUser from "../../components/Navbar/NavbarUser";
 import ShowListItem from "../../components/User/ShowListItem";
 import { useNavigate } from "react-router-dom";
 
-// const serverUrl = import.meta.env.VITE_API_URL;
-const serverUrl = "http://15.164.218.55:8080";
+const serverUrl = import.meta.env.VITE_API_URL;
+// const serverUrl = "http://15.164.218.55:8080";
 
 // const mockData = [
 //   {
@@ -54,6 +54,17 @@ export default function MyTicketList() {
           "Access-Control-Allow-Credentials": "true",
         },
       });
+      // const response = await fetch(
+      //   `${serverUrl}/user/myshow?managerId=${managerId}&status=upcoming`,
+      //   {
+      //     method: "GET",
+      //     credentials: "include",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "Access-Control-Allow-Credentials": "true",
+      //     },
+      //   }
+      // );
 
       if (!response.ok) throw new Error("네트워크 응답 실패");
       const res = await response.json();
