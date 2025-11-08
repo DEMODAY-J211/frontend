@@ -14,42 +14,68 @@ export default function Landing() {
   const [loading, setLoading] = useState(false);
 
   // 역할 선택 요청
-  const handleSelectRole = async (role) => {
-    try {
-      setLoading(true);
+const handleSelectRole = async (selectedRole) => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem("accessToken");
 
-      const response = await fetch(
-        ` https://back-tikitta.duckdns.org/auth/kakao/select-role`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // 쿠키 기반 세션 유지용
-          body: JSON.stringify({ role }), // role: "USER" or "MANAGER"
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("역할 선택 실패");
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/auth/kakao/select-role?role=${selectedRole}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include", // 쿠키 기반 세션 유지용
       }
+    );
 
+    // 응답 상태 코드가 실패일 경우
+    if (!response.ok) {
+      const errorText = await response.text();  // 오류 텍스트 받기
+      console.error("응답 오류:", errorText);
+      throw new Error("역할 선택 실패");
+    }
+
+    // 응답의 Content-Type이 JSON이 아니면 텍스트로 처리
+    const contentType = response.headers.get("Content-Type");
+    console.log("응답 Content-Type:", contentType);  // 응답 헤더 로그 추가
+
+    if (contentType && contentType.includes("application/json")) {
+      // JSON 형식이라면 파싱
       const data = await response.json();
       console.log("✅ 역할 선택 성공:", data);
 
-      // 역할에 따라 이동
-      if (role === "USER") {
+      // 역할에 따른 네비게이션
+      if (selectedRole === "USER") {
         navigate("/homeuser");
-      } else if (role === "MANAGER") {
+      } else if (selectedRole === "MANAGER") {
         navigate("/homemanager");
       }
-    } catch (error) {
-      console.error("❌ 역할 선택 중 오류:", error);
-      alert("역할 선택에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setLoading(false);
+    } else if (contentType && contentType.includes("text/plain")) {
+      // 응답이 텍스트 형식일 경우 처리
+      const textResponse = await response.text();
+      console.log("응답이 텍스트입니다:", textResponse);
+      alert(`응답 내용: ${textResponse}`);
+
+      // 텍스트 응답에 따라 추가 처리
+      if (textResponse.includes("role updated")) {
+        navigate(`/home${selectedRole.toLowerCase()}`);
+      }
+    } else {
+      console.error("예상하지 못한 응답 형식:", contentType);
+      alert("예상치 못한 응답 형식입니다.");
     }
-  };
+  } catch (error) {
+    console.error("❌ 역할 선택 중 오류:", error);
+    alert("역할 선택에 실패했습니다. 다시 시도해주세요.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   return (
     <PageWrapper>
