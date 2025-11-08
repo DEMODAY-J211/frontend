@@ -13,6 +13,8 @@ import ChangeUserStatusModal from "../../../components/Modal/ChangeUserStatusMod
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+import { useParams } from "react-router-dom";
+
 
 const ManageUser = () => {
   const navigate = useNavigate();
@@ -20,10 +22,13 @@ const ManageUser = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
 
+    const {showId} = useParams();
   
 
 const [reservationData, setReservationData] = useState([]);
 const [initialData, setInitialData] = useState([]); // 초기 데이터 저장
+
+
 
 
 
@@ -268,7 +273,6 @@ setShowChangeStatusModal(false);
 // const [loading, setLoading] = useState(false);
 // const [error, setError] = useState("");
 
-// const showId = 2;
 //     const viewUsers = async() => {
 //       try{
 //         setError("");
