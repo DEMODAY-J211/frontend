@@ -59,13 +59,13 @@ const App = () => {
         {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
         <Route path="/homemanager" element={<HomeManager />} />
         <Route path="/manageshow" element={<ManageShow/>}/>
-        <Route path="/manageshow/manageuser" element={<ManageUser/>}/>
+        <Route path="/manageshow/manageuser/:showId" element={<ManageUser/>}/>
          <Route path="/qrmanager" element={<QRManager />} />
          <Route path="/landing" element={<Landing />} />
         
 
           {/* 주현수 */}
-          <Route path="/manageshow/entrystatus" element={<ViewEntryStatus />} />
+          <Route path="/manageshow/entrystatus/:showId" element={<ViewEntryStatus />} />
           <Route path="/selectseat/:showtimeId" element={<SelectSeat />} />
           <Route path="/register-show/step3" element={<RegisterShowStep3 />} />
           <Route path="/register-venue/step1" element={<RegisterVenue1 />} />
