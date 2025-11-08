@@ -1,7 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

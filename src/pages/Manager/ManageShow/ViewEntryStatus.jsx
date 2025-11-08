@@ -67,12 +67,27 @@ const ViewEntryStatus = () => {
         throw new Error('예매 데이터를 불러오는데 실패했습니다.');
       }
 
-      const reservationDataFromAPI = await response.json();
+      const result = await response.json();
+      console.log('API 응답:', result);
 
-      // 전화번호 포맷팅 (하이픈 제거된 경우 대비)
-      const formattedData = reservationDataFromAPI.map(item => ({
+      // 응답 데이터 구조 확인 및 추출
+      const reservationDataFromAPI = Array.isArray(result)
+        ? result
+        : (result.data || result.reservations || []);
+
+      // 전화번호 포맷팅 및 필드명 변환
+      const formattedData = reservationDataFromAPI.map((item, index) => ({
         ...item,
-        phone: item.phone.includes('-') ? item.phone : item.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')
+        // API 응답 필드명 변환
+        isEntered: item.entered ?? item.isEntered ?? false,
+        isReserved: item.reserved ?? item.isReserved ?? true,
+        // 전화번호 포맷팅
+        phone: item.phone && item.phone.includes('-')
+          ? item.phone
+          : (item.phone ? item.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3') : ''),
+        // row, col이 없으면 임시로 생성 (좌석 이름에서 추출)
+        row: item.row ?? (item.seat ? item.seat.charCodeAt(0) - 65 : Math.floor(index / 10)),
+        col: item.col ?? (item.seat ? parseInt(item.seat.substring(1)) - 1 : index % 10)
       }));
 
       const newSeatLayout = generateSeatLayout(formattedData);
@@ -246,7 +261,7 @@ const ViewEntryStatus = () => {
 
     setSeatLayout(newLayout);
 
-    // reservationData도 업데이트
+    // reservationData와 displayData 모두 업데이트
     if (seat.reservationItemId) {
       const newData = reservationData.map((r) => {
         if (r.reservationItemId === seat.reservationItemId) {
@@ -255,11 +270,19 @@ const ViewEntryStatus = () => {
         return r;
       });
 
+      const newDisplayData = displayData.map((r) => {
+        if (r.reservationItemId === seat.reservationItemId) {
+          return { ...r, isEntered: !r.isEntered };
+        }
+        return r;
+      });
+
       setReservationData(newData);
+      setDisplayData(newDisplayData);
       setIsChanged(true);
 
       // 변경된 항목 계산
-      const changed = newData.filter((item) => {
+      const changed = newDisplayData.filter((item) => {
         const original = initialData.find(
           (u) => u.reservationItemId === item.reservationItemId
         );
@@ -296,7 +319,7 @@ const ViewEntryStatus = () => {
 
     setSeatLayout(newLayout);
 
-    // reservationData도 업데이트
+    // reservationData와 displayData 모두 업데이트
     if (seatIds.length > 0) {
       const newData = reservationData.map((r) => {
         if (seatIds.includes(r.reservationItemId)) {
@@ -305,11 +328,19 @@ const ViewEntryStatus = () => {
         return r;
       });
 
+      const newDisplayData = displayData.map((r) => {
+        if (seatIds.includes(r.reservationItemId)) {
+          return { ...r, isEntered: true };
+        }
+        return r;
+      });
+
       setReservationData(newData);
+      setDisplayData(newDisplayData);
       setIsChanged(true);
 
       // 변경된 항목 계산
-      const changed = newData.filter((item) => {
+      const changed = newDisplayData.filter((item) => {
         const original = initialData.find(
           (u) => u.reservationItemId === item.reservationItemId
         );
@@ -483,7 +514,7 @@ const ViewEntryStatus = () => {
   const handleSaveChanges = async () => {
     try {
       // API 요청 데이터 생성
-      const CheckinStatusUpdateRequest = changedItems.map((item) => {
+      const checkinStatusUpdateRequest = changedItems.map((item) => {
         const displayItem = displayData.find(
           (d) => d.reservationItemId === item.reservationItemId
         );
@@ -513,7 +544,7 @@ const ViewEntryStatus = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ CheckinStatusUpdateRequest }),
+          body: JSON.stringify({ checkinStatusUpdateRequest }),
         }
       );
 
@@ -1346,7 +1377,7 @@ const StatusButton = styled.button`
   transition: all 0.2s ease;
 
   ${(props) =>
-    props.active
+    props.$active
       ? `
     background-color: #FC2847;
     color: #FFFFFE;
