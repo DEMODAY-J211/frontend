@@ -4,8 +4,8 @@ import styled from "styled-components";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/tikitta_logo.png";
-
 import { AuthContext } from "../../pages/Auth/AuthContext";
+
 
 
 const NavbarManager = () => {
