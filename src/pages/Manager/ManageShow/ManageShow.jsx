@@ -18,6 +18,8 @@ import defaultimg from "../../../assets/tikitta_defaultcard.png";
 const ManageShow = () => {
   const navigate = useNavigate();
 
+    const [posters, setPosters] = useState([]);
+
   const menuItems = [
     {
       menuname: "예매자 관리",
@@ -45,23 +47,27 @@ const ManageShow = () => {
     },
   ];
 
-  const posters = [
-    { title: "제11회 정기공연", color: "#fdeeee" },
-    { title: "제12회 정기공연", color: "#fff3f3" },
-    { title: "제13회 정기공연", color: "#fdeeee" },
-    { title: "제14회 정기공연", color: "#dcdcdc" },
-    { title: "제15회 정기공연", color: "#f0f0f0" },
-    { title: "제16회 정기공연", color: "#e8e8e8" },
-    { title: "제16회 정기공연", color: "#e8e8e8" },
-    { title: "제20회 정기공연", color: "#e8e8e8" },
-  ];
+  // const posters = [
+  //   { title: "제11회 정기공연"},
+  //   { title: "제12회 정기공연"},
+  //   { title: "제13회 정기공연"},
+  //   { title: "제14회 정기공연"},
+  //   { title: "제15회 정기공연"},
+  //   { title: "제16회 정기공연"},
+  //   { title: "제16회 정기공연"},
+  //   { title: "제20회 정기공연"},
+  // ];
 
   const [selectedIndex, setSelectedIndex] = useState(0); // ✅ 선택된 카드 인덱스 (기본 0)
   const [startIndex, setStartIndex] = useState(0); // 보여지는 첫 카드 인덱스
   const visibleCount = Math.min(7, posters.length); // 카드 수가 7개 이하이면 그대로
 
+  const [selectedShow, setSelectedShow] = useState(null);  // 선택된 showId 상태
+
   const handleCardClick = (index) => {
+    const selectedPoster = posters[index];  // 클릭한 카드의 정보 가져오기
     setSelectedIndex(index); // ✅ 클릭된 카드 인덱스로 업데이트
+    setSelectedShow(selectedPoster);  // 선택된 공연 정보 저장
   };
 
   const scrollRef = useRef(null);
@@ -85,8 +91,18 @@ const ManageShow = () => {
     return posters[index];
   });
 
+
+  const handleMenuClick = (path) => {
+    if (selectedShow) {
+      // 선택된 showId에 따라 동적 경로로 이동
+      navigate(`${path}/${selectedShow.showId}`);
+    } else {
+      alert("먼저 공연을 선택해주세요.");
+    }
+  };
+
   //api
-  const [showlist, setShowlist] = useState([]);
+
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -112,29 +128,27 @@ const ManageShow = () => {
       console.log(result.data);
 
       if (!response.ok || result.success !== true) {
-        throw new Error(result.message || "예매자 리스트 조회에 실패했습니다.");
+        throw new Error(result.message || "공연 목록 조회에 실패했습니다.");
       }
 
-      setShowlist(result.data ?? []);
+      setPosters(result.data.published ?? []);
       console.log(result.data);
     } catch (error) {
-      console.error("Error fetching applied labors:", error);
+      console.error("Error fetching shows:", error);
       setError(error.message);
     }
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      await viewShows(); // ✅ 실제 API 호출
-      setLoading(false);
-    };
-
-    fetchData();
-  }, []); // 가 바뀌면 새로 호출
+    viewShows(); // API 호출
+    if (posters.length > 0) {
+      setSelectedShow(posters[0]);  // 첫 번째 카드에 해당하는 공연 정보
+    }
+  }, []); // 컴포넌트 마운트 시 한 번 호출
 
   if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
   if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
+
 
   return (
     <MyShow>
@@ -154,7 +168,7 @@ const ManageShow = () => {
                   style={{ backgroundColor: "var(--color-tertiary)" }}
                 >
                   <Poster
-                    src={poster.img ? poster.img : defaultimg}
+                    src={poster.poster ? poster.poster : defaultimg}
                     alt={poster.title}
                   />
                 </Card>
@@ -169,7 +183,7 @@ const ManageShow = () => {
         </Shows>
         <Container>
           {menuItems.map((item, idx) => (
-            <Menu key={idx} onClick={() => navigate(item.path)}>
+            <Menu key={idx} onClick={() => handleMenuClick(item.path)}>
               <TextBox>
                 <MenuTitle>{item.menuname}</MenuTitle>
                 <Desc>{item.desc}</Desc>
