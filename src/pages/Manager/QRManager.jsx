@@ -3,13 +3,55 @@ import styled from 'styled-components'
 import NavbarManager from '../../components/Navbar/NavbarManager'
 import { MdOutlineUnfoldMore } from 'react-icons/md'
 import { IoIosQrScanner } from 'react-icons/io'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Html5QrcodeScanner } from "html5-qrcode";
 
 const QRManager = () => {
+    // TODO: 실제 값은 props나 context에서 가져와야 함
+    const [showId] = useState(1); // 공연 ID
+    const [showtimeId] = useState(15); // 회차 ID
+    const [lastScannedCode, setLastScannedCode] = useState(null);
 
     useEffect(() => {
+    // QR 코드 검증 API 호출
+    const validateQRCode = async (qrCode) => {
+      console.log("=== QR 코드 검증 시작 ===");
+      console.log("QR 코드:", qrCode);
+      console.log("공연 ID:", showId);
+      console.log("회차 ID:", showtimeId);
+
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/QR?showtimeId=${showtimeId}&code=${qrCode}`,
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        console.log("응답 상태:", response.status);
+
+        const result = await response.json();
+        console.log("응답 데이터:", result);
+
+        if (response.ok && result.success) {
+          console.log("✅ 입장 완료:", result.data);
+          alert(`✅ ${result.message}\n이름: ${result.data.name}\n좌석: ${result.data.seat}\n입장 시간: ${result.data.checkinTime}`);
+        } else {
+          console.error("❌ 검증 실패:", result.message);
+          alert(`❌ ${result.message}`);
+        }
+      } catch (error) {
+        console.error("❌ API 호출 실패:", error);
+        alert("❌ 서버 연결에 실패했습니다.");
+      }
+    };
+
     // 1️⃣ 스캐너 초기화
     const scanner = new Html5QrcodeScanner("reader", {
       fps: 10,          // 초당 10프레임
@@ -21,11 +63,16 @@ const QRManager = () => {
     scanner.render(
       (decodedText) => {
         console.log("✅ QR 코드 인식 성공:", decodedText);
-        alert(`인식된 QR: ${decodedText}`);
+
+        // 같은 QR 코드를 연속으로 스캔하지 않도록 방지
+        if (decodedText !== lastScannedCode) {
+          setLastScannedCode(decodedText);
+          validateQRCode(decodedText);
+        }
       },
-      (error) => {
+      () => {
         // 인식 실패 시 콘솔 출력만 (매 프레임마다 출력되므로 조심)
-        console.warn("❌ 스캔 중 오류:", error);
+        // console.warn("❌ 스캔 중 오류:", error);
       }
     );
 
@@ -33,7 +80,7 @@ const QRManager = () => {
     return () => {
       scanner.clear().catch((err) => console.error("Cleanup error:", err));
     };
-  }, []);
+  }, [lastScannedCode, showId, showtimeId]);
   return (
     <Content>
         <NavbarManager/>

@@ -8,7 +8,9 @@ import { formatKoreanDate } from "../../utils/dateFormat.js";
 import { useAuth } from "../Auth/AuthContext.jsx";
 
 // s00104
+
 const managerId = 1;
+
 // const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
 const serverUrl = "https://back-tikitta.duckdns.org";
@@ -90,6 +92,10 @@ export default function HomeUser() {
 
   const fetchUserRes = async () => {
     // 유저가 예매한 공연
+    console.log("=== 예매 내역 조회 시작 ===");
+    console.log("managerId:", managerId);
+    console.log("요청 URL:", `${import.meta.env.VITE_API_URL}/user/${managerId}/myshow`);
+
     try {
       // const token = localStorage.getItem("accessToken");
       const userresponse = await fetch(
@@ -117,9 +123,26 @@ export default function HomeUser() {
       //   }
       // );
 
+      console.log("응답 상태:", userresponse.status);
+      console.log("응답 OK?:", userresponse.ok);
+
+      // 응답 상태 확인
+      if (!userresponse.ok) {
+        console.error(`❌ 서버 응답 에러: ${userresponse.status} ${userresponse.statusText}`);
+        const errorText = await userresponse.text();
+        console.error("에러 상세:", errorText);
+        console.error("⚠️ 백엔드 API 문제 - 빈 배열로 설정");
+
+        // 500 에러인 경우 빈 배열로 설정
+        setUserReservations([]);
+        return;
+      }
+
       const result2 = await userresponse.json();
+
       // console.log("status", userresponse.status);
       // console.log("text", await userresponse.text());
+
 
       // Mock 데이터
       // const mockData = {

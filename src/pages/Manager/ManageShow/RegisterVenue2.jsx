@@ -548,8 +548,7 @@ export default RegisterVenue2;
 
 // Styled Components
 const Container = styled.div`
-  width: 1440px;
-  margin: 0 auto;
+  width: 100%;
   background: #ffffff;
   display: flex;
   flex-direction: column;
@@ -557,18 +556,18 @@ const Container = styled.div`
 `;
 
 const MainContent = styled.div`
-  padding: 50px 100px;
+  flex: 1;
+  padding: 20px 100px 0px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  flex: 1;
 `;
 
 const Title = styled.h1`
-  font-weight: 500;
   font-size: 30px;
-  color: #000000;
-  margin: 0;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 18px;
 `;
 
 const ProgressSteps = styled.div`

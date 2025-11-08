@@ -21,6 +21,8 @@ import HomeManager from "./pages/Manager/HomeManager";
 import ManageShow from "./pages/Manager/ManageShow/ManageShow";
 import ManageUser from "./pages/Manager/ManageShow/ManageUser";
 import QRManager from "./pages/Manager/QRManager";
+import RegisterShow from "./pages/Manager/RegisterShow";
+import RegisteredVenues from "./pages/Manager/RegisteredVenues";
 import BuyTicket from "./pages/User/BuyTicket";
 import Landing from "./pages/Landing";
 
@@ -73,7 +75,9 @@ const App = () => {
             <Route path="/homemanager" element={<HomeManager />} />
             <Route path="/manageshow" element={<ManageShow />} />
             <Route path="/manageshow/manageuser/:showId" element={<ManageUser />} />
-            <Route path="/qrmanager" element={<QRManager />} />
+            <Route path="/qrmanager/:showId" element={<QRManager />} />
+            <Route path="/registershow" element={<RegisterShow />} />
+            
             <Route path="/landing" element={<Landing />} />
 
             {/* 주현수 */}
@@ -90,6 +94,7 @@ const App = () => {
             <Route path="/register-venue/step2" element={<RegisterVenue2 />} />
             <Route path="/register-venue/step3" element={<RegisterVenue3 />} />
             <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
+            <Route path="/registeredvenues" element={<RegisteredVenues />} />
           </Routes>
         </ToastProvider>
       </AuthProvider>

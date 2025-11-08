@@ -12,12 +12,14 @@ import myshowimg from '../../assets/homemanager/myshow_icon.png'
 
 import { ToastProvider } from '../../components/Toast/ToastProvider'
 import { useToast } from '../../components/Toast/UseToast'
+import EditTeamInfo from './EditTeamInfo'
 
 const HomeManager = () => {
 
     const navigate = useNavigate();
-    
+
     const { addToast } = useToast(); // 훅으로 토스트 가져오기
+    const [isEditTeamModalOpen, setIsEditTeamModalOpen] = useState(false);
 
     const handleCopyLink = async () => {
         const link = "https://example.com"; // 실제 복사할 링크
@@ -29,12 +31,24 @@ const HomeManager = () => {
         }
     };
 
+    const handleOpenTeamModal = () => {
+        setIsEditTeamModalOpen(true);
+    };
+
+    const handleCloseTeamModal = () => {
+        setIsEditTeamModalOpen(false);
+    };
+
   return (
     <Home>
     <NavbarManager/>
+    <EditTeamInfo
+        isOpen={isEditTeamModalOpen}
+        onClose={handleCloseTeamModal}
+    />
     <ButtonGridTop>
         <FarLeft>
-        <RegisterShow>
+        <RegisterShow onClick={()=>navigate(`/registershow`)}>
             <BtnName>공연 등록하기</BtnName>
             <BtnIcon src={showimg} alt="공연 등록하기"/>
             <BtnWriting>
@@ -46,7 +60,7 @@ const HomeManager = () => {
             </BtnWriting>
         </RegisterShow>
 
-        <TeamInfo>
+        <TeamInfo onClick={handleOpenTeamModal}>
             <MyShowContent>
             <MyShowLeft>
             <BtnName>단체 소개</BtnName>
@@ -85,7 +99,7 @@ const HomeManager = () => {
             </MyShowContent>
         </UserLink>
 
-        <MyLocation>
+        <MyLocation onClick={()=>navigate(`/registeredvenues`)}>
             <BtnName>내 공연장 관리</BtnName>
             <BtnIcon src={locationimg} alt="내 공연장 관리"/>
             <BtnInfo>설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구.. 어쩌구 저쩌구.</BtnInfo>
