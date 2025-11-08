@@ -8,7 +8,7 @@ import { formatKoreanDate } from "../../utils/dateFormat.js";
 import { useAuth } from "../Auth/AuthContext.jsx";
 
 // s00104
-const managerId = 5;
+const managerId = 1;
 // const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
 const serverUrl = "https://back-tikitta.duckdns.org";
@@ -64,7 +64,7 @@ export default function HomeUser() {
     try {
       // const token = localStorage.getItem("accessToken");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/user/${3}/main`,
+        `${import.meta.env.VITE_API_URL}/user/${managerId}/main`,
         {
           method: "GET",
           credentials: "include",
@@ -104,8 +104,22 @@ export default function HomeUser() {
           },
         }
       );
+      // const userresponse = await fetch(
+      //   `${serverUrl}/user/${managerId}/myshow/`,
+      //   {
+      //     method: "GET",
+      //     credentials: "include",
+      //     headers: {
+      //       Accept: "application/json",
+      //       "Content-Type": "application/json",
+      //       "Access-Control-Allow-Credentials": "true",
+      //     },
+      //   }
+      // );
 
       const result2 = await userresponse.json();
+      // console.log("status", userresponse.status);
+      // console.log("text", await userresponse.text());
 
       // Mock 데이터
       // const mockData = {
@@ -137,10 +151,14 @@ export default function HomeUser() {
       //     ],
       //   },
       // };
-      console.log("로그인한 유저가 예매한 페이지", userresponse);
+      // console.log("로그인한 유저가 예매한 페이지", userresponse);
       if (result2.success) {
         setUserReservations(result2.data);
-        console.log("로그인한 유저가 예매한 페이지", result2.success);
+        console.log(
+          "로그인한 유저가 예매한 페이지",
+          userresponse,
+          result2.data
+        );
       }
     } catch (error) {
       console.error("예매한 공연 조회 실패:", error);
@@ -152,10 +170,10 @@ export default function HomeUser() {
     fetchUserRes(); // 유저가 예매한 공연 리스트
   }, []);
 
-  // useEffect(() => {
-  //   console.log("userReservation", userReservations);
-  //   console.log("managerData", managerData);
-  // });
+  useEffect(() => {
+    console.log("userReservation", userReservations);
+    // console.log("managerData", managerData);
+  });
   return (
     <PageWrapper>
       <HomeUserContainer>

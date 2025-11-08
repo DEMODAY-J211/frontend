@@ -46,7 +46,7 @@ export default function MyTicketList() {
     try {
       // const token = localStorage.getItem("accessToken");
 
-      const response = await fetch(`${serverUrl}/user/${managerId}/myshow/`, {
+      const response = await fetch(`${serverUrl}/user/${managerId}/myshow`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -100,9 +100,9 @@ export default function MyTicketList() {
       //   ],
       // };
 
-      if (mockData.success) {
-        setReservationlist(mockData.data);
-        console.log("mockdata", mockData);
+      if (response.success) {
+        setReservationlist(response.data);
+        console.log("mockdata", response);
         console.log("showData입니다", reservationlist);
       }
     } catch (error) {
