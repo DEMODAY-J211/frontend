@@ -125,6 +125,21 @@ export default function MobileTicket() {
               <RiArrowRightWideFill size="40px" />
             </button>
           </QrContainer>
+          <div>sdd</div>
+          {/* <QrList index={currentIndex}>
+            {showInfo.tickets.map((ticket) => {
+              return (
+                <div>
+                  <div></div>
+                  {currentIndex} / {showInfo.tickets.length}
+                </div>
+              );
+            })}
+          </QrList> */}
+          {/* <div index={currentIndex}>
+              {showInfo.tickets.map((ticket) => {
+                return ()})}
+                <div/> */}
         </TicketContainer>
         {IsOpen && (
           <QRModal onClick={closeModal}>

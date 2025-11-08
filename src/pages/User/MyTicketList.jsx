@@ -44,16 +44,18 @@ export default function MyTicketList() {
   const [managerId, setManagerId] = useState();
   const fetchShowList = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
+      // const token = localStorage.getItem("accessToken");
 
       const response = await fetch(`${serverUrl}/user/${managerId}/myshow/`, {
         method: "GET",
         credentials: "include",
         headers: {
+          Accept: "application/json",
           "Content-Type": "application/json",
           "Access-Control-Allow-Credentials": "true",
         },
       });
+
       // const response = await fetch(
       //   `${serverUrl}/user/myshow?managerId=${managerId}&status=upcoming`,
       //   {
@@ -66,8 +68,8 @@ export default function MyTicketList() {
       //   }
       // );
 
-      if (!response.ok) throw new Error("네트워크 응답 실패");
-      const res = await response.json();
+      // if (!response.ok) throw new Error("네트워크 응답 실패");
+      // const res = await response.json();
       // const mockData = {
       //   success: true,
       //   code: 200,
@@ -88,7 +90,7 @@ export default function MyTicketList() {
       //       reservationId: 102,
       //       showtimeId: 14,
       //       showTitle: "제12회 정기공연",
-      //       showtimeStart: "2025-10-01T18:00:00",
+      //       showtimeStart: "2025-12-01T18:00:00",
       //       ticketOptionName: "학생할인",
       //       reservationQuantity: 2,
       //       reservationNumber: "000001",
@@ -98,9 +100,9 @@ export default function MyTicketList() {
       //   ],
       // };
 
-      if (res.success) {
-        setReservationlist(res.data);
-        console.log("mockdata", res);
+      if (mockData.success) {
+        setReservationlist(mockData.data);
+        console.log("mockdata", mockData);
         console.log("showData입니다", reservationlist);
       }
     } catch (error) {

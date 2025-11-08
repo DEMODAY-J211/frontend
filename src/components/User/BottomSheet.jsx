@@ -64,6 +64,7 @@ export default function BottomSheet({ onClose, showData = {}, onNeedModal }) {
         `${serverUrl}/user/${managerId}/booking/start`,
         {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         }
@@ -92,14 +93,14 @@ export default function BottomSheet({ onClose, showData = {}, onNeedModal }) {
       console.error("예약 요청 실패:", error);
       alert("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
       // 연결하고 지우기
-      // navigate(`../payment`, {
-      //   state: {
-      //     selectedShowtime,
-      //     selectedOption,
-      //     quantity,
-      //     showData,
-      //   },
-      // });
+      navigate(`../payment`, {
+        state: {
+          selectedShowtime,
+          selectedOption,
+          quantity,
+          showData,
+        },
+      });
     }
   };
 

@@ -52,6 +52,7 @@ export default function BuyTicket() {
         `${serverUrl}/user/${managerId}/booking/details`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -66,7 +67,7 @@ export default function BuyTicket() {
     } catch (error) {
       console.error("전송 실패:", error);
       // api 연결 후 삭제하기
-      setIsComplete(true);
+      // setIsComplete(true);
     }
   };
 
