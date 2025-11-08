@@ -13,6 +13,7 @@ export default function Footerbtn({ buttons = [], text = "" }) {
   const navigate = useNavigate();
 
   const handleClick = (btn) => {
+    if (btn.color === "gray") return; // 클릭 무시
     if (btn.onClick) {
       // 상위에서 onClick 넘겨주면 그거 실행
       btn.onClick();
