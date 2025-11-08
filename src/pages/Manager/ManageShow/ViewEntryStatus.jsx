@@ -48,11 +48,11 @@ const ViewEntryStatus = () => {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin?showtimeId=${showtimeId}`,
         {
+          credentials: 'include', // 세션 쿠키 자동 전송
           headers: {
             'Content-Type': 'application/json'
-          },
-          credentials: 'include' // 세션 쿠키 자동 전송
-        } 
+          }
+        }
       );
 
       // 401 Unauthorized - 세션 만료 또는 인증 실패
@@ -505,13 +505,12 @@ const ViewEntryStatus = () => {
         };
       });
 
-      const token = localStorage.getItem('accessToken');
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin?showtimeId=${showtimeId}`,
         {
           method: 'PATCH',
+          credentials: 'include', // 세션 쿠키 자동 전송
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ CheckinStatusUpdateRequest }),
@@ -941,14 +940,18 @@ const ViewToggle = styled.div`
 
 const ToggleOption = styled.div`
   padding: 5px 15px;
-  
+
   font-size: 20px;
-  font-weight: ${(props) => (props.active ? "500" : "300")};
-  color: #d60033;
-  background-color: ${(props) => (props.active ? "#FFF1F0" : "transparent")};
+  font-weight: ${(props) => (props.$active ? "500" : "300")};
+  color: ${(props) => (props.$active ? "#FFFFFF" : "#d60033")};
+  background-color: ${(props) => (props.$active ? "#FC2847" : "transparent")};
   border-radius: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${(props) => (props.$active ? "#FC2847" : "rgba(252, 40, 71, 0.1)")};
+  }
 `;
 
 const SelectedSeatsArea = styled.div`

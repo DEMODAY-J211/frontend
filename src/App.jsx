@@ -1,5 +1,5 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { ToastProvider } from "./components/Toast/ToastProvider";
 
 //여기서부터 자기 이름 밑으로 import 하기!!
@@ -35,6 +35,16 @@ import KakaoCallback from "./pages/Auth/KakaoCallback";
 
 
 const App = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+
+    console.log('=== 로그인 상태 확인 ===');
+    console.log('현재 경로:', location.pathname);
+    
+    console.log('=======================');
+  }, [location.pathname]);
+
   return (
     <div>
       <ToastProvider>
