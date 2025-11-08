@@ -1,9 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 
-// const AuthContext = createContext();
-
-export const AuthContext = createContext(); // ✅ Named export 추가
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -32,8 +30,8 @@ function getCookie(name) {
   );
   return matches ? matches[2] : null;
 }
+
 export const useAuth = () => useContext(AuthContext);
-// export const useAuth = () => useContext(AuthContext);
 // import React, { createContext, useState, useEffect } from "react";
 
 // // 인증 컨텍스트 생성
