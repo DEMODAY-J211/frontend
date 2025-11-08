@@ -86,6 +86,7 @@ const [error, setError] = useState("");
          `${import.meta.env.VITE_API_URL}/manager/shows/list`,
           {
             method: "GET",
+            credentials: 'include',  
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
               Accept: "application/json",

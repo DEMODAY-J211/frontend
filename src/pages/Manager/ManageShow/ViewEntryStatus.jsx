@@ -52,7 +52,7 @@ const ViewEntryStatus = () => {
             'Content-Type': 'application/json'
           },
           credentials: 'include' // 세션 쿠키 자동 전송
-        }
+        } 
       );
 
       // 401 Unauthorized - 세션 만료 또는 인증 실패
