@@ -23,7 +23,7 @@ import ManageUser from "./pages/Manager/ManageShow/ManageUser";
 import QRManager from "./pages/Manager/QRManager";
 import BuyTicket from "./pages/User/BuyTicket";
 import Landing from "./pages/Landing";
-import { AuthProvider } from "./pages/Auth/AuthContext";
+// import { AuthProvider } from "./pages/Auth/AuthContext";
 
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
@@ -72,7 +72,7 @@ const App = () => {
             />
 
             {/* 이예나 */}
-            {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
+            <Route path='/navbarmanager' element={<NavbarManager/>}/>
             <Route path="/homemanager" element={<HomeManager />} />
             <Route path="/manageshow" element={<ManageShow />} />
             <Route path="/manageshow/manageuser" element={<ManageUser />} />
