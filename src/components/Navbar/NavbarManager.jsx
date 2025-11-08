@@ -1,13 +1,18 @@
 import React from "react";
+import { useContext } from "react";
 import styled from "styled-components";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/tikitta_logo.png";
 
+import { AuthContext } from "../../pages/Auth/AuthContext";
+
 
 const NavbarManager = () => {
   const navigate = useNavigate();
   const [login, setLogin] = useState(true); //true: 로그인 상태 , false: 로그아웃 상태
+
+  const { logout } = useContext(AuthContext);
 
   return (
     <Navbar>
@@ -23,7 +28,7 @@ const NavbarManager = () => {
       </NavbarLeft>
       <NavbarRight>
         {login === true ? (
-          <Button>로그아웃</Button>
+          <Button onClick={logout}>로그아웃</Button>
         ) : (
           <Button onClick={()=>navigate("/login")}>로그인</Button>
         )}

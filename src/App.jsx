@@ -1,5 +1,5 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { ToastProvider } from "./components/Toast/ToastProvider";
 
 //여기서부터 자기 이름 밑으로 import 하기!!
@@ -23,6 +23,7 @@ import ManageUser from "./pages/Manager/ManageShow/ManageUser";
 import QRManager from "./pages/Manager/QRManager";
 import BuyTicket from "./pages/User/BuyTicket";
 import Landing from "./pages/Landing";
+import { AuthProvider } from "./pages/Auth/AuthContext";
 
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
@@ -34,8 +35,19 @@ import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
 
 const App = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+
+    console.log('=== 로그인 상태 확인 ===');
+    console.log('현재 경로:', location.pathname);
+    
+    console.log('=======================');
+  }, [location.pathname]);
+
   return (
     <div>
+      <AuthProvider>
       <ToastProvider>
         <AuthProvider>
           <Routes>
@@ -84,6 +96,7 @@ const App = () => {
           </Routes>
         </AuthProvider>
       </ToastProvider>
+      </AuthProvider>
     </div>
   );
 };

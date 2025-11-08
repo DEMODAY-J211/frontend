@@ -3,8 +3,37 @@ import styled from 'styled-components'
 import NavbarManager from '../../components/Navbar/NavbarManager'
 import { MdOutlineUnfoldMore } from 'react-icons/md'
 import { IoIosQrScanner } from 'react-icons/io'
+import { useEffect } from 'react'
+
+import { Html5QrcodeScanner } from "html5-qrcode";
 
 const QRManager = () => {
+
+    useEffect(() => {
+    // 1️⃣ 스캐너 초기화
+    const scanner = new Html5QrcodeScanner("reader", {
+      fps: 10,          // 초당 10프레임
+      qrbox: 300,       // 스캔 영역 크기
+      rememberLastUsedCamera: true,
+    });
+
+    // 2️⃣ QR코드 인식 시 실행되는 콜백
+    scanner.render(
+      (decodedText) => {
+        console.log("✅ QR 코드 인식 성공:", decodedText);
+        alert(`인식된 QR: ${decodedText}`);
+      },
+      (error) => {
+        // 인식 실패 시 콘솔 출력만 (매 프레임마다 출력되므로 조심)
+        console.warn("❌ 스캔 중 오류:", error);
+      }
+    );
+
+    // 3️⃣ 컴포넌트 언마운트 시 카메라 정리
+    return () => {
+      scanner.clear().catch((err) => console.error("Cleanup error:", err));
+    };
+  }, []);
   return (
     <Content>
         <NavbarManager/>
@@ -31,7 +60,8 @@ const QRManager = () => {
                 </TextContainer>
                 
                 <ScannerContainer>
-                    <IoIosQrScanner size={512} color="var(--color-primary)"/>
+                    {/* <IoIosQrScanner size={512} color="var(--color-primary)"/> */}
+                    <div id="reader"></div>
                 </ScannerContainer>
 
             </QRContainer>
@@ -113,6 +143,17 @@ const QRContainer = styled.div`
     align-self: stretch;
     background-color: var(--color-tertiary);
     border-radius: 20px;
+
+
+  /* QR 스캐너 영역 추가 */
+  #reader {
+    width: 500px;
+    max-width: 90%;
+    aspect-ratio: 1;
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+  }
 
 `
 
