@@ -13,6 +13,8 @@ import ChangeUserStatusModal from "../../../components/Modal/ChangeUserStatusMod
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+import { useParams } from "react-router-dom";
+
 
 const ManageUser = () => {
   const navigate = useNavigate();
@@ -20,10 +22,14 @@ const ManageUser = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
 
+    const {showId} = useParams();
+    const [showtimeId] = useState(1); // 임시값
   
 
 const [reservationData, setReservationData] = useState([]);
 const [initialData, setInitialData] = useState([]); // 초기 데이터 저장
+
+
 
 
 
@@ -263,58 +269,51 @@ setShowChangeStatusModal(false);
 };
 
 //api
-// const [userlist, setUserlist] = useState([]);
+const [userlist, setUserlist] = useState([]);
 
-// const [loading, setLoading] = useState(false);
-// const [error, setError] = useState("");
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
 
-// const showId = 2;
-//     const viewUsers = async() => {
-//       try{
-//         setError("");
+    const viewUsers = async() => {
+      try{
+        setError("");
     
-//         const response = await fetch(
-//          `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/customers`,
-//           {
-//             method: "GET",
-//             headers: {
-//               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-//               Accept: "application/json",
-//               "Content-type": "application/json",
-//             },
-//           }
-//         );
-    
+        const response = await fetch(
+         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/customers?showtimeId=${showtimeId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              Accept: "application/json",
+              "Content-type": "application/json",
+            },
+          }
+        );
     
     
-//         const result = await response.json();
+    
+        const result = await response.json();
       
-//         if(!response.ok || result.success !== true) {
-//           throw new Error(result.message || "예매자 리스트 조회에 실패했습니다.");
-//         }
+        if(!response.ok || result.success !== true) {
+          throw new Error(result.message || "예매자 리스트 조회에 실패했습니다.");
+        }
         
-//         setUserlist(result.data ?? []);
-//         console.log(result.data);
-//       }catch(error){
-//         console.error("Error fetching applied labors:", error);
-//         setError(error.message);
-//       }
-//     };
+        setUserlist(result.data ?? []);
+        console.log(result.data);
+      }catch(error){
+        console.error("Error fetching users:", error);
+        setError(error.message);
+      }
+    };
     	
 
 
-//     useEffect(() => {
-//   const fetchData = async () => {
-//     setLoading(true);
-//     await viewUsers(); // ✅ 실제 API 호출
-//     setLoading(false);
-//   };
+    useEffect(() => {
+  viewUsers();
+}, []); // festivalId가 바뀌면 새로 호출
 
-//   fetchData();
-// }, [userlist]); // festivalId가 바뀌면 새로 호출
-
-// if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
-// if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
+if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
+if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
   return (
     <Content>
       <NavbarManager />

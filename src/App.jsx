@@ -16,7 +16,7 @@ import CheckTicket from "./pages/User/CheckTicket";
 import MobileTicket from "./pages/User/MobileTicket";
 
 //이예나
-// import NavbarManager from "./components/Navbar/NavbarManager";
+import NavbarManager from "./components/Navbar/NavbarManager";
 import HomeManager from "./pages/Manager/HomeManager";
 import ManageShow from "./pages/Manager/ManageShow/ManageShow";
 import ManageUser from "./pages/Manager/ManageShow/ManageUser";
@@ -69,16 +69,16 @@ const App = () => {
             />
 
             {/* 이예나 */}
-            {/* <Route path='/navbarmanager' element={<NavbarManager/>}/> */}
+            <Route path='/navbarmanager' element={<NavbarManager/>}/>
             <Route path="/homemanager" element={<HomeManager />} />
             <Route path="/manageshow" element={<ManageShow />} />
-            <Route path="/manageshow/manageuser" element={<ManageUser />} />
+            <Route path="/manageshow/manageuser/:showId" element={<ManageUser />} />
             <Route path="/qrmanager" element={<QRManager />} />
             <Route path="/landing" element={<Landing />} />
 
             {/* 주현수 */}
             <Route
-              path="/manageshow/entrystatus"
+              path="/manageshow/entrystatus/:showId"
               element={<ViewEntryStatus />}
             />
             <Route path="/selectseat/:showtimeId" element={<SelectSeat />} />
