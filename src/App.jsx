@@ -26,7 +26,6 @@ import RegisteredVenues from "./pages/Manager/RegisteredVenues";
 import BuyTicket from "./pages/User/BuyTicket";
 import Landing from "./pages/Landing";
 
-
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
 import ViewEntryStatus from "./pages/Manager/ManageShow/ViewEntryStatus";
@@ -40,18 +39,16 @@ const App = () => {
   const location = useLocation();
 
   useEffect(() => {
+    console.log("=== 로그인 상태 확인 ===");
+    console.log("현재 경로:", location.pathname);
 
-    console.log('=== 로그인 상태 확인 ===');
-    console.log('현재 경로:', location.pathname);
-    
-    console.log('=======================');
+    console.log("=======================");
   }, [location.pathname]);
 
   return (
     <div>
       <AuthProvider>
-      <ToastProvider>
-        
+        <ToastProvider>
           <Routes>
             {/* 예시: <Route path='/mypage/festival' element={<MyPage/>}/> */}
             {/* 오서현 */}
@@ -99,8 +96,7 @@ const App = () => {
             <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
             <Route path="/registeredvenues" element={<RegisteredVenues />} />
           </Routes>
-        
-      </ToastProvider>
+        </ToastProvider>
       </AuthProvider>
     </div>
   );
