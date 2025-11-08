@@ -70,6 +70,7 @@ export default function ShowtimeSelector({
 
   const handleSelectOption = (option) => {
     setSelectedOption(option);
+    console.log("option", option);
     setIsOptionOpen(false);
   };
 
@@ -154,10 +155,33 @@ export default function ShowtimeSelector({
                     transition={{ duration: 0.25 }}
                   >
                     <DropdownList>
+                      {ticketOptionList.map((option, idx) => {
+                        // payload용 객체 생성: 기존 option에 id 추가
+                        const optionWithId = {
+                          ...option, // 기존 이름, 가격 등 복사
+                          ticketOptionId: idx, // idx 기반으로 id 부여 (서버 요구에 맞춰 조정)
+                        };
+
+                        return (
+                          <DropdownItem
+                            key={idx}
+                            onClick={() => handleSelectOption(optionWithId)} // id 포함 객체 전달
+                            selected={
+                              selectedOption?.ticketoptionName ===
+                              option.ticketoptionName
+                            }
+                          >
+                            {option.ticketoptionName} (
+                            {option.ticketoptionPrice}
+                            원)
+                          </DropdownItem>
+                        );
+                      })}
+                      {/* 
                       {ticketOptionList.map((option, idx) => (
                         <DropdownItem
                           key={idx}
-                          onClick={() => handleSelectOption(option)}
+                          onClick={() => handleSelectOption({ idx, option })}
                           selected={
                             selectedOption?.ticketoptionName ===
                             option.ticketoptionName
@@ -166,7 +190,7 @@ export default function ShowtimeSelector({
                           {option.ticketoptionName} ({option.ticketoptionPrice}
                           원)
                         </DropdownItem>
-                      ))}
+                      ))} */}
                     </DropdownList>
                   </motion.div>
                 )}

@@ -17,8 +17,6 @@ const SelectUserModal = ({ onClose, selectedUsers = [], onConfirm }) => {
   // ✅ 선택된 사람 이름 문자열로 표시
   const userNames = selectedUsers.map((u) => u.name).join(", ");
 
-  
-
   return (
     <Overlay>
       <ModalBox>
@@ -31,17 +29,16 @@ const SelectUserModal = ({ onClose, selectedUsers = [], onConfirm }) => {
 
         {/* 본문 내용 */}
         <Content>
-            {selectedUsers.length > 0 ? (
-                <>
-                <UserNames>{userNames}</UserNames>
-                <br/>
-                <NormalText>의 상태를 변경하시겠어요?</NormalText>
-                </>
-            ) : (
-                "상태를 변경하시겠어요?"
-            )}
+          {selectedUsers.length > 0 ? (
+            <>
+              <UserNames>{userNames}</UserNames>
+              <br />
+              <NormalText>의 상태를 변경하시겠어요?</NormalText>
+            </>
+          ) : (
+            "상태를 변경하시겠어요?"
+          )}
         </Content>
-
 
         {/* 커스텀 드롭다운 */}
         <DropdownContainer>
@@ -59,10 +56,7 @@ const SelectUserModal = ({ onClose, selectedUsers = [], onConfirm }) => {
           {isOpen && (
             <DropdownList>
               {options.map((option) => (
-                <DropdownItem
-                  key={option}
-                  onClick={() => handleSelect(option)}
-                >
+                <DropdownItem key={option} onClick={() => handleSelect(option)}>
                   {option}
                 </DropdownItem>
               ))}
@@ -157,7 +151,6 @@ const NormalText = styled.span`
   font-weight: 300;
   color: #333;
 `;
-
 
 const Placeholder = styled.span`
   color: ${({ $selected }) => ($selected ? "#333" : "#aaa")};
