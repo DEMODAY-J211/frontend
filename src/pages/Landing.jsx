@@ -19,7 +19,7 @@ export default function Landing() {
       setLoading(true);
 
       const response = await fetch(
-        `http://15.164.218.55:8080/auth/kakao/select-role`,
+        ` https://back-tikitta.duckdns.org/auth/kakao/select-role`,
         {
           method: "POST",
           headers: {
