@@ -106,6 +106,8 @@ export default function HomeUser() {
       );
 
       const result2 = await userresponse.json();
+      console.log("status", userresponse.status);
+      console.log("text", await userresponse.text());
 
       // Mock 데이터
       // const mockData = {
