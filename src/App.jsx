@@ -22,6 +22,7 @@ import ManageUser from "./pages/Manager/ManageShow/ManageUser";
 import QRManager from "./pages/Manager/QRManager";
 import BuyTicket from "./pages/User/BuyTicket";
 import Landing from "./pages/Landing";
+import { AuthProvider } from "./pages/Auth/AuthContext";
 
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
@@ -37,6 +38,7 @@ import KakaoCallback from "./pages/Auth/KakaoCallback";
 const App = () => {
   return (
     <div>
+      <AuthProvider>
       <ToastProvider>
         <Routes>
           {/* 예시: <Route path='/mypage/festival' element={<MyPage/>}/> */}
@@ -72,6 +74,7 @@ const App = () => {
           <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
         </Routes>
       </ToastProvider>
+      </AuthProvider>
     </div>
   );
 };
