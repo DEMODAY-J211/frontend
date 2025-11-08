@@ -16,7 +16,7 @@ import CheckTicket from "./pages/User/CheckTicket";
 import MobileTicket from "./pages/User/MobileTicket";
 
 //이예나
-import NavbarManager from "./components/Navbar/NavbarManager";
+// import NavbarManager from "./components/Navbar/NavbarManager";
 import HomeManager from "./pages/Manager/HomeManager";
 import ManageShow from "./pages/Manager/ManageShow/ManageShow";
 import ManageUser from "./pages/Manager/ManageShow/ManageUser";
