@@ -17,11 +17,18 @@ const KakaoCallback = () => {
         }
 
         // 백엔드로 code 전송하여 카카오 로그인 처리
+        // const response = await fetch(
+        //   `${import.meta.env.VITE_API_URL}/kakao/callback?code=${code}`,
+        //   {
+        //     method: "GET",
+        //     headers: { credentials: "include" },
+        //   }
+        // );
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/kakao/callback?code=${code}`,
           {
             method: "GET",
-            headers: { credentials: "include" },
+            credentials: "include", // 여기로 옮겨야 함
           }
         );
 
