@@ -5,58 +5,77 @@ import { RiArrowRightWideFill } from "react-icons/ri";
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatKoreanDate } from "../../utils/dateFormat.js";
+import { useAuth } from "../Auth/AuthContext.jsx";
 
 // s00104
-const managerId = 1;
+const managerId = 5;
 // const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
 const serverUrl = "https://back-tikitta.duckdns.org";
 
 export default function HomeUser() {
-  const [login, setLogin] = useState(false); //true: 로그인 상태 , false: 로그아웃 상태
   const [shows, setShows] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userReservations, setUserReservations] = useState([]);
   const currentShow = useMemo(() => shows[currentIndex], [shows, currentIndex]);
   const navigate = useNavigate();
-  const managerData = JSON.parse(localStorage.getItem("managerData"));
-  if (managerData) {
-    console.log("저장된 매니저 데이터:", managerData);
+  // const managerData = JSON.parse(localStorage.getItem("managerData"));
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  useEffect(() => {
+    // setmanaer;
+  });
+
+  useEffect(() => {
+    const jsessionId = getCookie("JSESSIONID");
+    if (jsessionId) {
+      setIsLoggedIn(true);
+    }
+  }, [setIsLoggedIn]);
+
+  function getCookie(name) {
+    const matches = document.cookie.match(
+      new RegExp("(^| )" + name + "=([^;]+)")
+    );
+    return matches ? matches[2] : null;
   }
+
+  // if (managerData) {
+  //   console.log("저장된 매니저 데이터:", managerData);
+  // }
   function handleNext() {
     setCurrentIndex((prev) => Math.min(prev + 1, shows.length - 1));
   }
   function handlePrev() {
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   }
-  console.log(login);
+  // console.log(isLoggedIn);
   const handleBuyTicket = () => {
     if (!currentShow) return;
+
     navigate(`/viewshowdetail/${currentShow.showId}`, {
       state: {
-        managerId: currentShow.managerId,
+        managerId: managerId,
         showId: currentShow.showId,
       },
     });
   };
-
+  // console.log("currentshow manaerId", currentShow.managerId);
   const fetchShows = async () => {
     try {
       // const token = localStorage.getItem("accessToken");
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/user/${managerId}/main`,
+        `${import.meta.env.VITE_API_URL}/user/${3}/main`,
         {
           method: "GET",
           credentials: "include",
           headers: {
             // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            Accept: "application/json",
             "Content-type": "application/json",
           },
         }
       );
       const result = await response.json();
-
+      console.log("managerId의 등록된 공연 Data", result);
       if (result.success) {
         // setManagerData(result.data);
         setShows(result.data.showList);
@@ -73,20 +92,20 @@ export default function HomeUser() {
     // 유저가 예매한 공연
     try {
       // const token = localStorage.getItem("accessToken");
-      // const response = await fetch(
-      //   `${import.meta.env.VITE_API_URL}/user/${managerId}/main`,
-      //   {
-      //     method: "GET",
-      //     credentials: "include",
-      //     headers: {
-      //       // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      //       Accept: "application/json",
-      //       "Content-type": "application/json",
-      //     },
-      //   }
-      // );
+      const userresponse = await fetch(
+        `${import.meta.env.VITE_API_URL}/user/${managerId}/myshow`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Accept: "application/json",
+            "Content-type": "application/json",
+          },
+        }
+      );
 
-      // const result = await response.json();
+      const result2 = await userresponse.json();
 
       // Mock 데이터
       // const mockData = {
@@ -118,10 +137,10 @@ export default function HomeUser() {
       //     ],
       //   },
       // };
-
-      if (result.success) {
-        setUserReservations(result.data.showList);
-        console.log("로그인한 유저가 예매한 페이지");
+      console.log("로그인한 유저가 예매한 페이지", userresponse);
+      if (result2.success) {
+        setUserReservations(result2.data);
+        console.log("로그인한 유저가 예매한 페이지", result2.success);
       }
     } catch (error) {
       console.error("예매한 공연 조회 실패:", error);
@@ -132,10 +151,11 @@ export default function HomeUser() {
     fetchShows(); // 공연 리스트
     fetchUserRes(); // 유저가 예매한 공연 리스트
   }, []);
-  useEffect(() => {
-    console.log(userReservations);
-    console.log(managerData);
-  });
+
+  // useEffect(() => {
+  //   console.log("userReservation", userReservations);
+  //   console.log("managerData", managerData);
+  // });
   return (
     <PageWrapper>
       <HomeUserContainer>
@@ -171,7 +191,9 @@ export default function HomeUser() {
                 })}
               </ShowItemSlider>
               <Buyticketbtn
-                reservable={!login || (login && currentShow.isReservable)}
+                reservable={
+                  !isLoggedIn || (isLoggedIn && currentShow.isReservable)
+                }
                 onClick={handleBuyTicket}
               >
                 {userReservations.includes(currentShow.showId)

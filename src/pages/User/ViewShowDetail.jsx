@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import ShowTab from "../../components/User/ShowTab";
@@ -9,18 +9,22 @@ import BottomSheet from "../../components/User/BottomSheet";
 import AlertModal from "../../components/Modal/AlertModal";
 import { formatKoreanDate } from "../../utils/dateFormat";
 // s01001
-const managerId = 1;
-// const serverUrl = import.meta.env.VITE_API_URL;
-const serverUrl = "http://15.164.218.55:8080";
-const showId = 1;
+// const managerId = 1;
+const serverUrl = import.meta.env.VITE_API_URL;
+// const serverUrl = "http://15.164.218.55:8080";
+// const showId = 1;
 
-export default function ViewShowDetail({}) {
+export default function ViewShowDetail() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [login, setLogin] = useState(true); //true: 로그인 상태 , false: 로그아웃 상태
   const [showModal, setShowModal] = useState(false);
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [showData, setShowData] = useState({});
   const [showAlert, setShowAlert] = useState(false);
+  const [bookingStatus, setBookingStatus] = useState("before");
+  // "before" | "available" | "closed"
+  const { managerId, showId } = location.state || {};
 
   const handlebtn = () => {
     if (!login) {
@@ -34,6 +38,7 @@ export default function ViewShowDetail({}) {
       navigate(`../selectseat/${showId}`);
     }
   };
+  // console.log("managerId, showId", managerId, showId);
 
   // const fetchShowDetail = async () => {
   //   try {
@@ -98,29 +103,61 @@ export default function ViewShowDetail({}) {
   //     alert("해당 공연을 찾을 수 없습니다.");
   //   }
   // };
-
-  useEffect(() => {
-    fetch(`${serverUrl}/user/${managerId}/detail/${showId}`, {
-      headers: {},
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("네트워크 응답 실패");
-        return res.json();
-      })
-      .then((data) => {
-        if (data.success) {
-          setShowData(data.data);
-          console.log(data.data);
-        } else {
-          console.error("공연 조회 실패:", error);
-          alert("해당 공연 단체를 찾을 수 없습니다.");
+  const fetchShows = async () => {
+    try {
+      // const token = localStorage.getItem("accessToken");
+      const response = await fetch(
+        `${serverUrl}/user/${managerId}/detail/${showId}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-type": "application/json",
+          },
         }
-      })
-      .catch((err) => console.error("Fetch 에러", err));
-  }, []);
+      );
+      const result = await response.json();
+      console.log("managerId의 등록된 공연 Data", result);
+      if (result.success) {
+        // setManagerData(result.data);
+        setShowData(result.data);
+        console.log(result.data);
+      }
+    } catch (error) {
+      console.error("공연 상세정보 조회 실패:", error);
+      alert("해당 공연 상세정보를 찾을 수 없습니다.");
+    }
+  };
 
   useEffect(() => {
-    console.log("showData 업데이트:", showData);
+    fetchShows();
+  }, []);
+  useEffect(() => {
+    if (showData.showStartDate) {
+      const now = new Date();
+      const startDate = new Date(showData.showStartDate);
+      const firstShow = showData.showtimeList?.[0];
+      const firstShowStart = firstShow
+        ? new Date(firstShow.showtimeDateTime)
+        : null;
+
+      // 예매 종료 시점 = 첫 공연 시작 1시간 전
+      const endDate = firstShowStart
+        ? new Date(firstShowStart.getTime() - 60 * 60 * 1000)
+        : null;
+
+      if (now < startDate) {
+        // 🎟️ 예매 전
+        setBookingStatus("before");
+      } else if (startDate <= now && (!endDate || now <= endDate)) {
+        // ✅ 예매 가능
+        setBookingStatus("available");
+      } else {
+        // ⛔ 예매 종료
+        setBookingStatus("closed");
+      }
+    }
   }, [showData]);
 
   // useEffect(() => {
@@ -209,7 +246,16 @@ export default function ViewShowDetail({}) {
             {!(login && showBottomSheet) && (
               <Footerbtn
                 buttons={[
-                  { text: "예매하기", color: "red", onClick: handlebtn },
+                  {
+                    text:
+                      bookingStatus === "before"
+                        ? "예매 준비 중"
+                        : bookingStatus === "available"
+                        ? "예매하기"
+                        : "예매 종료",
+                    color: bookingStatus === "available" ? "red" : "gray",
+                    onClick: handlebtn,
+                  },
                 ]}
               />
             )}

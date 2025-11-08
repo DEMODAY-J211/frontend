@@ -125,6 +125,7 @@ const ManageShow = () => {
       );
 
       const result = await response.json();
+      console.log(result.data);
 
       if (!response.ok || result.success !== true) {
         throw new Error(result.message || "공연 목록 조회에 실패했습니다.");
