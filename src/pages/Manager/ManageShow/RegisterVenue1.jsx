@@ -23,7 +23,7 @@ const RegisterVenue1 = () => {
   const [isStanding, setIsStanding] = useState(false);
   const [standingCapacity, setStandingCapacity] = useState('');
   const [isSeat, setIsSeat] = useState(selectedVenue ? true : false);
-  const [floorCount, setFloorCount] = useState(selectedVenue?.floorCount?.toString() || '2');
+  const [floorCount, setFloorCount] = useState(selectedVenue?.floorCount?.toString() || '');
   const [seatCount, setSeatCount] = useState(selectedVenue?.seatCount?.toString() || '');
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -126,16 +126,17 @@ const RegisterVenue1 = () => {
       <NavbarManager />
       <Container>
         <MainContent>
-          <Title>내 공연장 등록하기</Title>
-
-          {/* 진행 단계 표시 */}
-          <ProgressSteps>
-            <StepItem active={true}>① 공연장 기본 정보 입력</StepItem>
-            <ArrowIcon />
-            <StepItem active={false}>② 좌석배치표 업로드 및 수정</StepItem>
-            <ArrowIcon />
-            <StepItem active={false}>③ 좌석 라벨링</StepItem>
-          </ProgressSteps>
+          {/* 제목과 진행 단계 */}
+          <HeaderRow>
+            <Title>내 공연장 등록하기</Title>
+            <ProgressSteps>
+              <StepItem active={true}>① 공연장 기본 정보 입력</StepItem>
+              <ArrowIcon />
+              <StepItem active={false} disabled>② 좌석배치표 업로드 및 수정</StepItem>
+              <ArrowIcon />
+              <StepItem active={false} disabled>③ 좌석 라벨링</StepItem>
+            </ProgressSteps>
+          </HeaderRow>
 
           {/* 컨텐츠 영역 */}
           <ContentArea>
@@ -243,7 +244,7 @@ const RegisterVenue1 = () => {
                     value={floorCount}
                     onChange={(e) => setFloorCount(e.target.value)}
                     disabled={!isSeat || !!selectedVenue}
-                    placeholder="2"
+                    placeholder="0"
                     min="1"
                   />
                   <Unit>층</Unit>
@@ -307,19 +308,43 @@ const MainContent = styled.div`
   gap: 18px;
 `;
 
+const HeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid #c5c5c5;
+  padding-bottom: 0;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+`;
+
 const Title = styled.h1`
   font-size: 30px;
   font-weight: 500;
   color: #333;
-  margin-bottom: 18px;
+  margin: 0;
+  padding: 10px 0;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
 `;
 
 const ProgressSteps = styled.div`
   display: flex;
   align-items: center;
   gap: 5px;
-  border-bottom: 1px solid #c5c5c5;
   padding-bottom: 0;
+  flex-wrap: nowrap;
+
+  @media (max-width: 768px) {
+    gap: 2px;
+  }
 `;
 
 const StepItem = styled.div`
@@ -328,7 +353,9 @@ const StepItem = styled.div`
   padding: 10px;
   color: ${(props) => (props.active ? '#FC2847' : '#737373')};
   border-bottom: ${(props) => (props.active ? '2px solid #FC2847' : 'none')};
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
 `;
 
 const ArrowIcon = styled(RiArrowRightSLine)`
