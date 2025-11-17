@@ -35,6 +35,9 @@ import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
 import RegisterShowStep1 from "./pages/Manager/RegisterShow/RegisterShowStep1";
+import RegisterShowStep4 from "./pages/Manager/RegisterShow/RegisterShowStep4";
+import RegisterShowStep2 from "./pages/Manager/RegisterShow/RegisterShowStep2";
+import RegisterShowStep5 from "./pages/Manager/RegisterShow/RegisterShowStep5";
 
 const App = () => {
   const location = useLocation();
@@ -81,6 +84,10 @@ const App = () => {
             
             <Route path="/landing" element={<Landing />} />
             <Route path="/register-show/step1" element={<RegisterShowStep1 />} />
+            <Route path="/register-show/step2" element={<RegisterShowStep2 />} />
+            <Route path="/register-show/step4" element={<RegisterShowStep4 />} />
+            <Route path="/register-show/step5" element={<RegisterShowStep5 />} />
+
 
             {/* 주현수 */}
             <Route
