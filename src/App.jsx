@@ -33,6 +33,7 @@ import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
 import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
+import RegisterShowStep1 from "./pages/Manager/RegisterShow/RegisterShowStep1";
 
 const App = () => {
   const location = useLocation();
@@ -78,6 +79,7 @@ const App = () => {
             <Route path="/manageshow/manageuser/:showId" element={<ManageUser />} />
             <Route path="/qrmanager" element={<QRManager />} />
             <Route path="/landing" element={<Landing />} />
+            <Route path="/register-show/step1" element={<RegisterShowStep1 />} />
 
             {/* 주현수 */}
             <Route

@@ -23,7 +23,7 @@ const ManageUser = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
 
     const {showId} = useParams();
-    const [showtimeId] = useState(1); // 임시값
+    const [showTimeId] = useState(1); // 임시값
   
 
 const [reservationData, setReservationData] = useState([]);
@@ -41,7 +41,7 @@ useEffect(() => {
   const data =[
     {
       reservationId: 101,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 1,
       reservationNumber: "10010010",
       name: "홍길동",
@@ -58,7 +58,7 @@ useEffect(() => {
     },
     {
       reservationId: 102,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 2,
       reservationNumber: "10010011",
       name: "김철수",
@@ -75,7 +75,7 @@ useEffect(() => {
     },
     {
       reservationId: 103,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 3,
       reservationNumber: "10010012",
       name: "이영희",
@@ -92,7 +92,7 @@ useEffect(() => {
     },
     {
       reservationId: 104,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 4,
       reservationNumber: "10010013",
       name: "박민수",
@@ -109,7 +109,7 @@ useEffect(() => {
     },
     {
       reservationId: 105,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 5,
       reservationNumber: "10010014",
       name: "정수진",
@@ -269,51 +269,51 @@ setShowChangeStatusModal(false);
 };
 
 //api
-const [userlist, setUserlist] = useState([]);
+// const [userlist, setUserlist] = useState([]);
 
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState("");
+// const [loading, setLoading] = useState(false);
+// const [error, setError] = useState("");
 
-    const viewUsers = async() => {
-      try{
-        setError("");
+//     const viewUsers = async() => {
+//       try{
+//         setError("");
     
-        const response = await fetch(
-         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/customers?showtimeId=${showtimeId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Accept: "application/json",
-              "Content-type": "application/json",
-            },
-          }
-        );
+//         const response = await fetch(
+//          `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/customers?showTimeId=${showTimeId}`,
+//           {
+//             method: "GET",
+//             headers: {
+//               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+//               Accept: "application/json",
+//               "Content-type": "application/json",
+//             },
+//           }
+//         );
     
     
     
-        const result = await response.json();
+//         const result = await response.json();
       
-        if(!response.ok || result.success !== true) {
-          throw new Error(result.message || "예매자 리스트 조회에 실패했습니다.");
-        }
+//         if(!response.ok || result.success !== true) {
+//           throw new Error(result.message || "예매자 리스트 조회에 실패했습니다.");
+//         }
         
-        setUserlist(result.data ?? []);
-        console.log(result.data);
-      }catch(error){
-        console.error("Error fetching users:", error);
-        setError(error.message);
-      }
-    };
+//         setUserlist(result.data ?? []);
+//         console.log(result.data);
+//       }catch(error){
+//         console.error("Error fetching users:", error);
+//         setError(error.message);
+//       }
+//     };
     	
 
 
-    useEffect(() => {
-  viewUsers();
-}, []); // festivalId가 바뀌면 새로 호출
+//     useEffect(() => {
+//   viewUsers();
+// }, []); // festivalId가 바뀌면 새로 호출
 
-if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
-if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
+// if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
+// if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
   return (
     <Content>
       <NavbarManager />
