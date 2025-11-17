@@ -42,8 +42,8 @@ const RegisterShowStep1 = () => {
     };
 
     const removeSchedule = (index) => {
-  setShowSchedules(showSchedules.filter((_, i) => i !== index));
-};
+    setShowSchedules(showSchedules.filter((_, i) => i !== index));
+    };
 
 
 
@@ -93,14 +93,23 @@ const RegisterShowStep1 = () => {
 
     
 
-      // 임시 저장 핸들러
-  const handleTempSave = () => {
-    const formData = {
-        poster: preview, // 미리보기 URL 저장
-    };
+    const [showNameError, setShowNameError] = useState(false);
+    const [showDateError, setShowDateError] = useState(false);
+    const [showTimeError, setShowTimeError] = useState(false);
+    const [reserveDateError, setReserveDateError] = useState(false);
+    const [reserveTimeError, setReserveTimeError] = useState(false);
+
+    const handleTempSave = () => {
+    if (!validateFields()) {
+        addToast('필수 항목을 입력해주세요!', 'error');
+        return;
+    }
+
+    const formData = { poster: preview };
     localStorage.setItem('registerShowStep1', JSON.stringify(formData));
     addToast('임시 저장되었습니다!', 'success');
-  };
+    };
+
     // 파일 업로드 핸들러
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -118,16 +127,56 @@ const RegisterShowStep1 = () => {
     navigate('/homemanager');
   };
 
+  const validateFields = () => {
+  let isValid = true;
+
+  // 공연명
+  if (showName.trim() === "") {
+    setShowNameError(true);
+    isValid = false;
+  }
+
+  // 공연 날짜/시간 (회차 전체 체크)
+  const hasEmptyDate = showSchedules.some(sch => sch.date.trim() === "");
+  const hasEmptyStart = showSchedules.some(sch => sch.startTime.trim() === "");
+  const hasEmptyEnd = showSchedules.some(sch => sch.endTime.trim() === "");
+
+  if (hasEmptyDate) {
+    setShowDateError(true);
+    isValid = false;
+  }
+  if (hasEmptyStart || hasEmptyEnd) {
+    setShowTimeError(true);
+    isValid = false;
+  }
+
+  // 예매 시작 날짜, 시간
+  if (reserveStartDate.trim() === "") {
+    setReserveDateError(true);
+    isValid = false;
+  }
+
+  if (reserveStartTime.trim() === "") {
+    setReserveTimeError(true);
+    isValid = false;
+  }
+
+  return isValid;
+};
+
+
   // 다음 단계로
-  const handleNext = () => {
-    if (selectedVenues.length === 0) {
-      addToast('공연 장소를 선택해주세요!', 'error');
-      return;
+const handleNext = () => {
+    if (!validateFields()) {
+        addToast('필수 항목을 입력해주세요!', 'error');
+        return;
     }
 
-    // TODO: 4단계 페이지로 이동
     navigate('/register-show/step2');
-  };
+    };
+
+
+
 
       // 기존 임시 저장 데이터 불러오기
     useEffect(() => {
@@ -188,10 +237,21 @@ const RegisterShowStep1 = () => {
                 <Q>
                 {/* 공연명 */}
                 <Name>공연명</Name>
-                <Input value={showName} 
-                onChange={(e) => setShowName(e.target.value)}
+                <Input
+                value={showName}
+                onChange={(e) => {
+                    setShowName(e.target.value);
+                    if (e.target.value.trim() !== "") {
+                    setShowNameError(false);
+                    }
+                }}
                 className={showName === "" ? "placeholder" : ""}
-                placeholder="제4회 정기공연" />
+                placeholder="제4회 정기공연"/>
+                {showNameError && (
+                <ErrorMessage>*필수 항목입니다.</ErrorMessage>
+                )}
+
+
                 </Q>
 
                 <Q>
@@ -201,19 +261,33 @@ const RegisterShowStep1 = () => {
                 </Name>
                 {showSchedules.map((sch, idx) => (
                 <DateRow key={idx}>
+                    <Column>
                     <DateWrapper>
                     <DateInput
-                        type="date"
-                        value={sch.date}
-                        onChange={(e) => updateSchedule(idx, "date", e.target.value)}
-                        className={sch.date === "" ? "placeholder" : ""}
+                    type="date"
+                    value={sch.date}
+                    onChange={(e) => {
+                        updateSchedule(idx, "date", e.target.value);
+                        if (e.target.value.trim() !== "") setShowDateError(false);
+                    }}
+                    className={sch.date === "" ? "placeholder" : ""}
                     />
+
                     <CalendarIcon />
                     </DateWrapper>
+                    {showDateError && (
+                    <ErrorMessage>*필수 항목입니다.</ErrorMessage>
+                    )}
+                    </Column>
 
+
+                    <Column>
                     <TimeSelect
                     value={sch.startTime}
-                    onChange={(e) => updateSchedule(idx, "startTime", e.target.value)}
+                    onChange={(e) => {
+                        updateSchedule(idx, "startTime", e.target.value);
+                        if (e.target.value.trim() !== "") setShowTimeError(false);
+                    }}
                     className={sch.startTime === "" ? "placeholder" : ""}
                     >
                     <option value="" disabled className="placeholder">00:00</option>
@@ -221,12 +295,21 @@ const RegisterShowStep1 = () => {
                         <option key={idx} value={time}>{time}</option>
                     ))}
                     </TimeSelect>
+                    {showTimeError && (
+                    <ErrorMessage>*필수 항목입니다.</ErrorMessage>
+                    )}
+                    </Column>
+
 
                     <span>~</span>
 
+                    <Column>
                     <TimeSelect
                     value={sch.endTime}
-                    onChange={(e) => updateSchedule(idx, "endTime", e.target.value)}
+                    onChange={(e) => {
+                        updateSchedule(idx, "endTime", e.target.value);
+                        if (e.target.value.trim() !== "") setShowTimeError(false);
+                    }}
                     className={sch.endTime === "" ? "placeholder" : ""}
                     >
                     <option value="" disabled className="placeholder">00:00</option>
@@ -234,6 +317,10 @@ const RegisterShowStep1 = () => {
                         <option key={idx} value={time}>{time}</option>
                     ))}
                     </TimeSelect>
+                    {showTimeError && (
+                    <ErrorMessage>*필수 항목입니다.</ErrorMessage>
+                    )}
+                    </Column>
                     {/* ★ 삭제 버튼 (스케줄이 2개 이상일 때만 표시) */}
                     {showSchedules.length > 1 && (
                     <DeleteIcon onClick={() => removeSchedule(idx)} />
@@ -246,26 +333,45 @@ const RegisterShowStep1 = () => {
                 {/* 예매 기간 */}
                 <Name>예매 기간</Name>
                 <DateRow>
+                <Column>
                 <DateWrapper>
                 <DateInput
-                    type="date"
-                    value={reserveStartDate}
-                    onChange={(e) => setReserveStartDate(e.target.value)}
-                    className={reserveStartDate === "" ? "placeholder" : ""}
+                type="date"
+                value={reserveStartDate}
+                onChange={(e) => {
+                    setReserveStartDate(e.target.value);
+                    if (e.target.value.trim() !== "") setReserveDateError(false);
+                }}
+                className={reserveStartDate === "" ? "placeholder" : ""}
                 />
                 <CalendarIcon />
                 </DateWrapper>
+                {reserveDateError && (
+                <ErrorMessage>*필수 항목입니다.</ErrorMessage>
+                )}
+                </Column>
 
 
+
+                <Column>
                 <TimeSelect
                 value={reserveStartTime}
-                onChange={(e) => setReserveStartTime(e.target.value)}
-                className={reserveStartTime === "" ? "placeholder" : ""}>
+                onChange={(e) => {
+                    setReserveStartTime(e.target.value);
+                    if (e.target.value.trim() !== "") setReserveTimeError(false);
+                }}
+                className={reserveStartTime === "" ? "placeholder" : ""}
+                >
                 <option value="" disabled className="placeholder">00:00</option>
                 {timeOptions.map((time, idx) => (
                     <option key={idx} value={time}>{time}</option>
                 ))}
                 </TimeSelect>
+                {reserveTimeError && (
+                <ErrorMessage>*필수 항목입니다.</ErrorMessage>
+                )}
+                </Column>
+
 
 
                 <span>~</span>
@@ -709,4 +815,18 @@ const TicketContent = styled.div`
     display: flex;
     flex-direction: column;
     gap: 10px;
+`
+const ErrorMessage = styled.div`
+  color: #fc2847;
+  font-size: 15px;
+  margin-top: -8px;
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+`;
+
+const Column = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 `
