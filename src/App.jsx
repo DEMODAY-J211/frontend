@@ -29,7 +29,7 @@ import Landing from "./pages/Landing";
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
 import ViewEntryStatus from "./pages/Manager/ManageShow/ViewEntryStatus";
-import RegisterShowStep3 from "./pages/Manager/ManageShow/RegisterShowStep3";
+import RegisterShowStep3 from "./pages/Manager/RegisterShow/RegisterShowStep3";
 import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
 import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";

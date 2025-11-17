@@ -7,6 +7,8 @@ import { AiOutlineMinus, AiOutlinePlus } from 'react-icons/ai';
 import NavbarManager from '../../../components/Navbar/NavbarManager';
 import { useToast } from '../../../components/Toast/UseToast';
 import SeatSelectionModal from '../../../components/Modal/SeatSelectionModal';
+import RegisterShowNavbar from './RegisterShowNavbar';
+
 
 const RegisterShowStep3 = () => {
   const navigate = useNavigate();
@@ -93,30 +95,7 @@ const RegisterShowStep3 = () => {
       <NavbarManager />
       <Container>
         <MainContent>
-          <Title>공연 등록하기</Title>
-
-          {/* 진행 단계 표시 */}
-          <ProgressSteps>
-            <StepItem active={false}>
-              ① 공연 기본정보
-            </StepItem>
-            <ArrowIcon />
-            <StepItem active={false}>
-              ② 공연 상세정보
-            </StepItem>
-            <ArrowIcon />
-            <StepItem active={true}>
-              ③ 공연 장소·좌석
-            </StepItem>
-            <ArrowIcon />
-            <StepItem active={false}>
-              ④ 알림 메시지
-            </StepItem>
-            <ArrowIcon />
-            <StepItem active={false}>
-              ⑤ 미리 보기
-            </StepItem>
-          </ProgressSteps>
+          <RegisterShowNavbar currentStep={3}/>
 
           <FormContent>
             {/* 공연 장소 섹션 */}
