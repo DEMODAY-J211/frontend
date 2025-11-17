@@ -9,10 +9,8 @@ import BottomSheet from "../../components/User/BottomSheet";
 import AlertModal from "../../components/Modal/AlertModal";
 import { formatKoreanDate } from "../../utils/dateFormat";
 // s01001
-// const managerId = 1;
+
 const serverUrl = import.meta.env.VITE_API_URL;
-// const serverUrl = "http://15.164.218.55:8080";
-// const showId = 1;
 
 export default function ViewShowDetail() {
   const navigate = useNavigate();
@@ -38,71 +36,6 @@ export default function ViewShowDetail() {
       navigate(`../selectseat/${showId}`);
     }
   };
-  // console.log("managerId, showId", managerId, showId);
-
-  // const fetchShowDetail = async () => {
-  //   try {
-  //     // const token = localStorage.getItem('accessToken');
-  //     const response = await fetch(
-  //       `${serverUrl}/user/${managerId}/detail/${managerId}`,
-  //       {
-  //         headers: {
-  //           // 'Authorization': `Bearer ${token}`,
-  //           //     'Content-Type': 'application/json'
-  //         },
-  //       }
-  //     );
-  //     const result = await response.json();
-
-  //     // // Mock 데이터
-  //     // const mockData = {
-  //     //   success: true,
-  //     //   code: 200,
-  //     //   message: "success",
-  //     //   data: {
-  //     //     showId: 12,
-  //     //     showTitle: "제11회 정기공연",
-  //     //     showStartDate: "2025-09-25",
-  //     //     showtimeEndDate: "2025-09-26",
-  //     //     showLocation: "서강대학교 메리홀 소극장",
-  //     //     showPosterPicture: "https://example.com/poster.png",
-  //     //     showtimeList: [
-  //     //       {
-  //     //         showtimeId: 1,
-  //     //         showtimeStart: "2025-09-25 15:00",
-  //     //       },
-  //     //       {
-  //     //         showtimeId: 2,
-  //     //         showtimeStart: "2025-09-25 18:00",
-  //     //       },
-  //     //     ],
-  //     //     ticketOptionList: [
-  //     //       {
-  //     //         ticketoptionName: "학생할인",
-  //     //         ticketoptionPrice: 8000,
-  //     //       },
-  //     //       {
-  //     //         ticketoptionName: "학생할인",
-  //     //         ticketoptionPrice: 8000,
-  //     //       },
-  //     //     ],
-  //     //     managerInfo: {
-  //     //       managerName: "멋쟁이연극회",
-  //     //       managerEmail: "1004@gmail.com",
-  //     //     },
-  //     //     showDetailText: "공연상세 정보입니다.",
-  //     //   },
-  //     // };
-  //     console.log(result.data);
-
-  //     if (result.success) {
-  //       setShowData(result.data);
-  //     }
-  //   } catch (error) {
-  //     console.error("공연 조회 실패:", error);
-  //     alert("해당 공연을 찾을 수 없습니다.");
-  //   }
-  // };
   const fetchShows = async () => {
     try {
       // const token = localStorage.getItem("accessToken");
@@ -133,37 +66,26 @@ export default function ViewShowDetail() {
   useEffect(() => {
     fetchShows();
   }, []);
+
   useEffect(() => {
-    if (showData.showStartDate) {
-      const now = new Date();
-      const startDate = new Date(showData.showStartDate);
-      const firstShow = showData.showtimeList?.[0];
-      const firstShowStart = firstShow
-        ? new Date(firstShow.showtimeDateTime)
-        : null;
+    if (!showData.bookingStartAt) return;
 
-      // 예매 종료 시점 = 첫 공연 시작 1시간 전
-      const endDate = firstShowStart
-        ? new Date(firstShowStart.getTime() - 60 * 60 * 1000)
-        : null;
+    const now = new Date();
+    const bookingStart = new Date(showData.bookingStartAt);
+    const showStart = new Date(showData.showStartDate);
+    const bookingEnd = new Date(showStart.getTime() - 60 * 60 * 1000); // 첫 공연 1시간 전
 
-      if (now < startDate) {
-        // 🎟️ 예매 전
-        setBookingStatus("before");
-      } else if (startDate <= now && (!endDate || now <= endDate)) {
-        // ✅ 예매 가능
-        setBookingStatus("available");
-      } else {
-        // ⛔ 예매 종료
-        setBookingStatus("closed");
-      }
+    if (now < bookingStart) {
+      setBookingStatus("before"); // 예매 전
+      console.log("예매 전");
+    } else if (now >= bookingStart && now <= bookingEnd) {
+      setBookingStatus("available"); // 예매 가능
+      console.log("예매 가능");
+    } else {
+      setBookingStatus("closed"); // 예매 종료
+      console.log("예매 종료", { now, bookingStart, bookingEnd });
     }
   }, [showData]);
-
-  // useEffect(() => {
-  //   fetchShowDetail();
-  // }, []);
-
   return (
     <PageWrapper $dimmed={showModal}>
       <HomeUserContainer>
@@ -213,7 +135,7 @@ export default function ViewShowDetail() {
                 <div className="wrapper">
                   <a>예매 기한</a>
                   <b>
-                    {formatKoreanDate(showData.showStartDate)} ~ 각 공연 시작
+                    {formatKoreanDate(showData.bookingStartAt)} ~ 각 공연 시작
                     1시간 전
                   </b>
                 </div>

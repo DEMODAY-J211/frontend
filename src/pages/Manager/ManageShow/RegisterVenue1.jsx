@@ -5,6 +5,7 @@ import { RiArrowRightSLine } from 'react-icons/ri';
 import { GrCheckbox, GrCheckboxSelected } from 'react-icons/gr';
 import { BsUpload } from 'react-icons/bs';
 import { BiSolidMap } from 'react-icons/bi';
+import DaumPostcode from 'react-daum-postcode';
 import NavbarManager from '../../../components/Navbar/NavbarManager';
 import { useToast } from '../../../components/Toast/UseToast';
 
@@ -12,16 +13,21 @@ const RegisterVenue1 = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
+  // 선택된 공연장 정보 불러오기
+  const selectedVenue = JSON.parse(localStorage.getItem('selectedVenue') || 'null');
+
   // 상태 관리
-  const [venueName, setVenueName] = useState('');
-  const [address, setAddress] = useState('');
+  const [venueName, setVenueName] = useState(selectedVenue?.name || '');
+  const [address, setAddress] = useState(selectedVenue?.address || '');
   const [detailAddress, setDetailAddress] = useState('');
   const [isStanding, setIsStanding] = useState(false);
-  const [standingCapacity, setStandingCapacity] = useState(0);
-  const [isSeat, setIsSeat] = useState(false);
-  const [floorCount, setFloorCount] = useState(2);
-  const [seatCount, setSeatCount] = useState(0);
+  const [standingCapacity, setStandingCapacity] = useState('');
+  const [isSeat, setIsSeat] = useState(selectedVenue ? true : false);
+  const [floorCount, setFloorCount] = useState(selectedVenue?.floorCount?.toString() || '');
+  const [seatCount, setSeatCount] = useState(selectedVenue?.seatCount?.toString() || '');
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
 
   // 파일 업로드 핸들러
   const handleFileUpload = (e) => {
@@ -29,6 +35,14 @@ const RegisterVenue1 = () => {
     if (file) {
       if (file.type.startsWith('image/')) {
         setUploadedImage(file);
+
+        // 이미지 미리보기 생성
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
         addToast('좌석표가 업로드되었습니다.', 'success');
       } else {
         addToast('이미지 파일만 업로드 가능합니다.', 'error');
@@ -38,8 +52,14 @@ const RegisterVenue1 = () => {
 
   // 주소 검색 핸들러
   const handleAddressSearch = () => {
-    // TODO: Daum 주소 검색 API 연동
-    addToast('주소 검색 기능은 추후 구현됩니다.', 'info');
+    setIsPostcodeOpen(true);
+  };
+
+  // 주소 선택 완료 핸들러
+  const handleComplete = (data) => {
+    setAddress(data.address);
+    setIsPostcodeOpen(false);
+    addToast('주소가 입력되었습니다.', 'success');
   };
 
   // 유효성 검사
@@ -56,11 +76,11 @@ const RegisterVenue1 = () => {
       addToast('스탠딩석 또는 좌석 중 하나 이상 선택해주세요.', 'error');
       return false;
     }
-    if (isStanding && standingCapacity <= 0) {
+    if (isStanding && (!standingCapacity || Number(standingCapacity) <= 0)) {
       addToast('스탠딩석 허용 인원을 입력해주세요.', 'error');
       return false;
     }
-    if (isSeat && seatCount <= 0) {
+    if (isSeat && (!seatCount || Number(seatCount) <= 0)) {
       addToast('좌석 수를 입력해주세요.', 'error');
       return false;
     }
@@ -84,8 +104,16 @@ const RegisterVenue1 = () => {
     };
 
     localStorage.setItem('registerVenue1', JSON.stringify(venueData));
-    // TODO: 2단계 페이지로 이동
-    navigate('/register-venue/step2');
+
+    // 스탠딩석만 선택한 경우 2,3단계 건너뛰고 바로 등록 완료
+    if (isStanding && !isSeat) {
+      // TODO: API 호출하여 공연장 등록 완료
+      addToast('공연장이 등록되었습니다!', 'success');
+      navigate('/homemanager');
+    } else {
+      // 좌석이 있는 경우 2단계로 이동
+      navigate('/register-venue/step2');
+    }
   };
 
   // 이전 단계로
@@ -98,26 +126,31 @@ const RegisterVenue1 = () => {
       <NavbarManager />
       <Container>
         <MainContent>
-          <Title>내 공연장 등록하기</Title>
-
-          {/* 진행 단계 표시 */}
-          <ProgressSteps>
-            <StepItem active={true}>① 공연장 기본 정보 입력</StepItem>
-            <ArrowIcon />
-            <StepItem active={false}>② 좌석배치표 업로드 및 수정</StepItem>
-            <ArrowIcon />
-            <StepItem active={false}>③ 좌석 라벨링</StepItem>
-          </ProgressSteps>
+          {/* 제목과 진행 단계 */}
+          <HeaderRow>
+            <Title>내 공연장 등록하기</Title>
+            <ProgressSteps>
+              <StepItem active={true}>① 공연장 기본 정보 입력</StepItem>
+              <ArrowIcon />
+              <StepItem active={false} disabled>② 좌석배치표 업로드 및 수정</StepItem>
+              <ArrowIcon />
+              <StepItem active={false} disabled>③ 좌석 라벨링</StepItem>
+            </ProgressSteps>
+          </HeaderRow>
 
           {/* 컨텐츠 영역 */}
           <ContentArea>
             {/* 좌석표 업로드 */}
             <UploadSection>
-              <UploadBox onClick={() => document.getElementById('fileInput').click()}>
-                <BsUpload size={32} />
-                <UploadText>
-                  {uploadedImage ? uploadedImage.name : '공연장 좌석표 사진 업로드하기'}
-                </UploadText>
+              <UploadBox onClick={() => document.getElementById('fileInput').click()} hasImage={!!imagePreview}>
+                {imagePreview ? (
+                  <UploadedImage src={imagePreview} alt="업로드된 좌석표" />
+                ) : (
+                  <>
+                    <BsUpload size={32} />
+                    <UploadText>공연장 좌석표 사진 업로드하기</UploadText>
+                  </>
+                )}
               </UploadBox>
               <input
                 id="fileInput"
@@ -170,7 +203,12 @@ const RegisterVenue1 = () => {
 
               {/* 스탠딩석 */}
               <FormField>
-                <CheckboxContainer onClick={() => setIsStanding(!isStanding)}>
+                <CheckboxContainer onClick={() => {
+                  if (!isStanding && isSeat) {
+                    setIsSeat(false);
+                  }
+                  setIsStanding(!isStanding);
+                }}>
                   {isStanding ? <CheckboxIconSelected /> : <CheckboxIcon />}
                   <Label>스탠딩석</Label>
                 </CheckboxContainer>
@@ -179,9 +217,10 @@ const RegisterVenue1 = () => {
                   <SmallInput
                     type="number"
                     value={standingCapacity}
-                    onChange={(e) => setStandingCapacity(Number(e.target.value))}
+                    onChange={(e) => setStandingCapacity(e.target.value)}
                     disabled={!isStanding}
-                    min="0"
+                    placeholder="0"
+                    min="1"
                   />
                   <Unit>명</Unit>
                 </SubFieldGroup>
@@ -189,7 +228,12 @@ const RegisterVenue1 = () => {
 
               {/* 좌석 */}
               <FormField>
-                <CheckboxContainer onClick={() => setIsSeat(!isSeat)}>
+                <CheckboxContainer onClick={() => {
+                  if (!isSeat && isStanding) {
+                    setIsStanding(false);
+                  }
+                  setIsSeat(!isSeat);
+                }}>
                   {isSeat ? <CheckboxIconSelected /> : <CheckboxIcon />}
                   <Label>좌석</Label>
                 </CheckboxContainer>
@@ -198,8 +242,9 @@ const RegisterVenue1 = () => {
                   <SmallInput
                     type="number"
                     value={floorCount}
-                    onChange={(e) => setFloorCount(Number(e.target.value))}
-                    disabled={!isSeat}
+                    onChange={(e) => setFloorCount(e.target.value)}
+                    disabled={!isSeat || !!selectedVenue}
+                    placeholder="0"
                     min="1"
                   />
                   <Unit>층</Unit>
@@ -209,9 +254,10 @@ const RegisterVenue1 = () => {
                   <SmallInput
                     type="number"
                     value={seatCount}
-                    onChange={(e) => setSeatCount(Number(e.target.value))}
-                    disabled={!isSeat}
-                    min="0"
+                    onChange={(e) => setSeatCount(e.target.value)}
+                    disabled={!isSeat || !!selectedVenue}
+                    placeholder="0"
+                    min="1"
                   />
                   <Unit>석</Unit>
                 </SubFieldGroup>
@@ -225,6 +271,19 @@ const RegisterVenue1 = () => {
           <PrevButton onClick={handlePrevious}>←이전</PrevButton>
           <NextButton onClick={handleNext}>다음→</NextButton>
         </Footer>
+
+        {/* 주소 검색 모달 */}
+        {isPostcodeOpen && (
+          <PostcodeModal onClick={() => setIsPostcodeOpen(false)}>
+            <PostcodeContainer onClick={(e) => e.stopPropagation()}>
+              <PostcodeHeader>
+                <PostcodeTitle>주소 검색</PostcodeTitle>
+                <CloseButton onClick={() => setIsPostcodeOpen(false)}>✕</CloseButton>
+              </PostcodeHeader>
+              <DaumPostcode onComplete={handleComplete} autoClose={false} />
+            </PostcodeContainer>
+          </PostcodeModal>
+        )}
       </Container>
     </>
   );
@@ -234,8 +293,7 @@ export default RegisterVenue1;
 
 // Styled Components
 const Container = styled.div`
-  width: 1440px;
-  margin: 0 auto;
+  width: 100%;
   background: #ffffff;
   display: flex;
   flex-direction: column;
@@ -243,26 +301,50 @@ const Container = styled.div`
 `;
 
 const MainContent = styled.div`
-  padding: 50px 100px;
+  flex: 1;
+  padding: 20px 100px 0px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  flex: 1;
+`;
+
+const HeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid #c5c5c5;
+  padding-bottom: 0;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 `;
 
 const Title = styled.h1`
-  font-weight: 500;
   font-size: 30px;
-  color: #000000;
+  font-weight: 500;
+  color: #333;
   margin: 0;
+  padding: 10px 0;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
 `;
 
 const ProgressSteps = styled.div`
   display: flex;
   align-items: center;
   gap: 5px;
-  border-bottom: 1px solid #c5c5c5;
   padding-bottom: 0;
+  flex-wrap: nowrap;
+
+  @media (max-width: 768px) {
+    gap: 2px;
+  }
 `;
 
 const StepItem = styled.div`
@@ -271,7 +353,9 @@ const StepItem = styled.div`
   padding: 10px;
   color: ${(props) => (props.active ? '#FC2847' : '#737373')};
   border-bottom: ${(props) => (props.active ? '2px solid #FC2847' : 'none')};
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
 `;
 
 const ArrowIcon = styled(RiArrowRightSLine)`
@@ -281,7 +365,7 @@ const ArrowIcon = styled(RiArrowRightSLine)`
 `;
 
 const ContentArea = styled.div`
-  padding: 50px;
+  padding: 20px 0;
   display: flex;
   gap: 18px;
   flex: 1;
@@ -306,6 +390,8 @@ const UploadBox = styled.div`
   gap: 18px;
   cursor: pointer;
   transition: all 0.2s ease;
+  overflow: hidden;
+  position: relative;
 
   &:hover {
     transform: translateY(-4px);
@@ -315,6 +401,12 @@ const UploadBox = styled.div`
   svg {
     color: #000000;
   }
+`;
+
+const UploadedImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 `;
 
 const UploadText = styled.p`
@@ -328,7 +420,6 @@ const UploadText = styled.p`
 `;
 
 const FormSection = styled.div`
-  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 30px;
@@ -503,3 +594,60 @@ const NavButton = styled.button`
 const PrevButton = styled(NavButton)``;
 
 const NextButton = styled(NavButton)``;
+
+// 주소 검색 모달
+const PostcodeModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+`;
+
+const PostcodeContainer = styled.div`
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  width: 500px;
+  max-width: 90vw;
+  box-shadow: 0px 0px 20px 2px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+`;
+
+const PostcodeHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const PostcodeTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 500;
+  color: #000000;
+  margin: 0;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #000000;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    opacity: 0.7;
+  }
+`;

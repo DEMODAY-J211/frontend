@@ -26,23 +26,35 @@ export default function BuyTicket() {
   const [isComplete, setIsComplete] = useState(false);
   const [selectedBank, setSelectedBank] = useState(null);
   const [isOptionOpen, setIsOptionOpen] = useState(false);
-  const backOptions = [
-    { id: 1, name: "국민은행" },
-    { id: 2, name: "기업은행" },
-    { id: 3, name: "농협은행" },
-    { id: 4, name: "신한은행" },
-    { id: 5, name: "하나은행" },
-    { id: 6, name: "우리은행" },
-    { id: 7, name: "우체국" },
-    { id: 8, name: "카카오뱅크" },
-    { id: 9, name: "토스뱅크" },
+  // const bankOptions = [
+  //   { id: 1, name: "국민은행" },
+  //   { id: 2, name: "기업은행" },
+  //   { id: 3, name: "농협은행" },
+  //   { id: 4, name: "신한은행" },
+  //   { id: 5, name: "하나은행" },
+  //   { id: 6, name: "우리은행" },
+  //   { id: 7, name: "우체국" },
+  //   { id: 8, name: "카카오뱅크" },
+  //   { id: 9, name: "토스뱅크" },
+  // ];
+
+  const bankOptions = [
+    { id: 1, name: "국민은행", code: "KB" },
+    { id: 2, name: "기업은행", code: "IBK" },
+    { id: 3, name: "농협은행", code: "NH" },
+    { id: 4, name: "신한은행", code: "SHINHAN" },
+    { id: 5, name: "하나은행", code: "HANA" },
+    { id: 6, name: "우리은행", code: "WOORI" },
+    { id: 7, name: "우체국", code: "EPOST" },
+    { id: 8, name: "카카오뱅크", code: "KAKAO" },
+    { id: 9, name: "토스뱅크", code: "TOSS" },
   ];
 
   const handleBooking = async () => {
     try {
       const payload = {
         phone: phoneNumber,
-        refundBank: selectedBank,
+        refundBank: selectedBank.code,
         refundAccount: accountNumber,
         refundHolder: accountHolder,
       };
@@ -136,7 +148,7 @@ export default function BuyTicket() {
                 {isOptionOpen && (
                   <div key="option-list">
                     <DropdownList>
-                      {backOptions.map((option) => (
+                      {bankOptions.map((option) => (
                         <DropdownItem
                           key={option.id}
                           onClick={() => handleSelectOption(option)}
