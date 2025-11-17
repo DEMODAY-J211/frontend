@@ -23,6 +23,10 @@ const ManageUser = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
 
     const {showId} = useParams();
+<<<<<<< HEAD
+    const [showTimeId] = useState(1); // 임시값
+=======
+>>>>>>> origin/main
   
 
 const [reservationData, setReservationData] = useState([]);
@@ -40,7 +44,7 @@ useEffect(() => {
   const data =[
     {
       reservationId: 101,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 1,
       reservationNumber: "10010010",
       name: "홍길동",
@@ -57,7 +61,7 @@ useEffect(() => {
     },
     {
       reservationId: 102,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 2,
       reservationNumber: "10010011",
       name: "김철수",
@@ -74,7 +78,7 @@ useEffect(() => {
     },
     {
       reservationId: 103,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 3,
       reservationNumber: "10010012",
       name: "이영희",
@@ -91,7 +95,7 @@ useEffect(() => {
     },
     {
       reservationId: 104,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 4,
       reservationNumber: "10010013",
       name: "박민수",
@@ -108,7 +112,7 @@ useEffect(() => {
     },
     {
       reservationId: 105,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 5,
       reservationNumber: "10010014",
       name: "정수진",
@@ -278,7 +282,11 @@ setShowChangeStatusModal(false);
 //         setError("");
     
 //         const response = await fetch(
+<<<<<<< HEAD
+//          `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/customers?showTimeId=${showTimeId}`,
+=======
 //          `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/customers`,
+>>>>>>> origin/main
 //           {
 //             method: "GET",
 //             headers: {
@@ -300,7 +308,11 @@ setShowChangeStatusModal(false);
 //         setUserlist(result.data ?? []);
 //         console.log(result.data);
 //       }catch(error){
+<<<<<<< HEAD
+//         console.error("Error fetching users:", error);
+=======
 //         console.error("Error fetching applied labors:", error);
+>>>>>>> origin/main
 //         setError(error.message);
 //       }
 //     };
@@ -308,6 +320,11 @@ setShowChangeStatusModal(false);
 
 
 //     useEffect(() => {
+<<<<<<< HEAD
+//   viewUsers();
+// }, []); // festivalId가 바뀌면 새로 호출
+
+=======
 //   const fetchData = async () => {
 //     setLoading(true);
 //     await viewUsers(); // ✅ 실제 API 호출
@@ -317,6 +334,7 @@ setShowChangeStatusModal(false);
 //   fetchData();
 // }, [userlist]); // festivalId가 바뀌면 새로 호출
 
+>>>>>>> origin/main
 // if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
 // if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
   return (

@@ -17,7 +17,7 @@ import defaultimg from "../../../assets/tikitta_defaultcard.png";
 
 const ManageShow = () => {
   const navigate = useNavigate();
-    const [posters, setPosters] = useState([]);
+    
 
   const menuItems = [
     {
@@ -46,16 +46,16 @@ const ManageShow = () => {
     },
   ];
 
-  // const posters = [
-  //   { title: "제11회 정기공연"},
-  //   { title: "제12회 정기공연"},
-  //   { title: "제13회 정기공연"},
-  //   { title: "제14회 정기공연"},
-  //   { title: "제15회 정기공연"},
-  //   { title: "제16회 정기공연"},
-  //   { title: "제16회 정기공연"},
-  //   { title: "제20회 정기공연"},
-  // ];
+  const posters = [
+    { title: "제11회 정기공연"},
+    { title: "제12회 정기공연"},
+    { title: "제13회 정기공연"},
+    { title: "제14회 정기공연"},
+    { title: "제15회 정기공연"},
+    { title: "제16회 정기공연"},
+    { title: "제16회 정기공연"},
+    { title: "제20회 정기공연"},
+  ];
 
   const [selectedIndex, setSelectedIndex] = useState(0); // ✅ 선택된 카드 인덱스 (기본 0)
   const [startIndex, setStartIndex] = useState(0); // 보여지는 첫 카드 인덱스
@@ -102,51 +102,51 @@ const ManageShow = () => {
   //api
 
   
+  // const [posters, setPosters] = useState([]);
+  // const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState("");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // const viewShows = async () => {
+  //   try {
+  //     setError("");
 
-  const viewShows = async () => {
-    try {
-      setError("");
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_API_URL}/manager/shows/list`,
+  //       {
+  //         method: "GET",
+  //         credentials: "include",
+  //         headers: {
+  //           // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  //           Accept: "application/json",
+  //           "Content-type": "application/json",
+  //         },
+  //       }
+  //     );
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/manager/shows/list`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            Accept: "application/json",
-            "Content-type": "application/json",
-          },
-        }
-      );
+  //     const result = await response.json();
+  //     console.log(result.data);
 
-      const result = await response.json();
-      console.log(result.data);
+  //     if (!response.ok || result.success !== true) {
+  //       throw new Error(result.message || "공연 목록 조회에 실패했습니다.");
+  //     }
 
-      if (!response.ok || result.success !== true) {
-        throw new Error(result.message || "공연 목록 조회에 실패했습니다.");
-      }
+  //     setPosters(result.data.published ?? []);
+  //     console.log(result.data);
+  //   } catch (error) {
+  //     console.error("Error fetching shows:", error);
+  //     setError(error.message);
+  //   }
+  // };
 
-      setPosters(result.data.published ?? []);
-      console.log(result.data);
-    } catch (error) {
-      console.error("Error fetching shows:", error);
-      setError(error.message);
-    }
-  };
+  // useEffect(() => {
+  //   viewShows(); // API 호출
+  //   if (posters.length > 0) {
+  //     setSelectedShow(posters[0]);  // 첫 번째 카드에 해당하는 공연 정보
+  //   }
+  // }, []); // 컴포넌트 마운트 시 한 번 호출
 
-  useEffect(() => {
-    viewShows(); // API 호출
-    if (posters.length > 0) {
-      setSelectedShow(posters[0]);  // 첫 번째 카드에 해당하는 공연 정보
-    }
-  }, []); // 컴포넌트 마운트 시 한 번 호출
-
-  if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
-  if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
+  // if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
+  // if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
 
   return (
     <MyShow>
