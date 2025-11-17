@@ -60,6 +60,11 @@ select {
   font-weight: 300;
 }
 
+textarea {
+  font-family: inherit;
+  font-weight: 300;
+}
+
 
 
 

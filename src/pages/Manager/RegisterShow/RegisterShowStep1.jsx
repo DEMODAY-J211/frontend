@@ -12,7 +12,7 @@ import { AiOutlineClose } from 'react-icons/ai'
 const RegisterShowStep1 = () => {
 
     const navigate = useNavigate();
-      const { addToast } = useToast();
+    const { addToast } = useToast();
   
 
     // 이미지 파일 저장
