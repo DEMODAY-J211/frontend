@@ -50,6 +50,22 @@ button {
 }
 
 
+input {
+  font-family: inherit;
+  font-weight: 300;
+}
+
+select {
+  font-family: inherit;
+  font-weight: 300;
+}
+
+textarea {
+  font-family: inherit;
+  font-weight: 300;
+}
+
+
 
 
 

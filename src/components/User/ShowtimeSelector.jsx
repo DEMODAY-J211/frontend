@@ -131,6 +131,7 @@ export default function ShowtimeSelector({
                         // payload용 객체 생성: 기존 option에 id 추가
                         const optionWithId = {
                           ...option, // 기존 이름, 가격 등 복사
+
                           ticketOptionId: idx + 1, // idx 기반으로 id 부여 (서버 요구에 맞춰 조정)
                         };
 

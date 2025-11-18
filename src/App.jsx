@@ -21,17 +21,23 @@ import HomeManager from "./pages/Manager/HomeManager";
 import ManageShow from "./pages/Manager/ManageShow/ManageShow";
 import ManageUser from "./pages/Manager/ManageShow/ManageUser";
 import QRManager from "./pages/Manager/QRManager";
+import RegisterShow from "./pages/Manager/RegisterShow";
+import RegisteredVenues from "./pages/Manager/RegisteredVenues";
 import BuyTicket from "./pages/User/BuyTicket";
 import Landing from "./pages/Landing";
 
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
 import ViewEntryStatus from "./pages/Manager/ManageShow/ViewEntryStatus";
-import RegisterShowStep3 from "./pages/Manager/ManageShow/RegisterShowStep3";
+import RegisterShowStep3 from "./pages/Manager/RegisterShow/RegisterShowStep3";
 import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
 import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
+import RegisterShowStep1 from "./pages/Manager/RegisterShow/RegisterShowStep1";
+import RegisterShowStep4 from "./pages/Manager/RegisterShow/RegisterShowStep4";
+import RegisterShowStep2 from "./pages/Manager/RegisterShow/RegisterShowStep2";
+import RegisterShowStep5 from "./pages/Manager/RegisterShow/RegisterShowStep5";
 
 const App = () => {
   const location = useLocation();
@@ -73,8 +79,15 @@ const App = () => {
             <Route path="/homemanager" element={<HomeManager />} />
             <Route path="/manageshow" element={<ManageShow />} />
             <Route path="/manageshow/manageuser/:showId" element={<ManageUser />} />
-            <Route path="/qrmanager" element={<QRManager />} />
+            <Route path="/qrmanager/:showId" element={<QRManager />} />
+            <Route path="/registershow" element={<RegisterShow />} />
+            
             <Route path="/landing" element={<Landing />} />
+            <Route path="/register-show/step1" element={<RegisterShowStep1 />} />
+            <Route path="/register-show/step2" element={<RegisterShowStep2 />} />
+            <Route path="/register-show/step4" element={<RegisterShowStep4 />} />
+            <Route path="/register-show/step5" element={<RegisterShowStep5 />} />
+
 
             {/* 주현수 */}
             <Route
@@ -90,6 +103,7 @@ const App = () => {
             <Route path="/register-venue/step2" element={<RegisterVenue2 />} />
             <Route path="/register-venue/step3" element={<RegisterVenue3 />} />
             <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
+            <Route path="/registeredvenues" element={<RegisteredVenues />} />
           </Routes>
         </ToastProvider>
       </AuthProvider>

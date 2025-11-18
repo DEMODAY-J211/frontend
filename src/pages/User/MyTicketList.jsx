@@ -20,10 +20,7 @@ export default function MyTicketList() {
   const fetchShowList = async () => {
     try {
       // const token = localStorage.getItem("accessToken");
-      // const response = await fetch(`${serverUrl}/user/${managerId}/myshow`, {
-      //   credentials: "include",
-      //   header: { "Content-Type": "application/json" },
-      // });
+
       const response = await fetch(`${serverUrl}/user/${managerId}/myshow`, {
         method: "GET",
         credentials: "include",
@@ -49,11 +46,13 @@ export default function MyTicketList() {
         throw new Error(`HTTP error: ${response.status}`);
       }
 
+
       const data = await response.json();
       if (data.success) {
         setReservationlist(data.data);
         console.log("response", response);
         console.log("response의 data", data);
+
       }
     } catch (error) {
       console.error("예매한 공연 조회 실패:", error);
