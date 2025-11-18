@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { RiArrowRightSLine, RiInformationLine } from 'react-icons/ri';
@@ -15,14 +15,63 @@ const RegisterShowStep3 = () => {
   const { addToast } = useToast();
 
   // 상태 관리
-  const [selectedVenues, setSelectedVenues] = useState(['000 소극장']); // 다중 선택
+  const [selectedVenues, setSelectedVenues] = useState([]); // 다중 선택
   const [selectedMethod, setSelectedMethod] = useState('스탠딩석'); // 단일 선택
   const [quantity, setQuantity] = useState(100);
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
   const [excludedSeats, setExcludedSeats] = useState([]); // 제외된 좌석
 
-  // 공연 장소 더미 데이터
-  const venues = ['000 소극장', '001 소극장', '002 소극장', '003 소극장'];
+  // 공연 장소 목록 (API에서 가져옴)
+  const [venues, setVenues] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 페이지 로드 시 즐겨찾기 공연장 목록 불러오기
+  useEffect(() => {
+    const fetchFavoriteVenues = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/shows/venues?favorite=true`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Favorite venues:', result);
+
+          if (result.success && result.data && Array.isArray(result.data)) {
+            // API 응답에서 공연장 목록 설정
+            setVenues(result.data);
+          } else {
+            setVenues([]);
+            addToast('즐겨찾기한 공연장이 없습니다.', 'info');
+          }
+        } else {
+          console.error('Failed to fetch venues:', response.status);
+          addToast('공연장 목록을 불러오는데 실패했습니다.', 'error');
+          // API 실패 시 더미 데이터 사용
+          setVenues([
+            { id: 1, name: '올림픽공원 KSPO DOME' },
+            { id: 2, name: '잠실실내체육관' },
+            { id: 3, name: '고척스카이돔' },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching favorite venues:', error);
+        addToast('서버와의 통신 중 오류가 발생했습니다.', 'error');
+        // 네트워크 오류 시 더미 데이터 사용
+        setVenues([
+          { id: 1, name: '올림픽공원 KSPO DOME' },
+          { id: 2, name: '잠실실내체육관' },
+          { id: 3, name: '고척스카이돔' },
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFavoriteVenues();
+  }, []);
 
   // 좌석 판매 방법 옵션
   const salesMethods = ['스탠딩석', '주최 측 배정', '예매자 선택', '자동 배정'];
@@ -30,8 +79,8 @@ const RegisterShowStep3 = () => {
   // 공연 장소 선택 핸들러 (다중 선택)
   const handleVenueToggle = (venue) => {
     setSelectedVenues((prev) =>
-      prev.includes(venue)
-        ? prev.filter((v) => v !== venue)
+      prev.some((v) => v.id === venue.id)
+        ? prev.filter((v) => v.id !== venue.id)
         : [...prev, venue]
     );
   };
@@ -42,6 +91,11 @@ const RegisterShowStep3 = () => {
 
     // 예매자 선택 또는 자동 배정인 경우 모달 열기
     if (method === '예매자 선택' || method === '자동 배정') {
+      // 공연장이 선택되어 있는지 확인
+      if (selectedVenues.length === 0) {
+        addToast('먼저 공연 장소를 선택해주세요!', 'error');
+        return;
+      }
       setIsModalOpen(true);
     }
   };
@@ -104,16 +158,16 @@ const RegisterShowStep3 = () => {
               <ButtonGroup>
                 {venues.map((venue) => (
                   <SelectButton
-                    key={venue}
-                    active={selectedVenues.includes(venue)}
+                    key={venue.id}
+                    active={selectedVenues.some((v) => v.id === venue.id)}
                     onClick={() => handleVenueToggle(venue)}
                   >
-                    {selectedVenues.includes(venue) ? (
+                    {selectedVenues.some((v) => v.id === venue.id) ? (
                       <CheckboxIconSelected />
                     ) : (
                       <CheckboxIcon />
                     )}
-                    {venue}
+                    {venue.name || venue}
                   </SelectButton>
                 ))}
               </ButtonGroup>
@@ -179,6 +233,7 @@ const RegisterShowStep3 = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveSeats}
         salesMethod={selectedMethod}
+        locationId={selectedVenues[0]?.id || null}
       />
     </>
   );

@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { AiOutlineClose, AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
 import { RiInformationLine } from 'react-icons/ri';
 import { FaMousePointer } from 'react-icons/fa';
 import { BsFillEraserFill } from 'react-icons/bs';
 import { BiUndo, BiRedo, BiSolidSave } from 'react-icons/bi';
+import { useToast } from '../Toast/UseToast';
 
-const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod }) => {
+const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }) => {
+  const { addToast } = useToast();
   // 탭 상태 관리 (예매자 선택: exclude, 자동 배정: vip)
   const [activeTab, setActiveTab] = useState(salesMethod === '자동 배정' ? 'vip' : 'exclude');
   const [excludedSeats, setExcludedSeats] = useState(new Set()); // 판매 제외 좌석
@@ -18,6 +20,49 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod }) => {
   const [excludeHistoryIndex, setExcludeHistoryIndex] = useState(0);
   const [vipHistoryIndex, setVipHistoryIndex] = useState(0);
 
+  // API에서 가져온 좌석표 데이터
+  const [seatMapData, setSeatMapData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 모달이 열릴 때 좌석표 API 호출
+  useEffect(() => {
+    const fetchSeatMap = async () => {
+      if (!isOpen || !locationId) return;
+
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/manager/shows/${locationId}/seatmap/`,
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Seat map data:', result);
+
+          if (result.success && result.data) {
+            setSeatMapData(result.data);
+          } else {
+            addToast('좌석표를 불러오는데 실패했습니다.', 'error');
+          }
+        } else {
+          console.error('Failed to fetch seat map:', response.status);
+          addToast('좌석표를 불러오는데 실패했습니다.', 'error');
+        }
+      } catch (error) {
+        console.error('Error fetching seat map:', error);
+        addToast('서버와의 통신 중 오류가 발생했습니다.', 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSeatMap();
+  }, [isOpen, locationId, addToast]);
+
   // 현재 탭에 따른 좌석 상태
   const selectedSeats = activeTab === 'exclude' ? excludedSeats : vipSeats;
   const setSelectedSeats = activeTab === 'exclude' ? setExcludedSeats : setVipSeats;
@@ -26,8 +71,8 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod }) => {
   const historyIndex = activeTab === 'exclude' ? excludeHistoryIndex : vipHistoryIndex;
   const setHistoryIndex = activeTab === 'exclude' ? setExcludeHistoryIndex : setVipHistoryIndex;
 
-  // 좌석 데이터 생성 (5행)
-  const seatRows = [
+  // 좌석 데이터 생성 (API 데이터 또는 기본값)
+  const seatRows = seatMapData?.seat_map || [
     { id: 'A', seats: 10 }, // 10개 좌석
     { id: 'B', seats: 10 }, // 10개 좌석
     { id: 'C', seats: 10 }, // 10개 좌석
@@ -145,25 +190,80 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod }) => {
 
           {/* 좌석표 영역 */}
           <SeatingChartArea>
-            {/* 좌석 오버레이 */}
-            <SeatOverlay style={{ transform: `scale(${zoomLevel})` }}>
-              {seatRows.map((row) => (
-                <SeatRow key={row.id} align={row.seats === 9 ? 'end' : 'center'}>
-                  {Array.from({ length: row.seats }, (_, i) => {
-                    const seatId = `${row.id}${i + 1}`;
-                    const isSelected = selectedSeats.has(seatId);
+            {isLoading ? (
+              <LoadingMessage>좌석표를 불러오는 중...</LoadingMessage>
+            ) : seatMapData ? (
+              <SeatGrid>
+                {seatMapData.seat_map.map((row, rowIndex) =>
+                  row.map((seat, colIndex) => {
+                    const seatId = typeof seat === 'string' ? seat : null;
+                    const isEmpty = seat === 0;
+                    const isStage = seat === -1;
+                    const isSelected = seatId && selectedSeats.has(seatId);
+
+                    if (isEmpty) {
+                      return (
+                        <EmptySeat
+                          key={`${rowIndex}-${colIndex}`}
+                          style={{
+                            gridRow: rowIndex + 1,
+                            gridColumn: colIndex + 1,
+                          }}
+                        />
+                      );
+                    }
+
+                    if (isStage) {
+                      return (
+                        <StageSeat
+                          key={`${rowIndex}-${colIndex}`}
+                          style={{
+                            gridRow: rowIndex + 1,
+                            gridColumn: colIndex + 1,
+                          }}
+                        >
+                          무대
+                        </StageSeat>
+                      );
+                    }
+
                     return (
                       <SeatCell
-                        key={seatId}
+                        key={seatId || `${rowIndex}-${colIndex}`}
                         selected={isSelected}
-                        onClick={() => handleSeatClick(seatId)}
-                        style={{ cursor: activeTool === 'drag' ? 'grab' : 'pointer' }}
-                      />
+                        onClick={() => seatId && handleSeatClick(seatId)}
+                        style={{
+                          gridRow: rowIndex + 1,
+                          gridColumn: colIndex + 1,
+                          cursor: activeTool === 'drag' ? 'grab' : 'pointer',
+                        }}
+                      >
+                        {seatId}
+                      </SeatCell>
                     );
-                  })}
-                </SeatRow>
-              ))}
-            </SeatOverlay>
+                  })
+                )}
+              </SeatGrid>
+            ) : (
+              <SeatOverlay style={{ transform: `scale(${zoomLevel})` }}>
+                {seatRows.map((row) => (
+                  <SeatRow key={row.id} align={row.seats === 9 ? 'end' : 'center'}>
+                    {Array.from({ length: row.seats }, (_, i) => {
+                      const seatId = `${row.id}${i + 1}`;
+                      const isSelected = selectedSeats.has(seatId);
+                      return (
+                        <SeatCell
+                          key={seatId}
+                          selected={isSelected}
+                          onClick={() => handleSeatClick(seatId)}
+                          style={{ cursor: activeTool === 'drag' ? 'grab' : 'pointer' }}
+                        />
+                      );
+                    })}
+                  </SeatRow>
+                ))}
+              </SeatOverlay>
+            )}
 
             {/* 확대/축소 컨트롤 */}
             <ZoomControl>
@@ -350,6 +450,18 @@ const SeatOverlay = styled.div`
   transition: transform 0.2s ease;
 `;
 
+const SeatGrid = styled.div`
+  position: absolute;
+  left: 15px;
+  top: 41px;
+  width: calc(100% - 30px);
+  height: calc(100% - 60px);
+  display: grid;
+  gap: 2px;
+  padding: 20px;
+  overflow: auto;
+`;
+
 const SeatRow = styled.div`
   display: flex;
   justify-content: ${(props) => props.align || 'center'};
@@ -358,18 +470,49 @@ const SeatRow = styled.div`
 `;
 
 const SeatCell = styled.div`
-  width: 22px;
-  height: 16px;
+  width: 28px;
+  height: 20px;
   background: ${(props) => (props.selected ? '#FC2847' : '#9E5656')};
   border: 0.5px solid #000000;
   cursor: pointer;
   transition: all 0.2s ease;
   opacity: ${(props) => (props.selected ? 1 : 0.5)};
+  font-size: 9px;
+  font-weight: 500;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     opacity: 0.8;
     transform: scale(1.1);
   }
+`;
+
+const EmptySeat = styled.div`
+  width: 28px;
+  height: 20px;
+  background: transparent;
+`;
+
+const StageSeat = styled.div`
+  width: 28px;
+  height: 20px;
+  background: #333333;
+  border: 0.5px solid #000000;
+  font-size: 8px;
+  font-weight: 500;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const LoadingMessage = styled.div`
+  font-size: 20px;
+  font-weight: 500;
+  color: #333333;
 `;
 
 const ZoomControl = styled.div`
