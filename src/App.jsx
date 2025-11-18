@@ -103,7 +103,7 @@ const App = () => {
               element={<ProtectedRoute element={MobileTicket} />}
             />
             <Route
-              path=":managerId/selectseat/:showtimeId"
+              path=":managerId/selectseat/:showId/:showtimeId"
               element={<ProtectedRoute element={SelectSeat} />}
             />
 

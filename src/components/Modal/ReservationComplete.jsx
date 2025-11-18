@@ -43,7 +43,7 @@ export default function ReservationComplete({ onClose }) {
   // console.log(resData);
   const handleConfirm = async () => {
     const response = await fetch(
-      `${serverUrl}/user/${managerId}/booking/confirm`,
+      `/${serverUrl}/user/${managerId}/booking/confirm`,
       {
         method: "POST",
         credentials: "include",

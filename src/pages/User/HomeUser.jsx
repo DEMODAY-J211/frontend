@@ -28,6 +28,10 @@ export default function HomeUser() {
   }, [managerId]);
 
   useEffect(() => {
+    console.log("shows :", shows);
+  }, [shows]);
+
+  useEffect(() => {
     const jsessionId = getCookie("JSESSIONID");
     if (jsessionId) {
       setIsLoggedIn(true);
@@ -187,7 +191,7 @@ export default function HomeUser() {
               </ShowItemSlider>
               <Buyticketbtn
                 reservable={
-                  !isLoggedIn || (isLoggedIn && currentShow.isReservable)
+                  !isLoggedIn || (isLoggedIn && currentShow.reservable)
                 }
                 onClick={handleBuyTicket}
               >
