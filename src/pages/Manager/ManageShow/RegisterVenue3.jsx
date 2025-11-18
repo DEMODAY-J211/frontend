@@ -294,7 +294,7 @@ const RegisterVenue3 = () => {
   };
 
   // 등록하기
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // 좌석 라벨 검증
     const invalidSeats = labeledSeats.filter((seat) => {
       if (seat.type !== 'seat') return false; // 무대 등은 제외
@@ -371,41 +371,58 @@ const RegisterVenue3 = () => {
       // type이 없거나 다른 경우는 0 (빈 공간)으로 유지
     });
 
-    // JSON 파일 생성 및 다운로드
-    const venueData = {
+    // 1단계에서 저장한 공연장 정보 불러오기
+    const venue1Data = JSON.parse(localStorage.getItem('registerVenue1') || '{}');
+    const location = venue1Data.venueName || '공연장 이름 미입력';
+
+    // API 요청 데이터 준비
+    const requestData = {
+      location: location,
+      layout_width: maxCol + 1,
+      layout_height: maxRow + 1,
       seat_map: seatMap,
       seat_data: seatData,
     };
 
-    const jsonString = JSON.stringify(venueData, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `venue_layout_${Date.now()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+      // API 호출
+      const response = await fetch('/manager/venue/seatmap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
 
-    // localStorage에도 저장
-    const labelingData = {
-      rowLabeling,
-      sectionLabeling,
-      rowOrder,
-      rowStart,
-      sections,
-      labeledSeats,
-      venueData,
-    };
-    localStorage.setItem('registerVenue3', JSON.stringify(labelingData));
+      const result = await response.json();
 
-    addToast('좌석 배치 정보가 JSON 파일로 저장되었습니다!', 'success');
+      if (response.ok && result.success) {
+        // localStorage에 저장
+        const labelingData = {
+          rowLabeling,
+          sectionLabeling,
+          rowOrder,
+          rowStart,
+          sections,
+          labeledSeats,
+          venueData: requestData,
+        };
+        localStorage.setItem('registerVenue3', JSON.stringify(labelingData));
 
-    // 홈화면으로 이동
-    setTimeout(() => {
-      navigate('/homemanager');
-    }, 1000);
+        addToast('좌석 배치 정보가 성공적으로 등록되었습니다!', 'success');
+
+        // 홈화면으로 이동
+        setTimeout(() => {
+          navigate('/homemanager');
+        }, 1000);
+      } else {
+        // 에러 처리
+        addToast(result.message || '좌석 배치 등록에 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      console.error('API 요청 오류:', error);
+      addToast('서버와의 통신 중 오류가 발생했습니다.', 'error');
+    }
   };
 
   return (

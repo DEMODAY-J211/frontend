@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import React from "react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import { ToastProvider } from "./components/Toast/ToastProvider";
 
 //여기서부터 자기 이름 밑으로 import 하기!!
 // 예시: import Login from './pages/Login.jsx';
 
 //오서현
-import { AuthProvider } from "./pages/Auth/AuthContext";
+import { AuthProvider, useAuth } from "./pages/Auth/AuthContext";
 import Login from "./pages/Login";
 import HomeUser from "./pages/User/HomeUser";
 import ViewShowDetail from "./pages/User/ViewShowDetail";
@@ -38,45 +38,66 @@ import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
 import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
+
+// Protected Route 컴포넌트
+const ProtectedRoute = ({ element: Element, ...rest }) => {
+  const { isLoggedIn, isInitialized } = useAuth();
+
+  // AuthContext 초기화 대기 중
+  if (!isInitialized) {
+    return null; // 또는 로딩 스피너
+  }
+
+  return isLoggedIn ? (
+    <Element {...rest} />
+  ) : (
+    <Navigate to="/login" replace />
+  );
+};
 import RegisteredVenues from "./pages/Manager/RegisteredVenues";
 
 
 
 const App = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.log("=== 로그인 상태 확인 ===");
-    console.log("현재 경로:", location.pathname);
-
-    console.log("=======================");
-  }, [location.pathname]);
-
   return (
     <div>
       <AuthProvider>
         <ToastProvider>
           <Routes>
-            {/* 예시: <Route path='/mypage/festival' element={<MyPage/>}/> */}
-            {/* 오서현 */}
+            {/* 루트 경로를 로그인으로 리다이렉트 */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+
+            {/* 비보호 라우트: 로그인, 카카오 콜백, 랜딩 */}
             <Route path="/login" element={<Login />} />
-            <Route path="/homeuser" element={<HomeUser />} />
+            <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
+            <Route path="/landing" element={<Landing />} />
+
+            {/* 보호된 라우트: User */}
+            <Route path="/homeuser" element={<ProtectedRoute element={HomeUser} />} />
             <Route
               path="/viewshowdetail/:showId"
-              element={<ViewShowDetail />}
+              element={<ProtectedRoute element={ViewShowDetail} />}
             />
-            <Route path="/payment" element={<BuyTicket />} />
-            <Route path="/viewteaminfo" element={<ViewTeamInfo />} />
-            <Route path="/myticketlist" element={<MyTicketList />} />
+            <Route path="/payment" element={<ProtectedRoute element={BuyTicket} />} />
+            <Route path="/viewteaminfo" element={<ProtectedRoute element={ViewTeamInfo} />} />
+            <Route path="/myticketlist" element={<ProtectedRoute element={MyTicketList} />} />
             <Route
               path="/checkticket/:reservationId"
-              element={<CheckTicket />}
+              element={<ProtectedRoute element={CheckTicket} />}
             />
             <Route
               path="/mobileticket/:reservationId"
-              element={<MobileTicket />}
+              element={<ProtectedRoute element={MobileTicket} />}
             />
+            <Route path="/selectseat/:showtimeId" element={<ProtectedRoute element={SelectSeat} />} />
 
+            {/* 보호된 라우트: Manager */}
+            <Route path='/navbarmanager' element={<ProtectedRoute element={NavbarManager} />}/>
+            <Route path="/homemanager" element={<ProtectedRoute element={HomeManager} />} />
+            <Route path="/manageshow" element={<ProtectedRoute element={ManageShow} />} />
+            <Route path="/manageshow/manageuser/:showId" element={<ProtectedRoute element={ManageUser} />} />
+            <Route path="/qrmanager/:showId" element={<ProtectedRoute element={QRManager} />} />
+            <Route path="/registershow" element={<ProtectedRoute element={RegisterShow} />} />
             {/* 이예나 */}
             <Route path='/navbarmanager' element={<NavbarManager/>}/>
             <Route path="/homemanager" element={<HomeManager />} />
@@ -96,18 +117,20 @@ const App = () => {
             {/* 주현수 */}
             <Route
               path="/manageshow/entrystatus/:showId"
-              element={<ViewEntryStatus />}
+              element={<ProtectedRoute element={ViewEntryStatus} />}
             />
-            <Route path="/selectseat/:showtimeId" element={<SelectSeat />} />
+            <Route path="/register-show/step1" element={<ProtectedRoute element={RegisterShowStep1} />} />
+            <Route path="/register-show/step2" element={<ProtectedRoute element={RegisterShowStep2} />} />
             <Route
               path="/register-show/step3"
-              element={<RegisterShowStep3 />}
+              element={<ProtectedRoute element={RegisterShowStep3} />}
             />
-            <Route path="/register-venue/step1" element={<RegisterVenue1 />} />
-            <Route path="/register-venue/step2" element={<RegisterVenue2 />} />
-            <Route path="/register-venue/step3" element={<RegisterVenue3 />} />
-            <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
-            <Route path="/registeredvenues" element={<RegisteredVenues />} />
+            <Route path="/register-show/step4" element={<ProtectedRoute element={RegisterShowStep4} />} />
+            <Route path="/register-show/step5" element={<ProtectedRoute element={RegisterShowStep5} />} />
+            <Route path="/register-venue/step1" element={<ProtectedRoute element={RegisterVenue1} />} />
+            <Route path="/register-venue/step2" element={<ProtectedRoute element={RegisterVenue2} />} />
+            <Route path="/register-venue/step3" element={<ProtectedRoute element={RegisterVenue3} />} />
+            <Route path="/registeredvenues" element={<ProtectedRoute element={RegisteredVenues} />} />
           </Routes>
         </ToastProvider>
       </AuthProvider>

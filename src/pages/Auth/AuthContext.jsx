@@ -5,30 +5,50 @@ export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null); // 필요시 사용자 정보도 저장
+  const [user, setUser] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // ✅ 홈페이지나 새로고침 시 세션 쿠키 확인
+  // ✅ 로그인 상태 확인: URL 파라미터 또는 localStorage
   useEffect(() => {
-    const jsessionId = getCookie("JSESSIONID");
-    if (jsessionId) {
+    console.log("=== AuthContext 초기화 ===");
+    console.log("🍪 모든 쿠키:", document.cookie);
+    console.log("📍 현재 URL:", window.location.href);
+
+    // URL에서 login=success 파라미터 확인
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginSuccess = urlParams.get('login');
+    console.log("🔍 login 파라미터:", loginSuccess);
+
+    if (loginSuccess === 'success') {
+      console.log("✅ 카카오 로그인 성공 - 로그인 상태로 설정");
       setIsLoggedIn(true);
-      // 필요하면 여기서 사용자 정보 fetch
+      localStorage.setItem('isLoggedIn', 'true');
+
+      // URL에서 파라미터 제거 (깔끔하게)
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+      // localStorage에서 로그인 상태 확인
+      const savedLoginState = localStorage.getItem('isLoggedIn');
+      console.log("💾 localStorage isLoggedIn:", savedLoginState);
+
+      if (savedLoginState === 'true') {
+        console.log("✅ 저장된 로그인 상태 확인");
+        setIsLoggedIn(true);
+      } else {
+        console.log("❌ 로그아웃 상태");
+        setIsLoggedIn(false);
+      }
     }
+
+    // 초기화 완료
+    setIsInitialized(true);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser }}>
+    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser, isInitialized }}>
       {children}
     </AuthContext.Provider>
   );
-}
-
-// 쿠키 읽기 유틸 함수
-function getCookie(name) {
-  const matches = document.cookie.match(
-    new RegExp("(^| )" + name + "=([^;]+)")
-  );
-  return matches ? matches[2] : null;
 }
 
 export const useAuth = () => useContext(AuthContext);
