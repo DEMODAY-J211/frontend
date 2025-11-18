@@ -13,18 +13,15 @@ const RegisterVenue1 = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  // 선택된 공연장 정보 불러오기
-  const selectedVenue = JSON.parse(localStorage.getItem('selectedVenue') || 'null');
-
   // 상태 관리
-  const [venueName, setVenueName] = useState(selectedVenue?.name || '');
-  const [address, setAddress] = useState(selectedVenue?.address || '');
+  const [venueName, setVenueName] = useState('');
+  const [address, setAddress] = useState('');
   const [detailAddress, setDetailAddress] = useState('');
   const [isStanding, setIsStanding] = useState(false);
   const [standingCapacity, setStandingCapacity] = useState('');
-  const [isSeat, setIsSeat] = useState(selectedVenue ? true : false);
-  const [floorCount, setFloorCount] = useState(selectedVenue?.floorCount?.toString() || '');
-  const [seatCount, setSeatCount] = useState(selectedVenue?.seatCount?.toString() || '');
+  const [isSeat, setIsSeat] = useState(false);
+  const [floorCount, setFloorCount] = useState('');
+  const [seatCount, setSeatCount] = useState('');
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
@@ -88,31 +85,98 @@ const RegisterVenue1 = () => {
   };
 
   // 다음 단계로
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateForm()) return;
 
-    const venueData = {
-      venueName,
-      address,
-      detailAddress,
-      isStanding,
-      standingCapacity,
-      isSeat,
-      floorCount,
-      seatCount,
-      uploadedImage,
+    // FormData 생성 (multipart/form-data)
+    const formData = new FormData();
+
+    // JSON 데이터를 venueRegisterRequest로 Blob 형태로 추가
+    const venueRegisterRequest = {
+      locationName: venueName,
+      locationAddress: address,
+      locationAddressDetail: detailAddress || '',
+      locationStandingCount: isStanding ? Number(standingCapacity) : 0,
+      locationSeatFloor: isSeat ? Number(floorCount) : 1,
+      locationSeatCount: isSeat ? Number(seatCount) : 0,
     };
 
-    localStorage.setItem('registerVenue1', JSON.stringify(venueData));
+    formData.append('venueRegisterRequest', new Blob([JSON.stringify(venueRegisterRequest)], { type: 'application/json' }));
 
-    // 스탠딩석만 선택한 경우 2,3단계 건너뛰고 바로 등록 완료
-    if (isStanding && !isSeat) {
-      // TODO: API 호출하여 공연장 등록 완료
-      addToast('공연장이 등록되었습니다!', 'success');
-      navigate('/homemanager');
-    } else {
-      // 좌석이 있는 경우 2단계로 이동
-      navigate('/register-venue/step2');
+    // 이미지 파일 추가 (있는 경우)
+    if (uploadedImage) {
+      formData.append('locationPicture', uploadedImage);
+    }
+
+    console.log('=== 백엔드로 보내는 데이터 ===');
+    console.log('Request Body (FormData):');
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof Blob) {
+        console.log(`  ${key}:`, value instanceof File ? `File(${value.name}, ${value.size} bytes, ${value.type})` : `Blob(${value.size} bytes)`);
+      } else {
+        console.log(`  ${key}:`, value);
+      }
+    }
+
+    // venueRegisterRequest JSON 내용 출력
+    console.log('venueRegisterRequest:', JSON.stringify(venueRegisterRequest, null, 2));
+    console.log('locationPicture:', uploadedImage ? `File: ${uploadedImage.name}` : 'null');
+
+    try {
+      // 세션 기반 로그인: 쿠키로 인증
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/venue/register`, {
+        method: 'POST',
+        credentials: 'include', // 세션 쿠키 자동 전송
+        body: formData,
+      });
+
+      console.log('Response Status:', response.status);
+      console.log('Response Content-Type:', response.headers.get('content-type'));
+
+      // 응답이 JSON인지 확인
+      const contentType = response.headers.get('content-type');
+      let result;
+
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        // JSON이 아닌 경우 텍스트로 읽기
+        const text = await response.text();
+        console.log('Response Text:', text);
+        result = { success: response.ok, message: text };
+      }
+
+      console.log('Parsed Result:', result);
+
+      if (response.ok) {
+        // localStorage에 저장 (2,3단계에서 필요할 수 있음)
+        const venueData = {
+          venueName,
+          address,
+          detailAddress,
+          isStanding,
+          standingCapacity,
+          isSeat,
+          floorCount,
+          seatCount,
+        };
+        localStorage.setItem('registerVenue1', JSON.stringify(venueData));
+
+        addToast('공연장이 등록되었습니다!', 'success');
+
+        // 스탠딩석만 선택한 경우 홈으로, 좌석이 있는 경우 2단계로
+        if (isStanding && !isSeat) {
+          setTimeout(() => navigate('/homemanager'), 1000);
+        } else {
+          setTimeout(() => navigate('/register-venue/step2'), 1000);
+        }
+      } else {
+        console.error('API 에러 응답:', result);
+        addToast(result.message || '공연장 등록에 실패했습니다.', 'error');
+      }
+    } catch (error) {
+      console.error('API 요청 오류:', error);
+      addToast('서버와의 통신 중 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -130,11 +194,11 @@ const RegisterVenue1 = () => {
           <HeaderRow>
             <Title>내 공연장 등록하기</Title>
             <ProgressSteps>
-              <StepItem active={true}>① 공연장 기본 정보 입력</StepItem>
+              <StepItem $active={true}>① 공연장 기본 정보 입력</StepItem>
               <ArrowIcon />
-              <StepItem active={false} disabled>② 좌석배치표 업로드 및 수정</StepItem>
+              <StepItem $active={false} disabled>② 좌석배치표 업로드 및 수정</StepItem>
               <ArrowIcon />
-              <StepItem active={false} disabled>③ 좌석 라벨링</StepItem>
+              <StepItem $active={false} disabled>③ 좌석 라벨링</StepItem>
             </ProgressSteps>
           </HeaderRow>
 
@@ -142,7 +206,7 @@ const RegisterVenue1 = () => {
           <ContentArea>
             {/* 좌석표 업로드 */}
             <UploadSection>
-              <UploadBox onClick={() => document.getElementById('fileInput').click()} hasImage={!!imagePreview}>
+              <UploadBox onClick={() => document.getElementById('fileInput').click()}>
                 {imagePreview ? (
                   <UploadedImage src={imagePreview} alt="업로드된 좌석표" />
                 ) : (
@@ -243,7 +307,7 @@ const RegisterVenue1 = () => {
                     type="number"
                     value={floorCount}
                     onChange={(e) => setFloorCount(e.target.value)}
-                    disabled={!isSeat || !!selectedVenue}
+                    disabled={!isSeat}
                     placeholder="0"
                     min="1"
                   />
@@ -255,7 +319,7 @@ const RegisterVenue1 = () => {
                     type="number"
                     value={seatCount}
                     onChange={(e) => setSeatCount(e.target.value)}
-                    disabled={!isSeat || !!selectedVenue}
+                    disabled={!isSeat}
                     placeholder="0"
                     min="1"
                   />
@@ -351,8 +415,8 @@ const StepItem = styled.div`
   font-weight: 500;
   font-size: 20px;
   padding: 10px;
-  color: ${(props) => (props.active ? '#FC2847' : '#737373')};
-  border-bottom: ${(props) => (props.active ? '2px solid #FC2847' : 'none')};
+  color: ${(props) => (props.$active ? '#FC2847' : '#737373')};
+  border-bottom: ${(props) => (props.$active ? '2px solid #FC2847' : 'none')};
   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
   opacity: ${(props) => (props.disabled ? 0.5 : 1)};
   pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};

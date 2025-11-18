@@ -51,7 +51,7 @@ const handleSelectRole = async (selectedRole) => {
       if (selectedRole === "USER") {
         navigate("/homeuser");
       } else if (selectedRole === "MANAGER") {
-        navigate("/homemanager");
+        navigate("/write-teaminfo");
       }
     } else if (contentType && contentType.includes("text/plain")) {
       // 응답이 텍스트 형식일 경우 처리

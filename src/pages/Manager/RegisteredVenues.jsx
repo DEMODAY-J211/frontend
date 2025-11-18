@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom'
 import { BiSearch } from 'react-icons/bi'
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai'
 import NavbarManager from '../../components/Navbar/NavbarManager'
+import { useToast } from '../../components/Toast/UseToast'
 
 const RegisteredVenues = () => {
   const navigate = useNavigate()
+  const { addToast } = useToast()
   const [venues, setVenues] = useState([])
   const [selectedVenue, setSelectedVenue] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -15,14 +17,16 @@ const RegisteredVenues = () => {
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await fetch('/manager/venue/view', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/venue/view`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include', // 쿠키 포함
         })
 
         const result = await response.json()
+        
 
         if (response.ok && result.success) {
           // API 데이터를 컴포넌트에서 사용하는 형식으로 변환
@@ -37,6 +41,7 @@ const RegisteredVenues = () => {
             floorCount: venue.locationFloor,
             seatCount: venue.locationSeatTotalCount,
           }))
+          console.log(transformedVenues);
 
           setVenues(transformedVenues)
           // 첫 번째 공연장을 기본 선택
@@ -56,18 +61,47 @@ const RegisteredVenues = () => {
     fetchVenues()
   }, [])
 
-  const handleToggleFavorite = (venueId) => {
-    setVenues(prev =>
-      prev.map(venue =>
-        venue.id === venueId
-          ? { ...venue, isFavorite: !venue.isFavorite }
-          : venue
+  const handleToggleFavorite = async (venueId) => {
+    try {
+      // API 호출 (GET 메소드)
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/venue/like?id=${venueId}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
       )
-    )
 
-    // 선택된 공연장의 즐겨찾기 상태도 업데이트
-    if (selectedVenue?.id === venueId) {
-      setSelectedVenue(prev => ({ ...prev, isFavorite: !prev.isFavorite }))
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        // UI 업데이트
+        setVenues(prev =>
+          prev.map(venue =>
+            venue.id === venueId
+              ? { ...venue, isFavorite: !venue.isFavorite }
+              : venue
+          )
+        )
+
+        // 선택된 공연장의 즐겨찾기 상태도 업데이트
+        if (selectedVenue?.id === venueId) {
+          setSelectedVenue(prev => ({ ...prev, isFavorite: !prev.isFavorite }))
+        }
+
+        // 성공 메시지
+        const venue = venues.find(v => v.id === venueId)
+        const message = venue?.isFavorite
+          ? '즐겨찾기가 해제되었습니다.'
+          : '즐겨찾기에 추가되었습니다.'
+        addToast(message, 'success')
+      } else {
+        console.error('좋아요 API 실패:', result.message)
+        addToast('좋아요 처리에 실패했습니다.', 'error')
+      }
+    } catch (error) {
+      console.error('좋아요 API 오류:', error)
+      addToast('서버와의 통신 중 오류가 발생했습니다.', 'error')
     }
   }
 
@@ -130,7 +164,7 @@ const RegisteredVenues = () => {
                   <VenueCard
                     key={venue.id}
                     onClick={() => handleSelectVenue(venue)}
-                    isSelected={selectedVenue?.id === venue.id}
+                    $isSelected={selectedVenue?.id === venue.id}
                   >
                     <VenueThumbnail>
                       {venue.thumbnail ? (
@@ -233,9 +267,9 @@ const RegisteredVenues = () => {
         <PreviousButton onClick={handlePrevious}>
           ← 이전
         </PreviousButton>
-        <SaveButton onClick={handleSave}>
+        {/* <SaveButton onClick={handleSave}>
           저장하기
-        </SaveButton>
+        </SaveButton> */}
       </Footer>
     </Container>
   )
@@ -350,7 +384,7 @@ const VenueCard = styled.div`
   padding: 10px;
   border-radius: 15px;
   transition: background-color 0.2s ease;
-  background-color: ${props => props.isSelected ? '#FFF1F0' : 'transparent'};
+  background-color: ${props => props.$isSelected ? '#FFF1F0' : 'transparent'};
 
   &:hover {
     background-color: #FFF1F0;

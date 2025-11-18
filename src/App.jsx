@@ -14,6 +14,7 @@ import ViewTeamInfo from "./pages/User/ViewTeamInfo";
 import MyTicketList from "./pages/User/MyTicketList";
 import CheckTicket from "./pages/User/CheckTicket";
 import MobileTicket from "./pages/User/MobileTicket";
+import BuyTicket from "./pages/User/BuyTicket";
 
 //이예나
 import NavbarManager from "./components/Navbar/NavbarManager";
@@ -22,9 +23,12 @@ import ManageShow from "./pages/Manager/ManageShow/ManageShow";
 import ManageUser from "./pages/Manager/ManageShow/ManageUser";
 import QRManager from "./pages/Manager/QRManager";
 import RegisterShow from "./pages/Manager/RegisterShow";
-import RegisteredVenues from "./pages/Manager/RegisteredVenues";
-import BuyTicket from "./pages/User/BuyTicket";
 import Landing from "./pages/Landing";
+import WriteTeamInfo from "./pages/Manager/WriteTeamInfo";
+import RegisterShowStep1 from "./pages/Manager/RegisterShow/RegisterShowStep1";
+import RegisterShowStep4 from "./pages/Manager/RegisterShow/RegisterShowStep4";
+import RegisterShowStep2 from "./pages/Manager/RegisterShow/RegisterShowStep2";
+import RegisterShowStep5 from "./pages/Manager/RegisterShow/RegisterShowStep5";
 
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
@@ -34,10 +38,6 @@ import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
 import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
-import RegisterShowStep1 from "./pages/Manager/RegisterShow/RegisterShowStep1";
-import RegisterShowStep4 from "./pages/Manager/RegisterShow/RegisterShowStep4";
-import RegisterShowStep2 from "./pages/Manager/RegisterShow/RegisterShowStep2";
-import RegisterShowStep5 from "./pages/Manager/RegisterShow/RegisterShowStep5";
 
 // Protected Route 컴포넌트
 const ProtectedRoute = ({ element: Element, ...rest }) => {
@@ -58,6 +58,7 @@ const ProtectedRoute = ({ element: Element, ...rest }) => {
     />
   );
 };
+import RegisteredVenues from "./pages/Manager/RegisteredVenues";
 
 const App = () => {
   return (
@@ -107,39 +108,34 @@ const App = () => {
               element={<ProtectedRoute element={SelectSeat} />}
             />
 
-            {/* 이예나 */}
-            <Route path="/navbarmanager" element={<NavbarManager />} />
-            <Route path="/homemanager" element={<HomeManager />} />
-            <Route path="/manageshow" element={<ManageShow />} />
+            {/* 보호된 라우트: Manager */}
+            <Route
+              path="/navbarmanager"
+              element={<ProtectedRoute element={NavbarManager} />}
+            />
+            <Route
+              path="/homemanager"
+              element={<ProtectedRoute element={HomeManager} />}
+            />
+            <Route
+              path="/manageshow"
+              element={<ProtectedRoute element={ManageShow} />}
+            />
             <Route
               path="/manageshow/manageuser/:showId"
-              element={<ManageUser />}
+              element={<ProtectedRoute element={ManageUser} />}
             />
-            <Route path="/qrmanager/:showId" element={<QRManager />} />
-            <Route path="/registershow" element={<RegisterShow />} />
-
-            <Route path="/landing" element={<Landing />} />
-            <Route
-              path="/register-show/step1"
-              element={<RegisterShowStep1 />}
-            />
-            <Route
-              path="/register-show/step2"
-              element={<RegisterShowStep2 />}
-            />
-            <Route
-              path="/register-show/step4"
-              element={<RegisterShowStep4 />}
-            />
-            <Route
-              path="/register-show/step5"
-              element={<RegisterShowStep5 />}
-            />
-
-            {/* 주현수 */}
             <Route
               path="/manageshow/entrystatus/:showId"
               element={<ProtectedRoute element={ViewEntryStatus} />}
+            />
+            <Route
+              path="/qrmanager/:showId"
+              element={<ProtectedRoute element={QRManager} />}
+            />
+            <Route
+              path="/registershow"
+              element={<ProtectedRoute element={RegisterShow} />}
             />
             <Route
               path="/register-show/step1"
@@ -176,6 +172,10 @@ const App = () => {
             <Route
               path="/registeredvenues"
               element={<ProtectedRoute element={RegisteredVenues} />}
+            />
+            <Route
+              path="/write-teaminfo"
+              element={<ProtectedRoute element={WriteTeamInfo} />}
             />
           </Routes>
         </ToastProvider>

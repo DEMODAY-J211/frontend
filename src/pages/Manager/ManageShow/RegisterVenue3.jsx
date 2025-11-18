@@ -16,10 +16,16 @@ const RegisterVenue3 = () => {
 
   // 2단계 데이터 불러오기 (useMemo로 메모이제이션)
   const { initialSeatLayout, initialFloors } = useMemo(() => {
+    const venue1Data = JSON.parse(localStorage.getItem('registerVenue1') || '{}');
     const venue2Data = JSON.parse(localStorage.getItem('registerVenue2') || '{}');
+
+    // 1단계에서 설정한 층수 가져오기
+    const floorCount = venue1Data.floorCount ? Number(venue1Data.floorCount) : 1;
+    const floors = Array.from({ length: floorCount }, (_, i) => i + 1);
+
     return {
       initialSeatLayout: venue2Data.seatLayout || [],
-      initialFloors: venue2Data.floors || [1, 2],
+      initialFloors: floors,
     };
   }, []);
 
@@ -37,6 +43,8 @@ const RegisterVenue3 = () => {
   const [seatLayout] = useState(initialSeatLayout);
   const [labeledSeats, setLabeledSeats] = useState(initialSeatLayout);
   const [floors] = useState(initialFloors);
+  // 각 층별 라벨링 설정 저장
+  const [floorSettings, setFloorSettings] = useState({});
 
   // 구역 색상
   const SECTION_COLORS = ['#D72B2B', '#E38A03', '#7CD550', '#03C2E3', '#A974C5'];
@@ -63,13 +71,13 @@ const RegisterVenue3 = () => {
         const koreanChars = ['가', '나', '다', '라', '마', '바', '사', '아', '자', '차', '카', '타', '파', '하'];
         return koreanChars[index % koreanChars.length];
       case 'number':
-        return String(index + 1);
+        return (index + 1).toString();
       case 'lowercase':
         return String.fromCharCode(97 + (index % 26)); // a-z
       case 'uppercase':
         return String.fromCharCode(65 + (index % 26)); // A-Z
       default:
-        return String(index + 1);
+        return (index + 1).toString();
     }
   };
 
@@ -80,102 +88,102 @@ const RegisterVenue3 = () => {
 
   // 행 라벨링 적용
   useEffect(() => {
-    if (!rowLabeling && !sectionLabeling) {
+    if (!rowLabeling) {
       setLabeledSeats(seatLayout);
       return;
     }
 
     let newLabeledSeats = [...seatLayout];
 
-    // 전체 행 라벨링
-    if (rowLabeling) {
-      const currentFloorSeats = seatLayout.filter((seat) => seat.floor === currentFloor);
+    // 모든 층에 대해 라벨링 적용 (각 층의 설정에 따라)
+    floors.forEach((floor) => {
+      // 현재 층이면 현재 설정 사용, 아니면 저장된 설정 사용
+      const floorSetting = floor === currentFloor
+        ? { rowLabeling, rowOrder, rowStart }
+        : (floorSettings[floor] || { rowLabeling: false, rowOrder: 'korean', rowStart: 'top' });
 
-      if (currentFloorSeats.length > 0) {
-        // 행별로 그룹화
-        const rowMap = new Map();
-        currentFloorSeats.forEach((seat) => {
-          if (!rowMap.has(seat.row)) {
-            rowMap.set(seat.row, []);
+      if (!floorSetting.rowLabeling) return;
+
+      const floorSeats = seatLayout.filter((seat) => seat.floor === floor);
+      if (floorSeats.length === 0) return;
+
+      // 행별로 그룹화
+      const rowMap = new Map();
+      floorSeats.forEach((seat) => {
+        if (!rowMap.has(seat.row)) {
+          rowMap.set(seat.row, []);
+        }
+        rowMap.get(seat.row).push(seat);
+      });
+
+      // 방향에 따라 순서 변경
+      if (floorSetting.rowStart === 'left' || floorSetting.rowStart === 'right') {
+        // 열 기준 정렬 (좌우)
+        const colMap = new Map();
+        floorSeats.forEach((seat) => {
+          if (!colMap.has(seat.col)) {
+            colMap.set(seat.col, []);
           }
-          rowMap.get(seat.row).push(seat);
+          colMap.get(seat.col).push(seat);
         });
 
-        // 방향에 따라 순서 변경
-        if (rowStart === 'left' || rowStart === 'right') {
-          // 열 기준 정렬 (좌우)
-          const colMap = new Map();
-          currentFloorSeats.forEach((seat) => {
-            if (!colMap.has(seat.col)) {
-              colMap.set(seat.col, []);
-            }
-            colMap.get(seat.col).push(seat);
-          });
-
-          const sortedCols = Array.from(colMap.keys()).sort((a, b) => a - b);
-          if (rowStart === 'right') {
-            sortedCols.reverse();
-          }
-
-          // 열 기준으로 라벨링
-          newLabeledSeats = newLabeledSeats.map((seat) => {
-            if (seat.floor !== currentFloor) return seat;
-
-            const colIndex = sortedCols.indexOf(seat.col);
-            if (colIndex === -1) return seat;
-
-            const rowLabel = generateRowLabel(colIndex, rowOrder);
-            return {
-              ...seat,
-              label: rowLabel + (seat.label || ''),
-            };
-          });
-        } else {
-          // 상하 방향 라벨링 (top 또는 bottom)
-          const sortedRows = Array.from(rowMap.keys()).sort((a, b) => a - b);
-
-          // 아래에서 시작인 경우 역순
-          if (rowStart === 'bottom') {
-            sortedRows.reverse();
-          }
-
-          newLabeledSeats = newLabeledSeats.map((seat) => {
-            if (seat.floor !== currentFloor) return seat;
-
-            const rowIndex = sortedRows.indexOf(seat.row);
-            if (rowIndex === -1) return seat;
-
-            const rowLabel = generateRowLabel(rowIndex, rowOrder);
-            return {
-              ...seat,
-              label: rowLabel + (seat.label || ''),
-            };
-          });
+        const sortedCols = Array.from(colMap.keys()).sort((a, b) => a - b);
+        if (floorSetting.rowStart === 'right') {
+          sortedCols.reverse();
         }
+
+        // 열 기준으로 라벨링
+        newLabeledSeats = newLabeledSeats.map((seat) => {
+          if (seat.floor !== floor) return seat;
+
+          const colIndex = sortedCols.indexOf(seat.col);
+          if (colIndex === -1) return seat;
+
+          const rowLabel = generateRowLabel(colIndex, floorSetting.rowOrder);
+          // 기존 라벨에서 열 번호만 추출
+          const originalLabel = seatLayout.find((s) => s.id === seat.id)?.label || '';
+          const colMatch = originalLabel.match(/\d+$/);
+          const colNumber = colMatch ? colMatch[0] : '';
+
+          return {
+            ...seat,
+            label: rowLabel + '-' + colNumber,
+          };
+        });
+      } else {
+        // 상하 방향 라벨링 (top 또는 bottom)
+        const sortedRows = Array.from(rowMap.keys()).sort((a, b) => a - b);
+
+        // 아래에서 시작인 경우 역순
+        if (floorSetting.rowStart === 'bottom') {
+          sortedRows.reverse();
+        }
+
+        newLabeledSeats = newLabeledSeats.map((seat) => {
+          if (seat.floor !== floor) return seat;
+
+          const rowIndex = sortedRows.indexOf(seat.row);
+          if (rowIndex === -1) return seat;
+
+          const rowLabel = generateRowLabel(rowIndex, floorSetting.rowOrder);
+          // 기존 라벨에서 열 번호만 추출
+          const originalLabel = seatLayout.find((s) => s.id === seat.id)?.label || '';
+          const colMatch = originalLabel.match(/\d+$/);
+          const colNumber = colMatch ? colMatch[0] : '';
+
+          return {
+            ...seat,
+            label: rowLabel + '-' + colNumber,
+          };
+        });
       }
-    }
+    });
 
-    // 구역별 라벨링
-    if (sectionLabeling && sectionsRef.current.length > 0) {
-      newLabeledSeats = newLabeledSeats.map((seat) => {
-        if (seat.floor !== currentFloor) return seat;
-
-        // 좌석이 속한 구역 찾기
-        const section = sectionsRef.current.find((s) => s.seats.includes(seat.id));
-        if (!section) return seat;
-
-        // 구역 이름 + 열 번호
-        const originalLabel = seatLayout.find((s) => s.id === seat.id)?.label || '';
-        return {
-          ...seat,
-          label: section.name + originalLabel,
-        };
-      });
-    }
+    // 구역별 라벨링 - 좌석 라벨은 변경하지 않고 section 정보만 저장
+    // (실제 라벨 표시는 유지하되, section 정보는 별도로 관리)
 
     setLabeledSeats(newLabeledSeats);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowLabeling, rowOrder, rowStart, currentFloor, sectionLabeling, sections]);
+  }, [rowLabeling, rowOrder, rowStart, currentFloor, sectionLabeling, sections, floorSettings, floors, seatLayout]);
 
   // 드래그 종료 글로벌 이벤트
   useEffect(() => {
@@ -271,9 +279,44 @@ const RegisterVenue3 = () => {
     setSections(sections.map((s) => (s.id === sectionId ? { ...s, name } : s)));
   };
 
-  // 층 변경
+  // 층 변경 시 현재 층의 설정 저장 및 새 층 설정 불러오기
   const handleFloorChange = (floor) => {
+    // 현재 층의 설정 저장
+    setFloorSettings((prev) => ({
+      ...prev,
+      [currentFloor]: {
+        rowLabeling,
+        sectionLabeling,
+        rowOrder,
+        rowStart,
+        sections: sections.filter((s) => s.floor === currentFloor),
+      },
+    }));
+
+    // 새 층으로 이동
     setCurrentFloor(floor);
+
+    // 새 층의 설정 불러오기
+    const newFloorSettings = floorSettings[floor] || {
+      rowLabeling: false,
+      sectionLabeling: false,
+      rowOrder: 'korean',
+      rowStart: 'top',
+      sections: [],
+    };
+
+    setRowLabeling(newFloorSettings.rowLabeling);
+    setSectionLabeling(newFloorSettings.sectionLabeling);
+    setRowOrder(newFloorSettings.rowOrder);
+    setRowStart(newFloorSettings.rowStart);
+
+    // 기존 sections에서 다른 층 것은 유지하고 현재 층 것만 교체
+    setSections((prev) => [
+      ...prev.filter((s) => s.floor !== floor),
+      ...newFloorSettings.sections,
+    ]);
+
+    setSelectedSeats(new Set());
     addToast(`${floor}층으로 이동`, 'info');
   };
 
@@ -295,22 +338,42 @@ const RegisterVenue3 = () => {
 
   // 등록하기
   const handleSubmit = async () => {
+    // 현재 층 설정 저장
+    setFloorSettings((prev) => ({
+      ...prev,
+      [currentFloor]: {
+        rowLabeling,
+        sectionLabeling,
+        rowOrder,
+        rowStart,
+        sections: sections.filter((s) => s.floor === currentFloor),
+      },
+    }));
+
     // 좌석 라벨 검증
     const invalidSeats = labeledSeats.filter((seat) => {
       if (seat.type !== 'seat') return false; // 무대 등은 제외
 
       const label = seat.label || '';
-      // 라벨이 비어있거나, 행이나 열 중 하나가 누락된 경우
+      // 라벨이 비어있는 경우
       if (!label || label.length === 0) {
         return true;
       }
 
-      // 라벨에서 행(문자)과 열(숫자) 추출
-      const rowMatch = label.match(/^[A-Za-z가-힣]+/);
-      const colMatch = label.match(/\d+$/);
+      // "행-열" 형태 체크 (A-1, 가-1, 1-1 등)
+      const parts = label.split('-');
+      if (parts.length !== 2) {
+        return true; // "-"로 구분되지 않으면 유효하지 않음
+      }
 
-      // 행 또는 열이 없으면 유효하지 않음
-      if (!rowMatch || !colMatch) {
+      const [row, col] = parts;
+      // 행과 열 모두 비어있지 않아야 함
+      if (!row || !col || row.trim() === '' || col.trim() === '') {
+        return true;
+      }
+
+      // 열은 반드시 숫자여야 함
+      if (!/^\d+$/.test(col)) {
         return true;
       }
 
@@ -318,6 +381,7 @@ const RegisterVenue3 = () => {
     });
 
     if (invalidSeats.length > 0) {
+      console.log('Invalid seats:', invalidSeats);
       addToast('모든 좌석에 행과 열 정보가 필요합니다. 누락된 좌석을 확인해주세요.', 'error');
       return;
     }
@@ -344,14 +408,9 @@ const RegisterVenue3 = () => {
         // 무대는 -1
         seatMap[seat.row][seat.col] = -1;
       } else if (seat.type === 'seat') {
-        // 좌석은 라벨 사용
+        // 좌석은 라벨 사용 (이미 "행-열" 형태)
         const label = seat.label || '';
-        const rowMatch = label.match(/^[A-Za-z가-힣]+/);
-        const colMatch = label.match(/\d+$/);
-
-        const seatRow = rowMatch ? rowMatch[0] : '';
-        const seatCol = colMatch ? colMatch[0] : '';
-        const seatId = `${seatRow}-${seatCol}`;
+        const seatId = label; // 이미 "A-1", "가-1", "1-1" 형태
 
         seatMap[seat.row][seat.col] = seatId;
 
@@ -384,17 +443,24 @@ const RegisterVenue3 = () => {
       seat_data: seatData,
     };
 
+    console.log('=== 공연장 등록 API 요청 ===');
+    console.log('Request Data:', JSON.stringify(requestData, null, 2));
+
     try {
       // API 호출
-      const response = await fetch('/manager/venue/seatmap', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/venue/seatmap`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 쿠키 포함
         body: JSON.stringify(requestData),
       });
 
+      console.log('Response Status:', response.status);
+
       const result = await response.json();
+      console.log('Response Data:', result);
 
       if (response.ok && result.success) {
         // localStorage에 저장
@@ -417,6 +483,7 @@ const RegisterVenue3 = () => {
         }, 1000);
       } else {
         // 에러 처리
+        console.error('API 에러 응답:', result);
         addToast(result.message || '좌석 배치 등록에 실패했습니다.', 'error');
       }
     } catch (error) {
@@ -754,8 +821,8 @@ const SeatGrid = styled.div`
 `;
 
 const SeatCell = styled.div`
-  width: 22px;
-  height: 16px;
+  width: 28px;
+  height: 20px;
   background: ${(props) =>
     props.sectionColor ? props.sectionColor : props.type === 'stage' ? '#FFD700' : '#9E5656'};
   border: ${(props) => (props.selected ? '2px solid #ff0000' : '0.5px solid #000000')};
@@ -763,11 +830,12 @@ const SeatCell = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 9px;
   color: #ffffff;
   cursor: pointer;
   transition: all 0.2s ease;
   opacity: ${(props) => (props.selected ? 1 : 0.8)};
+  font-weight: 500;
 
   &:hover {
     opacity: 1;

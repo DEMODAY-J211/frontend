@@ -2,7 +2,7 @@ import React from "react";
 import NavbarManager from "../../components/Navbar/NavbarManager";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import showimg from "../../assets/homemanager/show_icon.png";
 import linkimg from "../../assets/homemanager/link.png";
@@ -20,6 +20,48 @@ const HomeManager = () => {
   const { addToast } = useToast(); // 훅으로 토스트 가져오기
   const [isEditTeamModalOpen, setIsEditTeamModalOpen] = useState(false);
   const [registerShowModal, setRegisterShowModal] = useState(null); // null, 'first', 'continue', 'duplicate', 'temp', 'tempDone'
+  const [hasVenues, setHasVenues] = useState(false); // 공연장 등록 여부
+  const [hasShows, setHasShows] = useState(false); // 공연 등록 여부
+
+  // 페이지 로드 시 즐겨찾기 공연장 확인
+  useEffect(() => {
+    const fetchFavoriteVenues = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/manager/shows/venues?favorite=true`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log("Favorite venues:", result);
+
+          // data가 배열이고 길이가 0보다 크면 공연장이 있는 것
+          if (
+            result.success &&
+            result.data &&
+            Array.isArray(result.data) &&
+            result.data.length > 0
+          ) {
+            setHasVenues(true);
+          } else {
+            setHasVenues(false);
+          }
+        } else {
+          console.error("Failed to fetch venues:", response.status);
+          setHasVenues(false);
+        }
+      } catch (error) {
+        console.error("Error fetching favorite venues:", error);
+        setHasVenues(false);
+      }
+    };
+
+    fetchFavoriteVenues();
+  }, []);
 
   const handleCopyLink = async () => {
     const link = "https://example.com"; // 실제 복사할 링크
@@ -41,9 +83,12 @@ const HomeManager = () => {
   };
 
   const handleRegisterShowClick = () => {
-    // 나중에 상황에 따라 모달을 다르게 띄울 수 있도록 함수로 분리
-    // 예시: setRegisterShowModal('first');
-    setRegisterShowModal("first");
+    // 즐겨찾기 공연장이 없으면 'first' 모달, 있으면 'duplicate' 모달
+    if (!hasVenues) {
+      setRegisterShowModal("first"); // "등록된 공연장이 없습니다"
+    } else {
+      setRegisterShowModal("duplicate"); // "새로운 공연장 등록하시겠습니까?"
+    }
   };
 
   const handleCloseRegisterModal = () => {
@@ -69,7 +114,10 @@ const HomeManager = () => {
               지금 첫 공연장을 등록해주세요!
             </ModalTitle>
             <ModalButtonGroup>
-              <ModalButton primary onClick={() => navigate("/registervenue")}>
+              <ModalButton
+                primary
+                onClick={() => navigate("/register-venue/step1")}
+              >
                 공연장 등록하기
               </ModalButton>
             </ModalButtonGroup>
@@ -87,7 +135,10 @@ const HomeManager = () => {
               이어서 공연도 등록하시겠습니까?
             </ModalTitle>
             <ModalButtonGroup>
-              <ModalButton primary onClick={() => navigate("/registershow")}>
+              <ModalButton
+                primary
+                onClick={() => navigate("/register-show/step1")}
+              >
                 네, 등록할래요
               </ModalButton>
               <ModalButton onClick={handleCloseRegisterModal}>
@@ -110,10 +161,13 @@ const HomeManager = () => {
               공연장을 등록해주세요!
             </ModalTitle>
             <ModalButtonGroup>
-              <ModalButton onClick={() => navigate("/registervenue")}>
+              <ModalButton onClick={() => navigate("/register-venue/step1")}>
                 공연장 등록하기
               </ModalButton>
-              <ModalButton primary onClick={() => navigate("/registershow")}>
+              <ModalButton
+                primary
+                onClick={() => navigate("/register-show/step1")}
+              >
                 이미 등록했어요
               </ModalButton>
             </ModalButtonGroup>
@@ -137,11 +191,11 @@ const HomeManager = () => {
             <ModalButtonGroup>
               <ModalButton
                 primary
-                onClick={() => navigate("/registershow?mode=continue")}
+                onClick={() => navigate("/register-show/step1?mode=continue")}
               >
                 이어서 등록하기
               </ModalButton>
-              <ModalButton onClick={() => navigate("/registershow")}>
+              <ModalButton onClick={() => navigate("/register-show/step1")}>
                 새로운 공연 등록하기
               </ModalButton>
             </ModalButtonGroup>
