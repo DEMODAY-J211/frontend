@@ -26,7 +26,7 @@ export default function HomeUser() {
   useEffect(() => {
     // setmanaer;
   });
-
+  console.log("managerId", managerId);
   useEffect(() => {
     const jsessionId = getCookie("JSESSIONID");
     if (jsessionId) {
@@ -123,22 +123,10 @@ export default function HomeUser() {
       //   }
       // );
 
-      console.log("응답 상태:", userresponse.status);
-      console.log("응답 OK?:", userresponse.ok);
-
-      // 응답 상태 확인
-      if (!userresponse.ok) {
-        console.error(`❌ 서버 응답 에러: ${userresponse.status} ${userresponse.statusText}`);
-        const errorText = await userresponse.text();
-        console.error("에러 상세:", errorText);
-        console.error("⚠️ 백엔드 API 문제 - 빈 배열로 설정");
-
-        // 500 에러인 경우 빈 배열로 설정
-        setUserReservations([]);
-        return;
-      }
 
       const result2 = await userresponse.json();
+      // console.log("status", userresponse.status);
+      // console.log("text", await userresponse.text());
 
       // console.log("status", userresponse.status);
       // console.log("text", await userresponse.text());
@@ -200,7 +188,7 @@ export default function HomeUser() {
   return (
     <PageWrapper>
       <HomeUserContainer>
-        <NavbarUser />
+        <NavbarUser managerId={managerId} />
         {!currentShow ? (
           <p>공연 정보를 불러오는 중입니다...</p>
         ) : (
