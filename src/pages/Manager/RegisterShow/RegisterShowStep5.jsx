@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { BsUpload } from "react-icons/bs";
 import { AiOutlineCalendar } from "react-icons/ai";
 import { AiOutlineClose } from "react-icons/ai";
-
+// UseToast -> useToast 로 수정
 const RegisterShowStep1 = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
