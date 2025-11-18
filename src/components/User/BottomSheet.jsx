@@ -31,11 +31,16 @@ import ShowtimeSelector from "./ShowtimeSelector";
 //     ],
 //   },
 // ];
-const managerId = 1;
+// const managerId = 1;
 const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
 
-export default function BottomSheet({ onClose, showData = {}, onNeedModal }) {
+export default function BottomSheet({
+  onClose,
+  showData = {},
+  onNeedModal,
+  managerId,
+}) {
   const navigate = useNavigate();
   const [selectedShowtime, setSelectedShowtime] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -83,6 +88,8 @@ export default function BottomSheet({ onClose, showData = {}, onNeedModal }) {
       // });
       navigate(`../payment`, {
         state: {
+          managerId: managerId,
+          showId: showData.showId,
           selectedShowtime,
           selectedOption,
           quantity,

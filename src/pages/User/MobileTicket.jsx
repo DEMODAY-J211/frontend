@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import Footerbtn from "../../components/Save/Footerbtn";
 import { QRCodeSVG } from "qrcode.react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { RiArrowLeftWideFill } from "react-icons/ri";
 import { RiArrowRightWideFill } from "react-icons/ri";
+import { formatKoreanDate } from "../../utils/dateFormat";
 
 const MockData = [
   {
@@ -42,12 +43,14 @@ const MockData = [
 ];
 
 export default function MobileTicket() {
+  const location = useLocation();
+  const managerId = location.state?.managerId;
+  const { reservationId } = useParams();
   const [showInfo, setShowInfo] = useState(MockData[0]);
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [IsOpen, setIsOpen] = useState(false);
   const [selectedQR, setSelectedQR] = useState("");
-  const [showId, setShowId] = useState(102);
 
   function handleNext() {
     setCurrentIndex((prev) => Math.min(prev + 1, showInfo.tickets.length - 1));
@@ -65,9 +68,42 @@ export default function MobileTicket() {
   }
 
   const handleCheckTicket = () => {
-    navigate(`/checkticket/${showId}`);
+    navigate(`/checkticket/${reservationId}`);
+  };
+  const fetchticket = async () => {
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/user/${managerId}/ticket/${reservationId}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Credentials": "true",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setShowInfo(data.data);
+        console.log("response의 data", data);
+      }
+    } catch (error) {
+      console.error("예매한 공연 조회 실패:", error);
+      alert("예매한 공연을 찾을 수 없습니다.");
+    }
   };
 
+  useEffect(() => {
+    fetchticket();
+  }, []);
   return (
     <PageWrapper>
       <HomeUserContainer>
@@ -76,7 +112,7 @@ export default function MobileTicket() {
           <ShowContainer>
             <h3>{showInfo.showTitle}</h3>
             <p>
-              2025.09.25(목) 15:00
+              {formatKoreanDate(showInfo.showDateTime)}
               <br />
               {showInfo.showLocation}
             </p>

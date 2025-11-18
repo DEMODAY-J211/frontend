@@ -40,7 +40,7 @@ useEffect(() => {
   const data =[
     {
       reservationId: 101,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 1,
       reservationNumber: "10010010",
       name: "홍길동",
@@ -57,7 +57,7 @@ useEffect(() => {
     },
     {
       reservationId: 102,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 2,
       reservationNumber: "10010011",
       name: "김철수",
@@ -74,7 +74,7 @@ useEffect(() => {
     },
     {
       reservationId: 103,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 3,
       reservationNumber: "10010012",
       name: "이영희",
@@ -91,7 +91,7 @@ useEffect(() => {
     },
     {
       reservationId: 104,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 4,
       reservationNumber: "10010013",
       name: "박민수",
@@ -108,7 +108,7 @@ useEffect(() => {
     },
     {
       reservationId: 105,
-      showtimeId: 45,
+      showTimeId: 45,
       kakaoId: 5,
       reservationNumber: "10010014",
       name: "정수진",
@@ -300,7 +300,9 @@ setShowChangeStatusModal(false);
 //         setUserlist(result.data ?? []);
 //         console.log(result.data);
 //       }catch(error){
-//         console.error("Error fetching applied labors:", error);
+//         console.error("Error fetching users:", error);
+
+
 //         setError(error.message);
 //       }
 //     };

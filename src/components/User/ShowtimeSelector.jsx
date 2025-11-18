@@ -4,34 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
 import { formatKoreanDate } from "../../utils/dateFormat";
 import Footerbtn from "../Save/Footerbtn";
-const MockData = [
-  {
-    showId: 12,
-    showTitle: "제11회 정기공연",
-    showtimeList: [
-      {
-        showtimeId: 1,
-        showtimeStart: "2025-10-28T15:00",
-        availableSeats: 0,
-      },
-      {
-        showtimeId: 2,
-        showtimeStart: "2025-10-28T15:00",
-        availableSeats: 20,
-      },
-    ],
-    ticketOptionList: [
-      {
-        ticketoptionName: "학생할인",
-        ticketoptionPrice: 8000,
-      },
-      {
-        ticketoptionName: "학생할인",
-        ticketoptionPrice: 8000,
-      },
-    ],
-  },
-];
 
 export default function ShowtimeSelector({
   showtimes = [],
@@ -159,7 +131,8 @@ export default function ShowtimeSelector({
                         // payload용 객체 생성: 기존 option에 id 추가
                         const optionWithId = {
                           ...option, // 기존 이름, 가격 등 복사
-                          ticketOptionId: idx, // idx 기반으로 id 부여 (서버 요구에 맞춰 조정)
+
+                          ticketOptionId: idx + 1, // idx 기반으로 id 부여 (서버 요구에 맞춰 조정)
                         };
 
                         return (

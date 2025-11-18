@@ -22,12 +22,13 @@ const HomeManager = () => {
     const [isEditTeamModalOpen, setIsEditTeamModalOpen] = useState(false);
     const [registerShowModal, setRegisterShowModal] = useState(null); // null, 'first', 'continue', 'duplicate', 'temp', 'tempDone'
 
+
     const handleCopyLink = async () => {
         const link = "https://example.com"; // 실제 복사할 링크
         try {
         await navigator.clipboard.writeText(link);
         addToast("링크를 복사했어요!", "success"); // 성공 토스트
-        } catch (err) {
+        } catch (error) {
         addToast("링크 복사 실패", "error"); // 실패 토스트
         }
     };
@@ -128,7 +129,7 @@ const HomeManager = () => {
     <ButtonGridTop>
         <FarLeft>
         <RegisterShow onClick={handleRegisterShowClick}>
-            <BtnName>공연 등록하기</BtnName>
+            <BtnName >공연 등록하기</BtnName>
             <BtnIcon src={showimg} alt="공연 등록하기"/>
             <BtnWriting>
             <BtnInfo>설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구.. 어쩌구 저쩌구.. </BtnInfo>

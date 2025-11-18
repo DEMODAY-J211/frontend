@@ -29,11 +29,15 @@ import Landing from "./pages/Landing";
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
 import ViewEntryStatus from "./pages/Manager/ManageShow/ViewEntryStatus";
-import RegisterShowStep3 from "./pages/Manager/ManageShow/RegisterShowStep3";
+import RegisterShowStep3 from "./pages/Manager/RegisterShow/RegisterShowStep3";
 import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
 import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
+import RegisterShowStep1 from "./pages/Manager/RegisterShow/RegisterShowStep1";
+import RegisterShowStep4 from "./pages/Manager/RegisterShow/RegisterShowStep4";
+import RegisterShowStep2 from "./pages/Manager/RegisterShow/RegisterShowStep2";
+import RegisterShowStep5 from "./pages/Manager/RegisterShow/RegisterShowStep5";
 
 // Protected Route 컴포넌트
 const ProtectedRoute = ({ element: Element, ...rest }) => {
@@ -95,10 +99,14 @@ const App = () => {
               path="/manageshow/entrystatus/:showId"
               element={<ProtectedRoute element={ViewEntryStatus} />}
             />
+            <Route path="/register-show/step1" element={<ProtectedRoute element={RegisterShowStep1} />} />
+            <Route path="/register-show/step2" element={<ProtectedRoute element={RegisterShowStep2} />} />
             <Route
               path="/register-show/step3"
               element={<ProtectedRoute element={RegisterShowStep3} />}
             />
+            <Route path="/register-show/step4" element={<ProtectedRoute element={RegisterShowStep4} />} />
+            <Route path="/register-show/step5" element={<ProtectedRoute element={RegisterShowStep5} />} />
             <Route path="/register-venue/step1" element={<ProtectedRoute element={RegisterVenue1} />} />
             <Route path="/register-venue/step2" element={<ProtectedRoute element={RegisterVenue2} />} />
             <Route path="/register-venue/step3" element={<ProtectedRoute element={RegisterVenue3} />} />
