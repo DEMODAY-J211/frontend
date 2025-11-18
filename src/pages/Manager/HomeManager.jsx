@@ -66,7 +66,7 @@ const HomeManager = () => {
                 <CloseButton onClick={handleCloseRegisterModal}>×</CloseButton>
                 <ModalTitle>등록된 공연장이 없습니다.<br/>지금 첫 공연장을 등록해주세요!</ModalTitle>
                 <ModalButtonGroup>
-                    <ModalButton primary onClick={() => navigate('/registervenue')}>공연장 등록하기</ModalButton>
+                    <ModalButton primary onClick={() => navigate('/register-venue/step1')}>공연장 등록하기</ModalButton>
                 </ModalButtonGroup>
             </ModalContent>
         </ModalOverlay>
@@ -91,7 +91,7 @@ const HomeManager = () => {
                 <CloseButton onClick={handleCloseRegisterModal}>×</CloseButton>
                 <ModalTitle>새로운 공연을 등록하시네요!<br/>새로운 공연의 공연장소를 아직 등록하지 않으셨다면<br/>공연장을 등록해주세요!</ModalTitle>
                 <ModalButtonGroup>
-                    <ModalButton onClick={() => navigate('/registervenue')}>공연장 등록하기</ModalButton>
+                    <ModalButton onClick={() => navigate('/register-venue/step1')}>공연장 등록하기</ModalButton>
                     <ModalButton primary onClick={() => navigate('/registershow')}>이미 등록했어요</ModalButton>
                 </ModalButtonGroup>
             </ModalContent>
