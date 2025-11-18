@@ -12,67 +12,54 @@ import { useState, useEffect } from "react";
 
 import { RiArrowLeftWideFill } from "react-icons/ri";
 import { RiArrowRightWideFill } from "react-icons/ri";
-import { AiOutlineMore } from "react-icons/ai";
 import defaultimg from "../../../assets/tikitta_defaultcard.png";
 
 const ManageShow = () => {
   const navigate = useNavigate();
-    
 
   const menuItems = [
     {
       menuname: "예매자 관리",
-      desc: "입장 현황 대한 설명글",
+      desc: "예매자 목록을 확인하고 관리할 수 있습니다.",
       icon: <img src={manageuser} alt="manageuser" />,
       path: "/manageshow/manageuser",
     },
     {
       menuname: "입장 현황",
-      desc: "입장 현황 대한 설명글",
+      desc: "현재 입장 현황을 확인할 수 있습니다.",
       icon: <img src={entrystatus} alt="entrystatus" />,
       path: "/manageshow/entrystatus",
     },
     {
       menuname: "공연 정보 수정",
-      desc: "공연 정보 수정에 대한 설명글",
+      desc: "공연 정보를 수정할 수 있습니다.",
       icon: <img src={editshow} alt="editshow" />,
       path: "/manageshow/manageuser",
     },
     {
       menuname: "QR 코드 확인",
-      desc: "공연 정보 수정에 대한 설명글",
+      desc: "QR 체크인 화면으로 이동합니다.",
       icon: <img src={checkqrimg} alt="checkqrimg" />,
       path: "/qrmanager",
     },
   ];
 
-  const posters = [
-    { title: "제11회 정기공연"},
-    { title: "제12회 정기공연"},
-    { title: "제13회 정기공연"},
-    { title: "제14회 정기공연"},
-    { title: "제15회 정기공연"},
-    { title: "제16회 정기공연"},
-    { title: "제16회 정기공연"},
-    { title: "제20회 정기공연"},
-  ];
+  const [posters, setPosters] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0); // 실제 posters index
+  const [startIndex, setStartIndex] = useState(0);
+  const [selectedShow, setSelectedShow] = useState(null);
 
-  const [selectedIndex, setSelectedIndex] = useState(0); // ✅ 선택된 카드 인덱스 (기본 0)
-  const [startIndex, setStartIndex] = useState(0); // 보여지는 첫 카드 인덱스
-  const visibleCount = Math.min(7, posters.length); // 카드 수가 7개 이하이면 그대로
+  const visibleCount = Math.min(7, posters.length);
 
-    const [selectedShow, setSelectedShow] = useState(null);  // 선택된 showId 상태
-
-  const handleCardClick = (index) => {
-    setSelectedIndex(index); // ✅ 클릭된 카드 인덱스로 업데이트
-    const selectedPoster = posters[index];  // 클릭한 카드의 정보 가져오기
-    setSelectedShow(selectedPoster);  // 선택된 공연 정보 저장
+  const handleCardClick = (realIndex) => {
+    setSelectedIndex(realIndex);
+    setSelectedShow(posters[realIndex]);
   };
 
   const scrollRef = useRef(null);
 
   const handleScroll = (direction) => {
-    if (posters.length <= visibleCount) return; // 카드가 7개 이하이면 스크롤 안함
+    if (posters.length <= visibleCount) return;
 
     if (direction === "left") {
       setStartIndex((prev) => (prev - 1 + posters.length) % posters.length);
@@ -81,72 +68,79 @@ const ManageShow = () => {
     }
   };
 
-  const visiblePosters = Array.from({ length: visibleCount }, (_, i) => {
-    // posters가 visibleCount보다 적으면 slice 사용
-    if (posters.length <= visibleCount) {
-      return posters[i];
-    }
-    const index = (startIndex + i) % posters.length;
-    return posters[index];
-  });
+  // 🔥 visiblePosters에서 realIndex를 포함시킴
+  const visiblePosters =
+    posters.length <= visibleCount
+      ? posters.map((p, i) => ({ ...p, realIndex: i }))
+      : Array.from({ length: visibleCount }, (_, i) => {
+          const realIndex = (startIndex + i) % posters.length;
+          return { ...posters[realIndex], realIndex };
+        });
 
-    const handleMenuClick = (path) => {
-    if (selectedShow) {
-      // 선택된 showId에 따라 동적 경로로 이동
-      navigate(`${path}/${selectedShow.showId}`);
-    } else {
-      alert("먼저 공연을 선택해주세요.");
+const handleMenuClick = (item) => {
+  // QR 코드 확인은 showId 없이 이동
+  if (item.menuname === "QR 코드 확인") {
+    navigate(item.path);
+    return;
+  }
+
+  // 그 외 메뉴는 showId 필요
+  if (!selectedShow) {
+    alert("먼저 공연을 선택해주세요.");
+    return;
+  }
+
+  navigate(`${item.path}/${selectedShow.showId}`);
+};
+
+
+  // API
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const viewShows = async () => {
+    try {
+      setError("");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows/list`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            "Content-type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || result.success !== true) {
+        throw new Error(result.message || "공연 목록 조회 실패");
+      }
+
+      setPosters(result.data.published ?? []);
+    } catch (error) {
+      console.error("Error fetching shows:", error);
+      setError(error.message);
     }
   };
 
-  //api
+  // 첫 로드 시 API 호출
+  useEffect(() => {
+    viewShows();
+  }, []);
 
-  
-  // const [posters, setPosters] = useState([]);
-  // const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState("");
+  // posters 로딩 후 첫 공연 자동 선택
+  useEffect(() => {
+    if (posters.length > 0) {
+      setSelectedIndex(0);
+      setSelectedShow(posters[0]);
+    }
+  }, [posters]);
 
-  // const viewShows = async () => {
-  //   try {
-  //     setError("");
-
-  //     const response = await fetch(
-  //       `${import.meta.env.VITE_API_URL}/manager/shows/list`,
-  //       {
-  //         method: "GET",
-  //         credentials: "include",
-  //         headers: {
-  //           // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-  //           Accept: "application/json",
-  //           "Content-type": "application/json",
-  //         },
-  //       }
-  //     );
-
-  //     const result = await response.json();
-  //     console.log(result.data);
-
-  //     if (!response.ok || result.success !== true) {
-  //       throw new Error(result.message || "공연 목록 조회에 실패했습니다.");
-  //     }
-
-  //     setPosters(result.data.published ?? []);
-  //     console.log(result.data);
-  //   } catch (error) {
-  //     console.error("Error fetching shows:", error);
-  //     setError(error.message);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   viewShows(); // API 호출
-  //   if (posters.length > 0) {
-  //     setSelectedShow(posters[0]);  // 첫 번째 카드에 해당하는 공연 정보
-  //   }
-  // }, []); // 컴포넌트 마운트 시 한 번 호출
-
-  // if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
-  // if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
+  if (loading) return <p style={{ padding: "150px" }}>불러오는 중...</p>;
+  if (error) return <p style={{ padding: "150px", color: "red" }}>{error}</p>;
 
   return (
     <MyShow>
@@ -160,9 +154,12 @@ const ManageShow = () => {
 
           <CardList ref={scrollRef}>
             {visiblePosters.map((poster, index) => (
-              <CardContainer key={index} onClick={() => handleCardClick(index)}>
+              <CardContainer
+                key={index}
+                onClick={() => handleCardClick(poster.realIndex)}
+              >
                 <Card
-                  $selected={selectedIndex === index} // ✅ 선택 상태 전달
+                  $selected={selectedIndex === poster.realIndex}
                   style={{ backgroundColor: "var(--color-tertiary)" }}
                 >
                   <Poster
@@ -179,9 +176,10 @@ const ManageShow = () => {
             <RiArrowRightWideFill size={28} />
           </Arrow>
         </Shows>
+
         <Container>
           {menuItems.map((item, idx) => (
-            <Menu key={idx} onClick={() => handleMenuClick(item.path)}>
+            <Menu key={idx} onClick={() => handleMenuClick(item)}>
               <TextBox>
                 <MenuTitle>{item.menuname}</MenuTitle>
                 <Desc>{item.desc}</Desc>
@@ -197,7 +195,10 @@ const ManageShow = () => {
 
 export default ManageShow;
 
+/* ------------------------ styled ------------------------ */
+
 const MyShow = styled.div``;
+
 const MyShowContent = styled.div`
   display: flex;
   flex-direction: column;
@@ -211,21 +212,19 @@ const MyShowContent = styled.div`
 const Title = styled.div`
   align-self: stretch;
   font-size: 30px;
-  font-style: normal;
   font-weight: 500;
-  line-height: normal;
   padding-left: 5px;
 `;
 
 const Shows = styled.div`
   display: flex;
   align-items: center;
-  position: relative;
   width: 100%;
   height: 400px;
   padding: 40px 0;
   justify-content: center;
 `;
+
 const Arrow = styled.div`
   padding: 10px;
   cursor: pointer;
@@ -234,14 +233,12 @@ const Arrow = styled.div`
   border-radius: 50%;
   &:hover {
     transform: scale(1.1);
-
     background-color: #f5f5f5;
   }
 `;
 
 const CardList = styled.div`
   display: flex;
-  justify-content: flex-start;
   align-items: center;
   overflow-x: auto;
   gap: 50px;
@@ -252,14 +249,13 @@ const CardList = styled.div`
   }
   width: 100%;
   height: 100%;
-  padding-left: 20px; // 좌측 여백 조금 추가 가능
+  padding-left: 20px;
 `;
 
 const CardContainer = styled.div`
   flex: 0 0 auto;
   scroll-snap-align: start;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
 `;
 
 const Card = styled.div`
@@ -267,22 +263,17 @@ const Card = styled.div`
   width: ${(props) => (props.$selected ? "145px" : "120px")};
   height: ${(props) => (props.$selected ? "221px" : "182px")};
   padding: 5px;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-  aspect-ratio: 60/91;
   border-radius: ${(props) => (props.$selected ? "10px" : "20px")};
   justify-content: center;
+  align-items: center;
   background: ${(props) =>
     props.$selected ? "#fff" : "var(--color-tertiary)"};
   box-shadow: ${(props) =>
     props.$selected
-      ? "0 0 15px 3px rgba(252, 40, 71, 0.50)"
+      ? "0 0 15px 3px rgba(252, 40, 71, 0.5)"
       : "2px 2px 10px rgba(0,0,0,0.15)"};
   cursor: pointer;
   transition: all 0.2s ease;
-  position: relative;
-
   &:hover {
     transform: translateY(-4px);
   }
@@ -297,15 +288,14 @@ const Poster = styled.img`
 
 const ShowName = styled.div`
   margin-top: 10px;
-  text-align: center;
   font-size: 14px;
   font-weight: 300;
 `;
+
 const Container = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
-
   background-color: #fff;
 `;
 
@@ -313,7 +303,6 @@ const Menu = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #fdeeee;
   width: 586px;
   height: 213px;
   padding: 36px 30px;
@@ -322,7 +311,6 @@ const Menu = styled.div`
   box-shadow: 3px 3px 15px 3px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
   cursor: pointer;
-
   &:hover {
     transform: translateY(-4px);
     background-color: #fbdede;
@@ -330,25 +318,20 @@ const Menu = styled.div`
 `;
 
 const MenuTitle = styled.div`
-  align-self: stretch;
   font-size: 30px;
-  font-style: normal;
   font-weight: 500;
-  line-height: normal;
-  padding-left: 5px;
 `;
 
 const Icon = styled.div`
   font-size: 48px;
-  color: #000;
 `;
 
 const TextBox = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* 위-아래로 끝과 끝 배치 */
-  height: 100%; /* 카드 높이에 맞춰 늘어나도록 */
+  justify-content: space-between;
+  height: 100%;
 `;
 
 const Desc = styled.p`
