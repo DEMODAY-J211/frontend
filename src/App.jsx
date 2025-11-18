@@ -96,41 +96,19 @@ const App = () => {
             <Route path="/homemanager" element={<ProtectedRoute element={HomeManager} />} />
             <Route path="/manageshow" element={<ProtectedRoute element={ManageShow} />} />
             <Route path="/manageshow/manageuser/:showId" element={<ProtectedRoute element={ManageUser} />} />
+            <Route path="/manageshow/entrystatus/:showId" element={<ProtectedRoute element={ViewEntryStatus} />} />
             <Route path="/qrmanager/:showId" element={<ProtectedRoute element={QRManager} />} />
             <Route path="/registershow" element={<ProtectedRoute element={RegisterShow} />} />
-            {/* 이예나 */}
-            <Route path='/navbarmanager' element={<NavbarManager/>}/>
-            <Route path="/homemanager" element={<HomeManager />} />
-            <Route path="/manageshow" element={<ManageShow />} />
-            <Route path="/manageshow/manageuser/:showId" element={<ManageUser />} />
-            <Route path="/qrmanager/:showId" element={<QRManager />} />
-            <Route path="/registershow" element={<RegisterShow />} />
-            
-            <Route path="/landing" element={<Landing />} />
-            <Route path="/register-show/step1" element={<RegisterShowStep1 />} />
-            <Route path="/register-show/step2" element={<RegisterShowStep2 />} />
-            <Route path="/register-show/step4" element={<RegisterShowStep4 />} />
-            <Route path="/register-show/step5" element={<RegisterShowStep5 />} />
-            <Route path="/write-teaminfo" element={<WriteTeamInfo />} />
-
-
-            {/* 주현수 */}
-            <Route
-              path="/manageshow/entrystatus/:showId"
-              element={<ProtectedRoute element={ViewEntryStatus} />}
-            />
             <Route path="/register-show/step1" element={<ProtectedRoute element={RegisterShowStep1} />} />
             <Route path="/register-show/step2" element={<ProtectedRoute element={RegisterShowStep2} />} />
-            <Route
-              path="/register-show/step3"
-              element={<ProtectedRoute element={RegisterShowStep3} />}
-            />
+            <Route path="/register-show/step3" element={<ProtectedRoute element={RegisterShowStep3} />} />
             <Route path="/register-show/step4" element={<ProtectedRoute element={RegisterShowStep4} />} />
             <Route path="/register-show/step5" element={<ProtectedRoute element={RegisterShowStep5} />} />
             <Route path="/register-venue/step1" element={<ProtectedRoute element={RegisterVenue1} />} />
             <Route path="/register-venue/step2" element={<ProtectedRoute element={RegisterVenue2} />} />
             <Route path="/register-venue/step3" element={<ProtectedRoute element={RegisterVenue3} />} />
             <Route path="/registeredvenues" element={<ProtectedRoute element={RegisteredVenues} />} />
+            <Route path="/write-teaminfo" element={<ProtectedRoute element={WriteTeamInfo} />} />
           </Routes>
         </ToastProvider>
       </AuthProvider>

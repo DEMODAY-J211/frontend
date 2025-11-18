@@ -78,7 +78,7 @@ const HomeManager = () => {
                 <CloseButton onClick={handleCloseRegisterModal}>×</CloseButton>
                 <ModalTitle>등록이 완료되었습니다!<br/>이어서 공연도 등록하시겠습니까?</ModalTitle>
                 <ModalButtonGroup>
-                    <ModalButton primary onClick={() => navigate('/registershow')}>네, 등록할래요</ModalButton>
+                    <ModalButton primary onClick={() => navigate('/register-show/step1')}>네, 등록할래요</ModalButton>
                     <ModalButton onClick={handleCloseRegisterModal}>아니요</ModalButton>
                 </ModalButtonGroup>
             </ModalContent>
@@ -92,7 +92,7 @@ const HomeManager = () => {
                 <ModalTitle>새로운 공연을 등록하시네요!<br/>새로운 공연의 공연장소를 아직 등록하지 않으셨다면<br/>공연장을 등록해주세요!</ModalTitle>
                 <ModalButtonGroup>
                     <ModalButton onClick={() => navigate('/register-venue/step1')}>공연장 등록하기</ModalButton>
-                    <ModalButton primary onClick={() => navigate('/registershow')}>이미 등록했어요</ModalButton>
+                    <ModalButton primary onClick={() => navigate('/register-show/step1')}>이미 등록했어요</ModalButton>
                 </ModalButtonGroup>
             </ModalContent>
         </ModalOverlay>
@@ -105,8 +105,8 @@ const HomeManager = () => {
                 <ModalTitle>임시저장된 공연이 있어요!<br/>해당 공연을 이어서 등록하시겠어요?</ModalTitle>
                 <ModalSubtitle>* 주의! 새로운 공연 등록 시<br/>임시 저장된 정보들은 사라지니 유의해주세요!</ModalSubtitle>
                 <ModalButtonGroup>
-                    <ModalButton primary onClick={() => navigate('/registershow?mode=continue')}>이어서 등록하기</ModalButton>
-                    <ModalButton onClick={() => navigate('/registershow')}>새로운 공연 등록하기</ModalButton>
+                    <ModalButton primary onClick={() => navigate('/register-show/step1?mode=continue')}>이어서 등록하기</ModalButton>
+                    <ModalButton onClick={() => navigate('/register-show/step1')}>새로운 공연 등록하기</ModalButton>
                 </ModalButtonGroup>
             </ModalContent>
         </ModalOverlay>
