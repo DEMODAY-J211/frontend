@@ -1,18 +1,63 @@
 import styled from "styled-components";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function CancelModal({ onClose }) {
+const managerId = 5;
+export default function CancelModal({ onClose, reservationId }) {
   const navigate = useNavigate();
-  const reservationId = useState(0);
   const [status, setStatus] = useState(false);
 
   const onClick = () => {
-    if (!status) {
-      setStatus(true);
-    } else {
-      navigate("/homeuser");
+    fetchCancel();
+  };
+
+  const fetchCancel = async () => {
+    try {
+      // const token = localStorage.getItem("accessToken");
+      // const response = await fetch(`${serverUrl}/user/${managerId}/myshow`, {
+      //   credentials: "include",
+      //   header: { "Content-Type": "application/json" },
+      // });
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/user/${managerId}/booking/${reservationId}/cancel`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Credentials": "true",
+          },
+        }
+      );
+
+      // const response = await fetch(
+      //   `${serverUrl}/user/myshow?managerId=${managerId}&status=upcoming`,
+      //   {
+      //     method: "GET",
+      //     credentials: "include",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "Access-Control-Allow-Credentials": "true",
+      //     },
+      //   }
+      // );
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        console.log("response의 data", data);
+        setStatus(true);
+        navigate(-1);
+      }
+    } catch (error) {
+      console.error("예매한 공연 조회 실패:", error);
+      alert("예매한 공연을 찾을 수 없습니다.");
     }
   };
 

@@ -6,10 +6,10 @@ import { RiInformationLine, RiArrowLeftSLine } from "react-icons/ri";
 import { IoTicket } from "react-icons/io5";
 import tikitta_small from "../../assets/tikitta_small.svg";
 
-export default function NavbarUser({ Backmode = false, text = "" }) {
+export default function NavbarUser({ Backmode = false, text = "", managerId }) {
   const navigate = useNavigate();
   const [login, setLogin] = useState(true); //true: 로그인 상태 , false: 로그아웃 상태
-
+  console.log("managerId,", managerId);
   return Backmode ? (
     // 예매하기(서브 헤더) 헤더 ex. <NavbarUser Backmode={true} text="예매하기" />
     <HeaderContainer>
@@ -24,7 +24,9 @@ export default function NavbarUser({ Backmode = false, text = "" }) {
       <img
         src={tikitta_small}
         alt="tikitta logo"
-        onClick={() => navigate("/homeuser")}
+        onClick={() =>
+          navigate("/homeuser", { state: { managerId: managerId } })
+        }
         style={{ cursor: "pointer" }}
       />
       <TextContainer>
@@ -32,7 +34,9 @@ export default function NavbarUser({ Backmode = false, text = "" }) {
         <div className="buttoncontainer">
           <RiInformationLine
             size="24px"
-            onClick={() => navigate("/viewteaminfo")}
+            onClick={() =>
+              navigate("/viewteaminfo", { state: { managerId: managerId } })
+            }
           />
         </div>
       </TextContainer>
@@ -40,7 +44,9 @@ export default function NavbarUser({ Backmode = false, text = "" }) {
         <IoTicket
           size="24px"
           color="#FC2847"
-          onClick={() => navigate("/myticketlist")}
+          onClick={() =>
+            navigate("/myticketlist", { state: { managerId: managerId } })
+          }
         />
       </div>
     </HeaderContainer>

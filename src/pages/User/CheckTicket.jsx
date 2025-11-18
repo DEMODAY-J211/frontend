@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import Footerbtn from "../../components/Save/Footerbtn";
@@ -7,15 +7,32 @@ import CancelModal from "../../components/Modal/CancelModal";
 import { formatKoreanDate } from "../../utils/dateFormat";
 
 // s01201
-// const serverUrl = import.meta.env.VITE_API_URL;
+const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
+const bankOptions = [
+  { id: 1, name: "국민은행", code: "KB" },
+  { id: 2, name: "기업은행", code: "IBK" },
+  { id: 3, name: "농협은행", code: "NH" },
+  { id: 4, name: "신한은행", code: "SHINHAN" },
+  { id: 5, name: "하나은행", code: "HANA" },
+  { id: 6, name: "우리은행", code: "WOORI" },
+  { id: 7, name: "우체국", code: "EPOST" },
+  { id: 8, name: "카카오뱅크", code: "KAKAO" },
+  { id: 9, name: "토스뱅크", code: "TOSS" },
+];
+function getBankNameByCode(code) {
+  const bank = bankOptions.find((b) => b.code === code);
+  return bank ? bank.name : null;
+}
 
 export default function CheckTicket() {
   const navigate = useNavigate();
-  const showid = useState(1);
+  const { managerId } = location.state || {};
   const [isCancel, setIsCancel] = useState(false);
   const [showData, setShowData] = useState([]);
-
+  const { reservationId } = useParams();
+  console.log("resId입니다.", reservationId);
+  console.log("managerId, showId", managerId);
   const handleSelectSeat = () => {
     navigate(`/selectseat/${showid}`);
   };
@@ -25,45 +42,19 @@ export default function CheckTicket() {
 
   const fetchShowData = async () => {
     try {
-      // const token = localStorage.getItem('accessToken');
-      // const response = await fetch(`${serverUrl}/user/${managerId}/booking/${reservationId}`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
-      // if (!response.ok) throw new Error("네트워크 응답 실패");
-      // const res = await response.json();
-      const mockData = {
-        success: true,
-        code: 200,
-        message: "success",
-        data: {
-          showTitle: "제11회 정기공연",
-          showPoster: "https://example.com/poster.png",
-          showtimeStart: "2025-09-25T15:00:00",
-          showLocation: "서강대학교 메리홀 소극장",
-          reservationNumber: "US25102220112",
-          seatList: ["J4", "J5"],
-          userName: "강길동",
-          userPhone: "010-0000-0000",
-          reservationDate: "2025-09-24T22:23:00",
-          ticketOptionName: "일반예매가",
-          price: 9000,
-          quantity: 2,
-          reservationstatus: "PENDING_PAYMENT",
-          totalAmount: 18000,
-          refundInfo: {
-            refundBank: "SHINHAN", // DomainEnums.Bank 값 중 하나
-            refundAccount: "444-555-666666",
-            refundHolder: "김철수",
-          },
-        },
-      };
+      const response = await fetch(
+        `${serverUrl}/user/${managerId}/booking/${reservationId}`,
+        {
+          credentials: "include",
+          header: { "Content-Type": "application/json" },
+        }
+      );
+      if (!response.ok) throw new Error("네트워크 응답 실패");
+      const res = await response.json();
 
-      if (mockData.success) {
-        setShowData(mockData.data);
-        console.log("mockdata", mockData);
+      if (res.success) {
+        setShowData(res.data);
+        console.log("mockdata", res);
         console.log("showData입니다", showData);
       }
     } catch (error) {
@@ -82,7 +73,12 @@ export default function CheckTicket() {
 
   return (
     <PageWrapper>
-      {isCancel && <CancelModal onClose={() => setIsCancel(false)} />}
+      {isCancel && (
+        <CancelModal
+          onClose={() => setIsCancel(false)}
+          reservationId={reservationId}
+        />
+      )}
       <HomeUserContainer>
         <NavbarUser Backmode={true} text="예매 상세 내역" />
         <TicketWrapper>
@@ -127,7 +123,11 @@ export default function CheckTicket() {
             <Title>결제정보</Title>
             <Content>
               <p>결제상태</p>
-              <p>{showData.reservationstatus}승인대기중</p>
+              <p>
+                {showData.reservationstatus === "PENDING_PAYMENT"
+                  ? "승인대기중"
+                  : "입금 완료"}
+              </p>
             </Content>
             <Content>
               <p>결제금액</p>
@@ -140,7 +140,7 @@ export default function CheckTicket() {
             <Content>
               <p>환불 계좌</p>
               <p>
-                {showData?.refundInfo?.refundBank}{" "}
+                {getBankNameByCode(showData?.refundInfo?.refundBank)}{" "}
                 {showData?.refundInfo?.refundAccount}
               </p>
             </Content>

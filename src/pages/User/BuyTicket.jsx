@@ -9,12 +9,18 @@ import { formatKoreanDate } from "../../utils/dateFormat";
 // s01101
 const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
-const managerId = 1;
+// const managerId = 1;
 
 export default function BuyTicket() {
   const location = useLocation();
-  const { selectedShowtime, selectedOption, quantity, showData } =
-    location.state || {};
+  const {
+    managerId,
+    showId,
+    selectedShowtime,
+    selectedOption,
+    quantity,
+    showData,
+  } = location.state || {};
   // console.log(selectedShowtime, selectedOption, quantity, showData);
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -96,7 +102,10 @@ export default function BuyTicket() {
   return (
     <PageWrapper>
       {isComplete && (
-        <ReservationComplete onClose={() => setIsComplete(false)} />
+        <ReservationComplete
+          onClose={() => setIsComplete(false)}
+          managerId={managerId}
+        />
       )}
       <HomeUserContainer>
         <NavbarUser Backmode={true} text="예매하기" />

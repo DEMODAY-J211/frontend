@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { formatKoreanDate } from "../../utils/dateFormat";
 
+const managerId = 5; // 손보기
 export default function ShowListItem({ reservation, activeTab }) {
   const navigate = useNavigate();
   const {
@@ -12,17 +14,18 @@ export default function ShowListItem({ reservation, activeTab }) {
     ticketOptionName,
     reservationQuantity,
     reservationNumber,
-    status,
   } = reservation;
   return (
     <ShowListWrapper onClick={() => navigate(`/checkticket/${reservationId}`)}>
       <img className="poster" src={showPosterPicture} alt={showTitle}></img>
       <ListContent>
-        <Toggle>{status}</Toggle>
+        <Toggle>
+          {new Date(showtimeStart) > new Date() ? "관람예정" : "관람완료"}
+        </Toggle>
         <Title>{showTitle}</Title>
         <Subcontent>
           <p>
-            2025.09.25 (목) 15:00
+            {formatKoreanDate(showtimeStart)}
             <br />
             {ticketOptionName} {reservationQuantity}매 | 예매번호{" "}
             {reservationNumber}
@@ -32,7 +35,9 @@ export default function ShowListItem({ reservation, activeTab }) {
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/mobileticket/${reservationId}`);
+                  navigate(`/mobileticket/${reservationId}`, {
+                    state: { managerId: managerId },
+                  });
                 }}
               >
                 모바일티켓
