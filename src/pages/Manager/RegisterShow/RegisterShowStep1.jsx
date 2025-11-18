@@ -86,7 +86,7 @@ const RegisterShowStep1 = () => {
 
 
     // 입금주
-    const [accountOwner, setAccountOwner] = useState("");
+    const [accountHolder, setAccountHolder] = useState("");
     // 은행
     const [selectBank, setSelectBank] = useState("");
     const [account, setAccount] = useState("");
@@ -195,7 +195,7 @@ const handleNext = () => {
     // console.log("티켓옵션", ticketName);
     // console.log("티켓설명", ticketDetail);
     // console.log("가격", ticketPrice);
-    // console.log("예금주", accountOwner);
+    // console.log("예금주", accountHolder);
     // console.log("계좌번호", account);
   return (
     <>
@@ -427,8 +427,8 @@ const handleNext = () => {
                 <Name>입금주</Name>
                 <Input 
                 placeholder="홍길동"
-                value={accountOwner}
-                onChange={(e) => setAccountOwner(e.target.value)} />
+                value={accountHolder}
+                onChange={(e) => setAccountHolder(e.target.value)} />
 
 
                 {/* 입금 계좌 */}
