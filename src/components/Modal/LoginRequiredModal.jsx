@@ -15,7 +15,12 @@ export default function LoginRequiredModal({ onClose }) {
           <p>예매는 로그인 후 가능합니다.</p>
           <p>지금 가입하고 원하는 공연을 예매해 보세요.</p>
         </div>
-        <div className="btn btn-red" onClick={() => navigate("/login")}>
+        <div
+          className="btn btn-red"
+          onClick={() =>
+            navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`)
+          }
+        >
           로그인하기{" "}
         </div>
       </ModalBox>

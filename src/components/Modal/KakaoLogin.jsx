@@ -2,13 +2,17 @@ import styled from "styled-components";
 import React from "react";
 import Kakaologo from "../../assets/Kakaologo.svg";
 
-export default function KakaoLogin() {
+export default function KakaoLogin({ redirectUri }) {
   const handleKakaoLogin = () => {
     console.log("=== 카카오 로그인 시작 ===");
     console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
-
+    console.log("redirectUri", redirectUri);
     // 백엔드에서 카카오 인증 후 /homeuser 또는 /homemanager로 직접 리다이렉트
-    const KAKAO_AUTH_URL = `${import.meta.env.VITE_API_URL}/oauth2/authorization/kakao`;
+    const KAKAO_AUTH_URL = `${
+      import.meta.env.VITE_API_URL
+    }/oauth2/authorization/kakao?redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}`;
 
     console.log("최종 URL:", KAKAO_AUTH_URL);
     console.log("리다이렉트 시작...");

@@ -27,14 +27,11 @@ function getBankNameByCode(code) {
 
 export default function CheckTicket() {
   const navigate = useNavigate();
-  const { managerId } = location.state || {};
   const [isCancel, setIsCancel] = useState(false);
   const [showData, setShowData] = useState([]);
-  const { reservationId } = useParams();
-  console.log("resId입니다.", reservationId);
-  console.log("managerId, showId", managerId);
+  const { managerId, reservationId } = useParams();
   const handleSelectSeat = () => {
-    navigate(`/selectseat/${showid}`);
+    navigate(`${managerId}/selectseat/${showid}`);
   };
   const handleCancel = () => {
     setIsCancel(true);
@@ -61,6 +58,12 @@ export default function CheckTicket() {
       console.error("공연 조회 실패:", error);
       alert("해당 공연 단체를 찾을 수 없습니다.");
     }
+  };
+
+  const statusText = {
+    PENDING_PAYMENT: "승인 대기중",
+    CANCEL_REQUESTED: "취소 완료",
+    COMPLETED: "예매 완료", // 예매완료 상태가 특정 코드라면 여기에!
   };
 
   useEffect(() => {
@@ -123,11 +126,7 @@ export default function CheckTicket() {
             <Title>결제정보</Title>
             <Content>
               <p>결제상태</p>
-              <p>
-                {showData.reservationstatus === "PENDING_PAYMENT"
-                  ? "승인대기중"
-                  : "입금 완료"}
-              </p>
+              <p>{statusText[showData?.reservationstatus]}</p>
             </Content>
             <Content>
               <p>결제금액</p>
@@ -150,12 +149,14 @@ export default function CheckTicket() {
             </Content>
           </Wrapper>
         </TicketWrapper>
-        <Footerbtn
-          buttons={[
-            { text: "예매 취소", color: "red", onClick: handleCancel },
-            { text: "좌석 변경", color: "red", onClick: handleSelectSeat },
-          ]}
-        />
+        {showData?.reservationstatus !== "CANCEL_REQUESTED" && (
+          <Footerbtn
+            buttons={[
+              { text: "예매 취소", color: "red", onClick: handleCancel },
+              { text: "좌석 변경", color: "red", onClick: handleSelectSeat },
+            ]}
+          />
+        )}
       </HomeUserContainer>
     </PageWrapper>
   );

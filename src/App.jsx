@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { ToastProvider } from "./components/Toast/ToastProvider";
 
 //여기서부터 자기 이름 밑으로 import 하기!!
@@ -42,7 +42,7 @@ import KakaoCallback from "./pages/Auth/KakaoCallback";
 // Protected Route 컴포넌트
 const ProtectedRoute = ({ element: Element, ...rest }) => {
   const { isLoggedIn, isInitialized } = useAuth();
-
+  const location = useLocation();
   // AuthContext 초기화 대기 중
   if (!isInitialized) {
     return null; // 또는 로딩 스피너
@@ -51,12 +51,14 @@ const ProtectedRoute = ({ element: Element, ...rest }) => {
   return isLoggedIn ? (
     <Element {...rest} />
   ) : (
-    <Navigate to="/login" replace />
+    <Navigate
+      to="/login"
+      replace
+      state={{ from: location.pathname + location.search }}
+    />
   );
 };
 import RegisteredVenues from "./pages/Manager/RegisteredVenues";
-
-
 
 const App = () => {
   return (
@@ -73,42 +75,108 @@ const App = () => {
             <Route path="/landing" element={<Landing />} />
 
             {/* 보호된 라우트: User */}
-            <Route path="/homeuser" element={<ProtectedRoute element={HomeUser} />} />
             <Route
-              path="/viewshowdetail/:showId"
+              path=":managerId/homeuser"
+              element={<ProtectedRoute element={HomeUser} />}
+            />
+            <Route
+              path=":managerId/viewshowdetail/:showId"
               element={<ProtectedRoute element={ViewShowDetail} />}
             />
-            <Route path="/payment" element={<ProtectedRoute element={BuyTicket} />} />
-            <Route path="/viewteaminfo" element={<ProtectedRoute element={ViewTeamInfo} />} />
-            <Route path="/myticketlist" element={<ProtectedRoute element={MyTicketList} />} />
             <Route
-              path="/checkticket/:reservationId"
+              path=":managerId/payment/:showId"
+              element={<ProtectedRoute element={BuyTicket} />}
+            />
+            <Route
+              path=":managerId/viewteaminfo"
+              element={<ProtectedRoute element={ViewTeamInfo} />}
+            />
+            <Route
+              path=":managerId/myticketlist"
+              element={<ProtectedRoute element={MyTicketList} />}
+            />
+            <Route
+              path=":managerId/checkticket/:reservationId"
               element={<ProtectedRoute element={CheckTicket} />}
             />
             <Route
-              path="/mobileticket/:reservationId"
+              path=":managerId/mobileticket/:reservationId"
               element={<ProtectedRoute element={MobileTicket} />}
             />
-            <Route path="/selectseat/:showtimeId" element={<ProtectedRoute element={SelectSeat} />} />
+            <Route
+              path=":managerId/selectseat/:showId/:showtimeId"
+              element={<ProtectedRoute element={SelectSeat} />}
+            />
 
             {/* 보호된 라우트: Manager */}
-            <Route path='/navbarmanager' element={<ProtectedRoute element={NavbarManager} />}/>
-            <Route path="/homemanager" element={<ProtectedRoute element={HomeManager} />} />
-            <Route path="/manageshow" element={<ProtectedRoute element={ManageShow} />} />
-            <Route path="/manageshow/manageuser/:showId" element={<ProtectedRoute element={ManageUser} />} />
-            <Route path="/manageshow/entrystatus/:showId" element={<ProtectedRoute element={ViewEntryStatus} />} />
-            <Route path="/qrmanager/:showId" element={<ProtectedRoute element={QRManager} />} />
-            <Route path="/registershow" element={<ProtectedRoute element={RegisterShow} />} />
-            <Route path="/register-show/step1" element={<ProtectedRoute element={RegisterShowStep1} />} />
-            <Route path="/register-show/step2" element={<ProtectedRoute element={RegisterShowStep2} />} />
-            <Route path="/register-show/step3" element={<ProtectedRoute element={RegisterShowStep3} />} />
-            <Route path="/register-show/step4" element={<ProtectedRoute element={RegisterShowStep4} />} />
-            <Route path="/register-show/step5" element={<ProtectedRoute element={RegisterShowStep5} />} />
-            <Route path="/register-venue/step1" element={<ProtectedRoute element={RegisterVenue1} />} />
-            <Route path="/register-venue/step2" element={<ProtectedRoute element={RegisterVenue2} />} />
-            <Route path="/register-venue/step3" element={<ProtectedRoute element={RegisterVenue3} />} />
-            <Route path="/registeredvenues" element={<ProtectedRoute element={RegisteredVenues} />} />
-            <Route path="/write-teaminfo" element={<ProtectedRoute element={WriteTeamInfo} />} />
+            <Route
+              path="/navbarmanager"
+              element={<ProtectedRoute element={NavbarManager} />}
+            />
+            <Route
+              path="/homemanager"
+              element={<ProtectedRoute element={HomeManager} />}
+            />
+            <Route
+              path="/manageshow"
+              element={<ProtectedRoute element={ManageShow} />}
+            />
+            <Route
+              path="/manageshow/manageuser/:showId"
+              element={<ProtectedRoute element={ManageUser} />}
+            />
+            <Route
+              path="/manageshow/entrystatus/:showId"
+              element={<ProtectedRoute element={ViewEntryStatus} />}
+            />
+            <Route
+              path="/qrmanager/:showId"
+              element={<ProtectedRoute element={QRManager} />}
+            />
+            <Route
+              path="/registershow"
+              element={<ProtectedRoute element={RegisterShow} />}
+            />
+            <Route
+              path="/register-show/step1"
+              element={<ProtectedRoute element={RegisterShowStep1} />}
+            />
+            <Route
+              path="/register-show/step2"
+              element={<ProtectedRoute element={RegisterShowStep2} />}
+            />
+            <Route
+              path="/register-show/step3"
+              element={<ProtectedRoute element={RegisterShowStep3} />}
+            />
+            <Route
+              path="/register-show/step4"
+              element={<ProtectedRoute element={RegisterShowStep4} />}
+            />
+            <Route
+              path="/register-show/step5"
+              element={<ProtectedRoute element={RegisterShowStep5} />}
+            />
+            <Route
+              path="/register-venue/step1"
+              element={<ProtectedRoute element={RegisterVenue1} />}
+            />
+            <Route
+              path="/register-venue/step2"
+              element={<ProtectedRoute element={RegisterVenue2} />}
+            />
+            <Route
+              path="/register-venue/step3"
+              element={<ProtectedRoute element={RegisterVenue3} />}
+            />
+            <Route
+              path="/registeredvenues"
+              element={<ProtectedRoute element={RegisteredVenues} />}
+            />
+            <Route
+              path="/write-teaminfo"
+              element={<ProtectedRoute element={WriteTeamInfo} />}
+            />
           </Routes>
         </ToastProvider>
       </AuthProvider>

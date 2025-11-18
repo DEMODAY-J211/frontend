@@ -43,14 +43,12 @@ const MockData = [
 ];
 
 export default function MobileTicket() {
-  const location = useLocation();
-  const managerId = location.state?.managerId;
+  const { managerId } = useParams();
   const { reservationId } = useParams();
   const [showInfo, setShowInfo] = useState(MockData[0]);
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [IsOpen, setIsOpen] = useState(false);
-  const [selectedQR, setSelectedQR] = useState("");
 
   function handleNext() {
     setCurrentIndex((prev) => Math.min(prev + 1, showInfo.tickets.length - 1));
@@ -68,33 +66,32 @@ export default function MobileTicket() {
   }
 
   const handleCheckTicket = () => {
-    navigate(`/checkticket/${reservationId}`);
+    navigate(`/${managerId}/checkticket/${reservationId}`);
   };
   const fetchticket = async () => {
     try {
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/user/${managerId}/ticket/${reservationId}`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Credentials": "true",
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setShowInfo(data.data);
-        console.log("response의 data", data);
-      }
+      // const response = await fetch(
+      //   `${
+      //     import.meta.env.VITE_API_URL
+      //   }/user/${managerId}/ticket/${reservationId}`,
+      //   {
+      //     method: "GET",
+      //     credentials: "include",
+      //     headers: {
+      //       Accept: "application/json",
+      //       "Content-Type": "application/json",
+      //       "Access-Control-Allow-Credentials": "true",
+      //     },
+      //   }
+      // );
+      // if (!response.ok) {
+      //   throw new Error(`HTTP error: ${response.status}`);
+      // }
+      // const data = await response.json();
+      // if (data.success) {
+      //   setShowInfo(data.data);
+      //   console.log("response의 data", data);
+      // }
     } catch (error) {
       console.error("예매한 공연 조회 실패:", error);
       alert("예매한 공연을 찾을 수 없습니다.");
@@ -124,58 +121,52 @@ export default function MobileTicket() {
           QR을 통해 입장하실 수 있습니다.
           <br />
           즐거운 관람되세요!
-          <QrContainer>
-            <button
-              className="buttoncontainer"
-              onClick={handlePrev}
-              style={{ visibility: currentIndex === 0 ? "hidden" : "visible" }}
-            >
-              <RiArrowLeftWideFill size="40px" />
-            </button>
-            <QrList index={currentIndex}>
-              {showInfo.tickets.map((ticket) => {
-                return (
-                  <QRItem onClick={() => openModal(ticket.qrCode)}>
-                    <img
-                      src={
-                        "https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg"
-                      }
-                      alt={`QR-${currentIndex}`}
-                    />
-                    {/* <div className="overlay">전체 화면으로 확인하기</div>" */}
-                  </QRItem>
-                );
-              })}
-            </QrList>
+          <QrWrapper>
+            <QrContainer>
+              <button
+                className="buttoncontainer"
+                onClick={handlePrev}
+                style={{
+                  visibility: currentIndex === 0 ? "hidden" : "visible",
+                }}
+              >
+                <RiArrowLeftWideFill size="40px" />
+              </button>
+              <QrList index={currentIndex}>
+                {showInfo.tickets.map((ticket) => {
+                  return (
+                    <QRItem onClick={() => openModal(ticket.qrCode)}>
+                      <img src={ticket?.qrCode} alt={`QR-${currentIndex}`} />
+                      {/* <div className="overlay">전체 화면으로 확인하기</div>" */}
+                    </QRItem>
+                  );
+                })}
+              </QrList>
 
-            <button
-              className="buttoncontainer"
-              onClick={handleNext}
-              style={{
-                visibility:
-                  currentIndex === showInfo.tickets.length - 1
-                    ? "hidden"
-                    : "visible",
-              }}
-            >
-              <RiArrowRightWideFill size="40px" />
-            </button>
-          </QrContainer>
-          <div>sdd</div>
-          {/* <QrList index={currentIndex}>
-            {showInfo.tickets.map((ticket) => {
-              return (
-                <div>
-                  <div></div>
-                  {currentIndex} / {showInfo.tickets.length}
-                </div>
-              );
-            })}
-          </QrList> */}
-          {/* <div index={currentIndex}>
-              {showInfo.tickets.map((ticket) => {
-                return ()})}
-                <div/> */}
+              <button
+                className="buttoncontainer"
+                onClick={handleNext}
+                style={{
+                  visibility:
+                    currentIndex === showInfo.tickets.length - 1
+                      ? "hidden"
+                      : "visible",
+                }}
+              >
+                <RiArrowRightWideFill size="40px" />
+              </button>
+            </QrContainer>
+            {/* 🔵 페이지 네비게이션 버튼 */}
+            <Pagination_container>
+              {showInfo.tickets.map((_, i) => (
+                <div
+                  key={i}
+                  className={`dot ${currentIndex === i ? "active" : ""}`}
+                  onClick={() => setCurrentIndex(i)}
+                />
+              ))}
+            </Pagination_container>
+          </QrWrapper>
         </TicketContainer>
         {IsOpen && (
           <QRModal onClick={closeModal}>
@@ -184,7 +175,7 @@ export default function MobileTicket() {
               <ShowContainer>
                 <h3>{showInfo.showTitle}</h3>
                 <p>
-                  2025.09.25(목) 15:00
+                  {formatKoreanDate(showInfo.showDateTime)}
                   <br />
                   {showInfo.showLocation}
                 </p>
@@ -193,15 +184,15 @@ export default function MobileTicket() {
                   {showInfo.ticketOption.ticketOptionPrice.toLocaleString()}원
                 </p>
                 <p>
-                  강길동님의 좌석은 A17입니다.
+                  {showInfo?.userName}님의 좌석은{" "}
+                  {showInfo?.tickets?.[currentIndex]?.seat?.seatNumber}
+                  입니다.
                   <br />
                   즐거운 관람되세요!
                 </p>
               </ShowContainer>
               <img
-                src={
-                  "https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg"
-                }
+                src={showInfo?.tickets?.[currentIndex]?.qrCode}
                 alt="QR Modal"
               />
             </ModalContent>
@@ -280,6 +271,7 @@ const QrContainer = styled.div`
   font-weight: 300;
   line-height: normal;
   text-align: center;
+
   .buttoncontainer {
     display: flex;
     aspect-ratio: 1/1;
@@ -288,7 +280,34 @@ const QrContainer = styled.div`
     cursor: pointer;
   }
 `;
+const QrWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  align-self: stretch;
+`;
 
+const Pagination_container = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+  align-items: center;
+  width: 100%;
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #d1d1d1;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .dot.active {
+    background-color: #555;
+  }
+`;
 const QrList = styled.div`
   // align-items: center;
   // align-self: stretch;

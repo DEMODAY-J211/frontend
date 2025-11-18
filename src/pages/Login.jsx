@@ -5,8 +5,12 @@ import KakaoLogin from "../components/Modal/KakaoLogin.jsx";
 import KakaoCallback from "./Auth/KakaoCallback.jsx";
 const serverUrl = import.meta.env.VITE_API_URL;
 const authorization_code = "176F530BC2413E63A36A93E2C2663037";
+import { useLocation } from "react-router-dom";
 
 export default function Login() {
+  const location = useLocation();
+  const from = location.state?.from || "/";
+  console.log(from);
   // const handlelogin = () => {
   //   window.location.href = `${serverUrl}/oauth2/authorization/kakao`;
   // };
@@ -56,7 +60,7 @@ export default function Login() {
             <br />
             '좌석-결제-QR 입장'까지 한번에!
           </a>
-          <KakaoLogin />
+          <KakaoLogin redirectUri={from} />
         </LoginContainer>
       </HomeUserContainer>
     </PageWrapper>

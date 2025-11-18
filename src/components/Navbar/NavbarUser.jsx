@@ -1,15 +1,19 @@
 import React from "react";
 import styled from "styled-components";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { RiInformationLine, RiArrowLeftSLine } from "react-icons/ri";
 import { IoTicket } from "react-icons/io5";
 import tikitta_small from "../../assets/tikitta_small.svg";
 
-export default function NavbarUser({ Backmode = false, text = "", managerId }) {
+export default function NavbarUser({
+  Backmode = false,
+  text = "",
+  onIconClick,
+}) {
+  const { managerId } = useParams();
   const navigate = useNavigate();
-  const [login, setLogin] = useState(true); //true: 로그인 상태 , false: 로그아웃 상태
-  console.log("managerId,", managerId);
+  // console.log("managerId,", managerId);
   return Backmode ? (
     // 예매하기(서브 헤더) 헤더 ex. <NavbarUser Backmode={true} text="예매하기" />
     <HeaderContainer>
@@ -24,9 +28,7 @@ export default function NavbarUser({ Backmode = false, text = "", managerId }) {
       <img
         src={tikitta_small}
         alt="tikitta logo"
-        onClick={() =>
-          navigate("/homeuser", { state: { managerId: managerId } })
-        }
+        onClick={() => navigate(`/${managerId}/homeuser`)}
         style={{ cursor: "pointer" }}
       />
       <TextContainer>
@@ -34,20 +36,12 @@ export default function NavbarUser({ Backmode = false, text = "", managerId }) {
         <div className="buttoncontainer">
           <RiInformationLine
             size="24px"
-            onClick={() =>
-              navigate("/viewteaminfo", { state: { managerId: managerId } })
-            }
+            onClick={() => navigate(`/${managerId}/viewteaminfo`)}
           />
         </div>
       </TextContainer>
       <div className="buttoncontainer">
-        <IoTicket
-          size="24px"
-          color="#FC2847"
-          onClick={() =>
-            navigate("/myticketlist", { state: { managerId: managerId } })
-          }
-        />
+        <IoTicket size="24px" color="#FC2847" onClick={onIconClick} />
       </div>
     </HeaderContainer>
   );

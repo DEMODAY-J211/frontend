@@ -2,10 +2,11 @@ import styled from "styled-components";
 import { BsInstagram, BsFacebook } from "react-icons/bs";
 import { BiLogoYoutube } from "react-icons/bi";
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 
-const managerId = 1;
-// const serverUrl = import.meta.env.VITE_API_URL;
-const serverUrl = "http://15.164.218.55:8080";
+// const managerId = 1;
+const serverUrl = import.meta.env.VITE_API_URL;
+// const serverUrl = "http://15.164.218.55:8080";
 
 // const mockData = {
 //   managerId: 1,
@@ -22,6 +23,7 @@ const serverUrl = "http://15.164.218.55:8080";
 // };
 
 export default function TeamInfo() {
+  const { managerId } = useParams();
   const [managerData, setManagerData] = useState([]);
 
   useEffect(() => {

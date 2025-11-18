@@ -80,22 +80,28 @@ export default function BottomSheet({
 
       const result = await response.json();
       console.log("서버 응답:", result);
-      // 성공 시 다음 페이지 이동
-      // navigate(`../selectseat/${showData.showId}`, {
-      //   selectedShowtime,
-      //   selectedOption,
-      //   quantity,
-      // });
-      navigate(`../payment`, {
-        state: {
-          managerId: managerId,
-          showId: showData.showId,
-          selectedShowtime,
-          selectedOption,
-          quantity,
-          showData,
-        },
-      });
+      if (showData.saleMethod === "Select_by_User") {
+        navigate(
+          `/${managerId}/selectseat/${showData.showId}/${selectedShowtime.showtimeId}`,
+          {
+            state: {
+              selectedShowtime,
+              selectedOption,
+              quantity,
+              showData,
+            },
+          }
+        );
+      } else {
+        navigate(`/${managerId}/payment/${showData.showId}`, {
+          state: {
+            selectedShowtime,
+            selectedOption,
+            quantity,
+            showData,
+          },
+        });
+      }
     } catch (error) {
       console.error("예약 요청 실패:", error);
       alert("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
