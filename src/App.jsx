@@ -103,7 +103,7 @@ const App = () => {
             <Route path="/homemanager" element={<HomeManager />} />
             <Route path="/manageshow" element={<ManageShow />} />
             <Route path="/manageshow/manageuser/:showId" element={<ManageUser />} />
-            <Route path="/qrmanager/:showId" element={<QRManager />} />
+            <Route path="/qrmanager" element={<QRManager />} />
             <Route path="/registershow" element={<RegisterShow />} />
             
             <Route path="/landing" element={<Landing />} />
