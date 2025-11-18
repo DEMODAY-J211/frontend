@@ -8,7 +8,7 @@ import { formatKoreanDate } from "../../utils/dateFormat.js";
 import { useAuth } from "../Auth/AuthContext.jsx";
 
 // s00104
-const managerId = 1;
+const managerId = 5;
 // const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
 const serverUrl = "https://back-tikitta.duckdns.org";
@@ -24,7 +24,7 @@ export default function HomeUser() {
   useEffect(() => {
     // setmanaer;
   });
-
+  console.log("managerId", managerId);
   useEffect(() => {
     const jsessionId = getCookie("JSESSIONID");
     if (jsessionId) {
@@ -177,7 +177,7 @@ export default function HomeUser() {
   return (
     <PageWrapper>
       <HomeUserContainer>
-        <NavbarUser />
+        <NavbarUser managerId={managerId} />
         {!currentShow ? (
           <p>공연 정보를 불러오는 중입니다...</p>
         ) : (

@@ -6,9 +6,9 @@ import { useToast } from "../../components/Toast/UseToast";
 
 const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
-const managerId = 3;
+// const managerId = 5;
 
-export default function ReservationComplete({ onClose }) {
+export default function ReservationComplete({ onClose, managerId }) {
   const navigate = useNavigate();
   const [resData, setResData] = useState([]);
 
@@ -33,7 +33,7 @@ export default function ReservationComplete({ onClose }) {
 
       if (res.success) {
         setResData(res.data);
-        console.log("res.data입니다.", res);
+        // console.log("res.data입니다.", res);
       }
     } catch (error) {
       console.error("공연 조회 실패:", error);
@@ -63,7 +63,12 @@ export default function ReservationComplete({ onClose }) {
     // };
     const reservationId = data.data;
     console.log("예매 완료 응답:", data);
-    navigate(`/checkticket/${reservationId}`);
+
+    navigate(`/checkticket/${reservationId}`, {
+      state: {
+        managerId: managerId,
+      },
+    });
   };
 
   useEffect(() => {

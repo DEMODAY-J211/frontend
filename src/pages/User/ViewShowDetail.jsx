@@ -73,17 +73,19 @@ export default function ViewShowDetail() {
     const now = new Date();
     const bookingStart = new Date(showData.bookingStartAt);
     const showStart = new Date(showData.showStartDate);
+    const showendStart = new Date(showData.showtimeEndDate);
     const bookingEnd = new Date(showStart.getTime() - 60 * 60 * 1000); // 첫 공연 1시간 전
 
     if (now < bookingStart) {
       setBookingStatus("before"); // 예매 전
       console.log("예매 전");
-    } else if (now >= bookingStart && now <= bookingEnd) {
+      // } else if (now >= bookingStart && now <= bookingEnd) {
+    } else if (now >= bookingStart && now <= showendStart) {
       setBookingStatus("available"); // 예매 가능
       console.log("예매 가능");
     } else {
       setBookingStatus("closed"); // 예매 종료
-      console.log("예매 종료", { now, bookingStart, bookingEnd });
+      console.log("예매 종료", { now, bookingStart, bookingEnd, showStart });
     }
   }, [showData]);
   return (
@@ -195,6 +197,7 @@ export default function ViewShowDetail() {
           onClose={() => setShowBottomSheet(false)}
           onNeedModal={() => setShowAlert(true)}
           showData={showData}
+          managerId={managerId}
         />
       )}
 
