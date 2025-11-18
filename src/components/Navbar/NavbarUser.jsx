@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { RiInformationLine, RiArrowLeftSLine } from "react-icons/ri";
 import { IoTicket } from "react-icons/io5";
 import tikitta_small from "../../assets/tikitta_small.svg";
@@ -9,9 +9,9 @@ import tikitta_small from "../../assets/tikitta_small.svg";
 export default function NavbarUser({
   Backmode = false,
   text = "",
-  managerId,
   onIconClick,
 }) {
+  const { managerId } = useParams();
   const navigate = useNavigate();
   // console.log("managerId,", managerId);
   return Backmode ? (
@@ -28,7 +28,7 @@ export default function NavbarUser({
       <img
         src={tikitta_small}
         alt="tikitta logo"
-        onClick={() => navigate(`${managerId}/homeuser`)}
+        onClick={() => navigate(`/${managerId}/homeuser`)}
         style={{ cursor: "pointer" }}
       />
       <TextContainer>
@@ -36,7 +36,7 @@ export default function NavbarUser({
         <div className="buttoncontainer">
           <RiInformationLine
             size="24px"
-            onClick={() => navigate(`${managerId}/viewteaminfo`)}
+            onClick={() => navigate(`/${managerId}/viewteaminfo`)}
           />
         </div>
       </TextContainer>

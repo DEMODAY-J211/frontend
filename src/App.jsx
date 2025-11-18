@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { ToastProvider } from "./components/Toast/ToastProvider";
 
 //여기서부터 자기 이름 밑으로 import 하기!!
@@ -42,13 +42,21 @@ import RegisterShowStep5 from "./pages/Manager/RegisterShow/RegisterShowStep5";
 // Protected Route 컴포넌트
 const ProtectedRoute = ({ element: Element, ...rest }) => {
   const { isLoggedIn, isInitialized } = useAuth();
-
+  const location = useLocation();
   // AuthContext 초기화 대기 중
   if (!isInitialized) {
     return null; // 또는 로딩 스피너
   }
 
-  return isLoggedIn ? <Element {...rest} /> : <Navigate to="/login" replace />;
+  return isLoggedIn ? (
+    <Element {...rest} />
+  ) : (
+    <Navigate
+      to="/login"
+      replace
+      state={{ from: location.pathname + location.search }}
+    />
+  );
 };
 
 const App = () => {

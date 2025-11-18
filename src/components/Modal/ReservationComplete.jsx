@@ -76,8 +76,9 @@ export default function ReservationComplete({ onClose }) {
     try {
       await navigator.clipboard.writeText(resData.managerAccountNumber);
       addToast("계좌번호를 복사했어요!", "success"); // 성공 토스트
+      console.log(resData.managerAccountNumber);
     } catch (err) {
-      addToast("계좌번호 복사 실패", "error"); // 실패 토스트
+      addToast("계좌번호 복사 실패", err); // 실패 토스트
     }
   };
 
