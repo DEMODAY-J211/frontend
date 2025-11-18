@@ -32,7 +32,7 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
       try {
         setIsLoading(true);
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/manager/shows/${locationId}/seatmap/`,
+          `${import.meta.env.VITE_API_URL}/manager/shows/${locationId}/seatmap`,
           {
             method: 'GET',
             credentials: 'include',

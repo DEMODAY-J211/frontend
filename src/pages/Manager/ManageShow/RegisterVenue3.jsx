@@ -432,11 +432,15 @@ const RegisterVenue3 = () => {
 
     // 1단계에서 저장한 공연장 정보 불러오기
     const venue1Data = JSON.parse(localStorage.getItem('registerVenue1') || '{}');
-    const location = venue1Data.venueName || '공연장 이름 미입력';
+
+    // 1단계에서 저장해 둔 location_id 불러오기
+    // RegisterVenue1에서 registerVenue1.locationId 또는 별도의 localStorage('locationId')에 저장됨
+    const storedLocationId = venue1Data.locationId || localStorage.getItem('locationId');
+    const location_id = storedLocationId ? Number(storedLocationId) : undefined;
 
     // API 요청 데이터 준비
     const requestData = {
-      location: location,
+      location_id, // ✅ 백엔드에 함께 전달
       layout_width: maxCol + 1,
       layout_height: maxRow + 1,
       seat_map: seatMap,

@@ -98,7 +98,7 @@ const RegisterVenue1 = () => {
       locationAddressDetail: detailAddress || '',
       locationStandingCount: isStanding ? Number(standingCapacity) : 0,
       locationSeatFloor: isSeat ? Number(floorCount) : 1,
-      locationSeatCount: isSeat ? Number(seatCount) : 0,
+      locationSeatCount: 0,
     };
 
     formData.append('venueRegisterRequest', new Blob([JSON.stringify(venueRegisterRequest)], { type: 'application/json' }));
@@ -149,6 +149,15 @@ const RegisterVenue1 = () => {
       console.log('Parsed Result:', result);
 
       if (response.ok) {
+        // 백엔드에서 내려준 location_id 추출
+        const locationId = result?.data?.location_id;
+
+        console.log('등록된 공연장 location_id:', locationId);
+
+        if (!locationId) {
+          console.warn('location_id가 응답에 없습니다. 이후 단계에서 문제가 될 수 있습니다.');
+        }
+
         // localStorage에 저장 (2,3단계에서 필요할 수 있음)
         const venueData = {
           venueName,
@@ -159,8 +168,14 @@ const RegisterVenue1 = () => {
           isSeat,
           floorCount,
           seatCount,
+          locationId,
         };
         localStorage.setItem('registerVenue1', JSON.stringify(venueData));
+
+        // locationId를 따로도 저장 (다른 페이지에서 바로 사용할 수 있도록)
+        if (locationId) {
+          localStorage.setItem('locationId', String(locationId));
+        }
 
         addToast('공연장이 등록되었습니다!', 'success');
 
@@ -276,7 +291,7 @@ const RegisterVenue1 = () => {
                   {isStanding ? <CheckboxIconSelected /> : <CheckboxIcon />}
                   <Label>스탠딩석</Label>
                 </CheckboxContainer>
-                <SubFieldGroup>
+                {/* <SubFieldGroup>
                   <SubLabel>허용 인원</SubLabel>
                   <SmallInput
                     type="number"
@@ -287,7 +302,7 @@ const RegisterVenue1 = () => {
                     min="1"
                   />
                   <Unit>명</Unit>
-                </SubFieldGroup>
+                </SubFieldGroup> */}
               </FormField>
 
               {/* 좌석 */}
@@ -313,7 +328,7 @@ const RegisterVenue1 = () => {
                   />
                   <Unit>층</Unit>
                 </SubFieldGroup>
-                <SubFieldGroup>
+                {/* <SubFieldGroup>
                   <SubLabel>좌석 수</SubLabel>
                   <SmallInput
                     type="number"
@@ -324,7 +339,7 @@ const RegisterVenue1 = () => {
                     min="1"
                   />
                   <Unit>석</Unit>
-                </SubFieldGroup>
+                </SubFieldGroup> */}
               </FormField>
             </FormSection>
           </ContentArea>
