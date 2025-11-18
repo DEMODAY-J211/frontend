@@ -15,14 +15,16 @@ const RegisteredVenues = () => {
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const response = await fetch('/manager/venue/view', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/venue/view`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include', // 쿠키 포함
         })
 
         const result = await response.json()
+        
 
         if (response.ok && result.success) {
           // API 데이터를 컴포넌트에서 사용하는 형식으로 변환
@@ -37,6 +39,7 @@ const RegisteredVenues = () => {
             floorCount: venue.locationFloor,
             seatCount: venue.locationSeatTotalCount,
           }))
+          console.log(transformedVenues);
 
           setVenues(transformedVenues)
           // 첫 번째 공연장을 기본 선택
@@ -130,7 +133,7 @@ const RegisteredVenues = () => {
                   <VenueCard
                     key={venue.id}
                     onClick={() => handleSelectVenue(venue)}
-                    isSelected={selectedVenue?.id === venue.id}
+                    $isSelected={selectedVenue?.id === venue.id}
                   >
                     <VenueThumbnail>
                       {venue.thumbnail ? (
@@ -233,9 +236,9 @@ const RegisteredVenues = () => {
         <PreviousButton onClick={handlePrevious}>
           ← 이전
         </PreviousButton>
-        <SaveButton onClick={handleSave}>
+        {/* <SaveButton onClick={handleSave}>
           저장하기
-        </SaveButton>
+        </SaveButton> */}
       </Footer>
     </Container>
   )
@@ -350,7 +353,7 @@ const VenueCard = styled.div`
   padding: 10px;
   border-radius: 15px;
   transition: background-color 0.2s ease;
-  background-color: ${props => props.isSelected ? '#FFF1F0' : 'transparent'};
+  background-color: ${props => props.$isSelected ? '#FFF1F0' : 'transparent'};
 
   &:hover {
     background-color: #FFF1F0;

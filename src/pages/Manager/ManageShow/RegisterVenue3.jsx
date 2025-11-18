@@ -384,17 +384,24 @@ const RegisterVenue3 = () => {
       seat_data: seatData,
     };
 
+    console.log('=== 공연장 등록 API 요청 ===');
+    console.log('Request Data:', JSON.stringify(requestData, null, 2));
+
     try {
       // API 호출
-      const response = await fetch('/manager/venue/seatmap', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/venue/seatmap`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 쿠키 포함
         body: JSON.stringify(requestData),
       });
 
+      console.log('Response Status:', response.status);
+
       const result = await response.json();
+      console.log('Response Data:', result);
 
       if (response.ok && result.success) {
         // localStorage에 저장
@@ -417,6 +424,7 @@ const RegisterVenue3 = () => {
         }, 1000);
       } else {
         // 에러 처리
+        console.error('API 에러 응답:', result);
         addToast(result.message || '좌석 배치 등록에 실패했습니다.', 'error');
       }
     } catch (error) {
