@@ -1,52 +1,60 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { BiSearch } from 'react-icons/bi'
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai'
 import NavbarManager from '../../components/Navbar/NavbarManager'
 
-// 임시 데이터
-const MOCK_VENUES = [
-  {
-    id: '1',
-    name: '대학로 소극장',
-    address: '서울시 종로구 대학로 123',
-    capacity: '1층 150석',
-    thumbnail: '',
-    image: '',
-    isFavorite: true,
-    floorCount: 1,
-    seatCount: 150
-  },
-  {
-    id: '2',
-    name: '아트홀 서울',
-    address: '서울시 강남구 테헤란로 456',
-    capacity: '2층 300석',
-    thumbnail: '',
-    image: '',
-    isFavorite: false,
-    floorCount: 2,
-    seatCount: 300
-  },
-  {
-    id: '3',
-    name: '문화예술극장',
-    address: '서울시 마포구 월드컵로 789',
-    capacity: '1층 200석',
-    thumbnail: '',
-    image: '',
-    isFavorite: false,
-    floorCount: 1,
-    seatCount: 200
-  }
-]
-
 const RegisteredVenues = () => {
   const navigate = useNavigate()
-  const [venues, setVenues] = useState(MOCK_VENUES)
-  const [selectedVenue, setSelectedVenue] = useState(MOCK_VENUES[0])
+  const [venues, setVenues] = useState([])
+  const [selectedVenue, setSelectedVenue] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+
+  // API에서 공연장 데이터 가져오기
+  useEffect(() => {
+    const fetchVenues = async () => {
+      try {
+        const response = await fetch('/manager/venue/view', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const result = await response.json()
+
+        if (response.ok && result.success) {
+          // API 데이터를 컴포넌트에서 사용하는 형식으로 변환
+          const transformedVenues = result.data.map((venue) => ({
+            id: String(venue.locationId),
+            name: venue.locationName,
+            address: venue.locationAddress,
+            capacity: `${venue.locationFloor}층 ${venue.locationSeatTotalCount}석`,
+            thumbnail: venue.locationSeatPicture,
+            image: venue.locationSeatPicture,
+            isFavorite: venue.locationLike,
+            floorCount: venue.locationFloor,
+            seatCount: venue.locationSeatTotalCount,
+          }))
+
+          setVenues(transformedVenues)
+          // 첫 번째 공연장을 기본 선택
+          if (transformedVenues.length > 0) {
+            setSelectedVenue(transformedVenues[0])
+          }
+        } else {
+          console.error('공연장 데이터를 불러오는데 실패했습니다:', result.message)
+          setVenues([])
+        }
+      } catch (error) {
+        console.error('API 요청 오류:', error)
+        setVenues([])
+      }
+    }
+
+    fetchVenues()
+  }, [])
 
   const handleToggleFavorite = (venueId) => {
     setVenues(prev =>

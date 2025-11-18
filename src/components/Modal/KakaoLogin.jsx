@@ -4,20 +4,16 @@ import Kakaologo from "../../assets/Kakaologo.svg";
 
 export default function KakaoLogin() {
   const handleKakaoLogin = () => {
-    // 백엔드 카카오 OAuth 로그인 URL로 리다이렉트
-    // const KAKAO_AUTH_URL = `${
-    //   import.meta.env.VITE_API_URL
-    // }/oauth2/authorization/kakao`;
-    // window.location.href = KAKAO_AUTH_URL;
-    const KAKAO_AUTH_URL = `${
-      import.meta.env.VITE_API_URL
-    }/oauth2/authorization/kakao?redirect_uri=${encodeURIComponent(
-      import.meta.env.VITE_FRONTEND_URL + "/auth/kakao/callback"
-    )}`;
-    window.location.href = KAKAO_AUTH_URL;
+    console.log("=== 카카오 로그인 시작 ===");
+    console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
 
-    console.log(KAKAO_AUTH_URL);
-    console.log("handlekakaologin");
+    // 백엔드에서 카카오 인증 후 /homeuser 또는 /homemanager로 직접 리다이렉트
+    const KAKAO_AUTH_URL = `${import.meta.env.VITE_API_URL}/oauth2/authorization/kakao`;
+
+    console.log("최종 URL:", KAKAO_AUTH_URL);
+    console.log("리다이렉트 시작...");
+
+    window.location.href = KAKAO_AUTH_URL;
   };
 
   return (
