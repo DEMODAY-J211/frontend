@@ -2,21 +2,18 @@ import { useState, useEffect } from "react";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import ShowListItem from "../../components/User/ShowListItem";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 
 const serverUrl = import.meta.env.VITE_API_URL;
 
 export default function MyTicketList() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const managerId = location.state?.managerId;
+  const { managerId } = useParams();
+  // const managerId = location.state?.managerId;
 
   const [activeTab, setActiveTab] = useState("예매확인/취소");
   const tabs = ["예매확인/취소", "지난 공연내역"];
   const [reservationlist, setReservationlist] = useState([]);
-  const [managerData, setManagerData] = useState(null);
-
-  console.log("managerId", managerId);
   const fetchShowList = async () => {
     try {
       // const token = localStorage.getItem("accessToken");
@@ -31,38 +28,25 @@ export default function MyTicketList() {
         },
       });
 
-      // const response = await fetch(
-      //   `${serverUrl}/user/myshow?managerId=${managerId}&status=upcoming`,
-      //   {
-      //     method: "GET",
-      //     credentials: "include",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       "Access-Control-Allow-Credentials": "true",
-      //     },
-      //   }
-      // );
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
       }
-
 
       const data = await response.json();
       if (data.success) {
         setReservationlist(data.data);
         console.log("response", response);
         console.log("response의 data", data);
-
       }
     } catch (error) {
       console.error("예매한 공연 조회 실패:", error);
-      alert("예매한 공연을 찾을 수 없습니다.");
+      // alert("예매한 공연을 찾을 수 없습니다.");
     }
   };
 
   useEffect(() => {
     fetchShowList();
-    console.log("NavbarUser(managerId):", managerId);
+    // console.log("NavbarUser(managerId):", managerId);
   }, []);
 
   return (
@@ -91,7 +75,7 @@ export default function MyTicketList() {
                       key={r.reservationId}
                       reservation={r}
                       onClick={() => {
-                        navigate("/viewshowdetail");
+                        navigate(`${managerId}/viewshowdetail`);
                       }}
                     />
                   ))}

@@ -57,37 +57,51 @@ const App = () => {
             {/* 예시: <Route path='/mypage/festival' element={<MyPage/>}/> */}
             {/* 오서현 */}
             <Route path="/login" element={<Login />} />
-            <Route path="/homeuser" element={<HomeUser />} />
+            <Route path=":managerId/homeuser" element={<HomeUser />} />
             <Route
-              path="/viewshowdetail/:showId"
+              path=":managerId/viewshowdetail/:showId"
               element={<ViewShowDetail />}
             />
-            <Route path="/payment" element={<BuyTicket />} />
-            <Route path="/viewteaminfo" element={<ViewTeamInfo />} />
-            <Route path="/myticketlist" element={<MyTicketList />} />
+            <Route path=":managerId/payment/:showId" element={<BuyTicket />} />
+            <Route path=":managerId/viewteaminfo" element={<ViewTeamInfo />} />
+            <Route path=":managerId/myticketlist" element={<MyTicketList />} />
             <Route
-              path="/checkticket/:reservationId"
+              path=":managerId/checkticket/:reservationId"
               element={<CheckTicket />}
             />
             <Route
-              path="/mobileticket/:reservationId"
+              path=":managerId/mobileticket/:reservationId"
               element={<MobileTicket />}
             />
 
             {/* 이예나 */}
-            <Route path='/navbarmanager' element={<NavbarManager/>}/>
+            <Route path="/navbarmanager" element={<NavbarManager />} />
             <Route path="/homemanager" element={<HomeManager />} />
             <Route path="/manageshow" element={<ManageShow />} />
-            <Route path="/manageshow/manageuser/:showId" element={<ManageUser />} />
+            <Route
+              path="/manageshow/manageuser/:showId"
+              element={<ManageUser />}
+            />
             <Route path="/qrmanager/:showId" element={<QRManager />} />
             <Route path="/registershow" element={<RegisterShow />} />
-            
-            <Route path="/landing" element={<Landing />} />
-            <Route path="/register-show/step1" element={<RegisterShowStep1 />} />
-            <Route path="/register-show/step2" element={<RegisterShowStep2 />} />
-            <Route path="/register-show/step4" element={<RegisterShowStep4 />} />
-            <Route path="/register-show/step5" element={<RegisterShowStep5 />} />
 
+            <Route path="/landing" element={<Landing />} />
+            <Route
+              path="/register-show/step1"
+              element={<RegisterShowStep1 />}
+            />
+            <Route
+              path="/register-show/step2"
+              element={<RegisterShowStep2 />}
+            />
+            <Route
+              path="/register-show/step4"
+              element={<RegisterShowStep4 />}
+            />
+            <Route
+              path="/register-show/step5"
+              element={<RegisterShowStep5 />}
+            />
 
             {/* 주현수 */}
             <Route

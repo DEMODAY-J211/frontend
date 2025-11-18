@@ -86,10 +86,8 @@ export default function BottomSheet({
       //   selectedOption,
       //   quantity,
       // });
-      navigate(`../payment`, {
+      navigate(`/${managerId}/payment/${showData.showId}`, {
         state: {
-          managerId: managerId,
-          showId: showData.showId,
           selectedShowtime,
           selectedOption,
           quantity,

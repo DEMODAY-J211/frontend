@@ -1,9 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { formatKoreanDate } from "../../utils/dateFormat";
 
-const managerId = 5; // 손보기
+// const managerId = 5; // 손보기
 export default function ShowListItem({ reservation, activeTab }) {
+  const { managerId } = useParams();
   const navigate = useNavigate();
   const {
     reservationId,
@@ -16,7 +17,9 @@ export default function ShowListItem({ reservation, activeTab }) {
     reservationNumber,
   } = reservation;
   return (
-    <ShowListWrapper onClick={() => navigate(`/checkticket/${reservationId}`)}>
+    <ShowListWrapper
+      onClick={() => navigate(`/${managerId}/checkticket/${reservationId}`)}
+    >
       <img className="poster" src={showPosterPicture} alt={showTitle}></img>
       <ListContent>
         <Toggle>
@@ -35,9 +38,7 @@ export default function ShowListItem({ reservation, activeTab }) {
               <span
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/mobileticket/${reservationId}`, {
-                    state: { managerId: managerId },
-                  });
+                  navigate(`/${managerId}/mobileticket/${reservationId}`);
                 }}
               >
                 모바일티켓

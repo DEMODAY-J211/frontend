@@ -43,8 +43,7 @@ const MockData = [
 ];
 
 export default function MobileTicket() {
-  const location = useLocation();
-  const managerId = location.state?.managerId;
+  const { managerId } = useParams();
   const { reservationId } = useParams();
   const [showInfo, setShowInfo] = useState(MockData[0]);
   const navigate = useNavigate();
@@ -68,7 +67,7 @@ export default function MobileTicket() {
   }
 
   const handleCheckTicket = () => {
-    navigate(`/checkticket/${reservationId}`);
+    navigate(`${managerId}/checkticket/${reservationId}`);
   };
   const fetchticket = async () => {
     try {

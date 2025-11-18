@@ -27,14 +27,11 @@ function getBankNameByCode(code) {
 
 export default function CheckTicket() {
   const navigate = useNavigate();
-  const { managerId } = location.state || {};
   const [isCancel, setIsCancel] = useState(false);
   const [showData, setShowData] = useState([]);
-  const { reservationId } = useParams();
-  console.log("resId입니다.", reservationId);
-  console.log("managerId, showId", managerId);
+  const { managerId, reservationId } = useParams();
   const handleSelectSeat = () => {
-    navigate(`/selectseat/${showid}`);
+    navigate(`${managerId}/selectseat/${showid}`);
   };
   const handleCancel = () => {
     setIsCancel(true);

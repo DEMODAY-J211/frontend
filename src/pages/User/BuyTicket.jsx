@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import Footerbtn from "../../components/Save/Footerbtn";
@@ -13,16 +13,11 @@ const serverUrl = import.meta.env.VITE_API_URL;
 
 export default function BuyTicket() {
   const location = useLocation();
-  const {
-    managerId,
-    showId,
-    selectedShowtime,
-    selectedOption,
-    quantity,
-    showData,
-  } = location.state || {};
+  const { managerId, showId } = useParams();
+  const { selectedShowtime, selectedOption, quantity, showData } =
+    location.state || {};
   // console.log(selectedShowtime, selectedOption, quantity, showData);
-  const [name, setName] = useState("");
+  // const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   // const [accountBank, setAccountBank] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -129,15 +124,15 @@ export default function BuyTicket() {
           {/* 예매 정보 */}
           <InfoSection>
             <Title>예매정보</Title>
-            <Subtitle>예매 안내를 위해 성함을 입력해주세요.</Subtitle>
-            <InputWrapper
+            {/* <Subtitle>예매 안내를 위해 성함을 입력해주세요.</Subtitle> */}
+            {/* <InputWrapper
               placeholder="홍길동"
               value={name}
               onChange={(e) => setName(e.target.value)}
-            />
+            /> */}
             <Subtitle>예매 안내를 위해 전화번호를 입력해주세요.</Subtitle>
             <InputWrapper
-              placeholder="-을 제외하고 작성해주세요."
+              placeholder="-을 포함하여 작성해주세요."
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
             />
