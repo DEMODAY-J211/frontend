@@ -94,42 +94,24 @@ const WriteTeamInfo = () => {
             </Desc>
             </Logo>
 
+            <Flex>
             {/* Group Name */}
+            <Left>
             <FormField>
               <FieldLabel>단체명</FieldLabel>
               <InputField
                 type="text"
-                placeholder="단체명"
+                placeholder="단체명을 입력해주세요"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                style={{ width: '150px' }}
+                style={{ width: '700px' }}
               />
+             <Desc>
+            * 필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.
+            </Desc>
             </FormField>
 
-            {/* One Liner */}
-            <FormField>
-              <FieldLabel>한줄 소개</FieldLabel>
-              <TextAreaField
-                placeholder="한줄 소개를 입력하세요"
-                value={formData.oneLiner}
-                onChange={(e) => handleInputChange('oneLiner', e.target.value)}
-                rows={1}
-              />
-            </FormField>
-
-            {/* Description */}
-            <FormField>
-              <FieldLabel>소개글</FieldLabel>
-              <TextAreaField
-                placeholder="소개글을 입력하세요"
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                rows={3}
-                style={{ height: '80px' }}
-              />
-            </FormField>
-
-            {/* URL Section */}
+             {/* URL Section */}
             <URLSection>
               <URLHeader>
                 <URLTitle>URL</URLTitle>
@@ -174,6 +156,38 @@ const WriteTeamInfo = () => {
                 />
               </URLInputWrapper>
             </URLSection>
+            </Left>
+
+            <Right>
+            {/* One Liner */}
+            <FormField>
+              <FieldLabel>한줄 소개</FieldLabel>
+              <TextAreaField
+                placeholder="한줄 소개를 입력해주세요"
+                value={formData.oneLiner}
+                onChange={(e) => handleInputChange('oneLiner', e.target.value)}
+                rows={1}
+              />
+            <Desc>
+            * 필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.
+            </Desc>
+            </FormField>
+
+            {/* Description */}
+            <FormField>
+              <FieldLabel>소개글</FieldLabel>
+              <TextAreaField
+                placeholder="소개글을 입력해주세요"
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                rows={3}
+                style={{ height: '80px' }}
+              />
+            </FormField>
+            </Right>
+            </Flex>
+
+           
 
             {/* Save Button */}
             <SaveButton onClick={handleSave}>저장하기</SaveButton>
@@ -202,7 +216,7 @@ const EditForm = styled.div`
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 30px;
 `
 
 const FormField = styled.div`
@@ -260,18 +274,38 @@ const HiddenInput = styled.input`
 `
 const Desc = styled.p`
     color: #D72B2B;
-    text-align: center;
     font-size: 15px;
     font-weight: 300;
 `
 
+const Flex = styled.div`
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: space-between;
+`
+
+const Left =styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 20px;
+
+`
+
+const Right =styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 20px;
+`
 const InputField = styled.input`
   background: white;
   border: 1px solid #C5C5C5;
   border-radius: 12px;
-  padding: 8px 15px;
+  padding: 10px 20px;
   font-family: inherit;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 300;
 
   &::placeholder {
@@ -289,9 +323,9 @@ const TextAreaField = styled.textarea`
   background: white;
   border: 1px solid #C5C5C5;
   border-radius: 12px;
-  padding: 8px 15px;
+  padding: 10px 20px;
   font-family: inherit;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 300;
   resize: none;
 
@@ -318,7 +352,7 @@ const URLHeader = styled.div`
 `
 
 const URLTitle = styled.div`
-  font-size: 16px;
+  font-size: 25px;
   font-weight: 500;
   color: #333;
 `
@@ -368,9 +402,9 @@ const URLInput = styled.input`
   background: white;
   border: 1px solid #C5C5C5;
   border-radius: 12px;
-  padding: 8px 15px;
+  padding: 10px 20px;
   font-family: inherit;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 300;
 
   &::placeholder {
