@@ -15,7 +15,16 @@ export default function ShowListItem({ reservation, activeTab }) {
     ticketOptionName,
     reservationQuantity,
     reservationNumber,
+    reservationStatus,
   } = reservation;
+  const statusText = {
+    PENDING_PAYMENT: "승인 대기중",
+    CANCEL_REQUESTED: "취소 완료",
+    COMPLETED: "예매 완료", // 예매완료 상태가 특정 코드라면 여기에!
+  };
+
+  const displayText = statusText[reservationStatus] || "알 수 없는 상태";
+
   return (
     <ShowListWrapper
       onClick={() => navigate(`/${managerId}/checkticket/${reservationId}`)}
@@ -23,7 +32,7 @@ export default function ShowListItem({ reservation, activeTab }) {
       <img className="poster" src={showPosterPicture} alt={showTitle}></img>
       <ListContent>
         <Toggle>
-          {new Date(showtimeStart) > new Date() ? "관람예정" : "관람완료"}
+          {new Date(showtimeStart) > new Date() ? displayText : "관람완료"}
         </Toggle>
         <Title>{showTitle}</Title>
         <Subcontent>
@@ -33,18 +42,19 @@ export default function ShowListItem({ reservation, activeTab }) {
             {ticketOptionName} {reservationQuantity}매 | 예매번호{" "}
             {reservationNumber}
           </p>
-          {activeTab !== "지난 공연내역" && (
-            <Btn>
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/${managerId}/mobileticket/${reservationId}`);
-                }}
-              >
-                모바일티켓
-              </span>
-            </Btn>
-          )}
+          {activeTab !== "지난 공연내역" &&
+            reservationStatus !== "CANCEL_REQUESTED" && (
+              <Btn>
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/${managerId}/mobileticket/${reservationId}`);
+                  }}
+                >
+                  모바일티켓
+                </span>
+              </Btn>
+            )}
         </Subcontent>
       </ListContent>
     </ShowListWrapper>

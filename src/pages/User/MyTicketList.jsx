@@ -10,7 +10,6 @@ export default function MyTicketList() {
   const navigate = useNavigate();
   const { managerId } = useParams();
   // const managerId = location.state?.managerId;
-
   const [activeTab, setActiveTab] = useState("예매확인/취소");
   const tabs = ["예매확인/취소", "지난 공연내역"];
   const [reservationlist, setReservationlist] = useState([]);

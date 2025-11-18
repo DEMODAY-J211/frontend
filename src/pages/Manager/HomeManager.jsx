@@ -11,7 +11,7 @@ import myteamimg from "../../assets/homemanager/myteam.png";
 import myshowimg from "../../assets/homemanager/myshow_icon.png";
 
 import { ToastProvider } from "../../components/Toast/ToastProvider";
-import { useToast } from "../../components/Toast/UseToast";
+import { useToast } from "../../components/Toast/useToast";
 import EditTeamInfo from "./EditTeamInfo";
 
 const HomeManager = () => {
