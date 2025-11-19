@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { AiOutlineClose } from "react-icons/ai";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useToast } from "../../components/Toast/UseToast";
+import { useToast } from "../../components/Toast/useToast";
 
 const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";

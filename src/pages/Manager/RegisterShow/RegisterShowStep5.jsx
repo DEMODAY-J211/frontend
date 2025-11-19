@@ -1,274 +1,238 @@
-import React from 'react'
-import NavbarManager from '../../../components/Navbar/NavbarManager'
-import RegisterShowNavbar from './RegisterShowNavbar'
-import styled from 'styled-components'
-import { useNavigate } from 'react-router-dom'
-import { useToast } from '../../../components/Toast/UseToast'
-import { useState, useEffect } from 'react'
-import { BsUpload } from 'react-icons/bs'
-import { AiOutlineCalendar } from 'react-icons/ai'
-import { AiOutlineClose } from 'react-icons/ai'
-
+import React from "react";
+import NavbarManager from "../../../components/Navbar/NavbarManager";
+import RegisterShowNavbar from "./RegisterShowNavbar";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "../../../components/Toast/useToast";
+import { useState, useEffect } from "react";
+import { BsUpload } from "react-icons/bs";
+import { AiOutlineCalendar } from "react-icons/ai";
+import { AiOutlineClose } from "react-icons/ai";
+// UseToast -> useToast 로 수정
 const RegisterShowStep1 = () => {
+  const navigate = useNavigate();
+  const { addToast } = useToast();
 
-    const navigate = useNavigate();
-    const { addToast } = useToast();
-  
+  // 이미지 파일 저장
+  const [poster, setPoster] = useState(null);
+  // 미리보기 URL 저장
+  const [preview, setPreview] = useState(null);
 
-    // 이미지 파일 저장
-    const [poster, setPoster] = useState(null); 
-     // 미리보기 URL 저장
-    const [preview, setPreview] = useState(null);
+  //공연명
+  const [showName, setShowName] = useState("");
 
-    //공연명
-    const [showName, setShowName] = useState("");
+  // 공연 날짜/회차들
+  const [showSchedules, setShowSchedules] = useState([
+    { date: "", startTime: "", endTime: "" },
+  ]);
 
-    // 공연 날짜/회차들
-    const [showSchedules, setShowSchedules] = useState([
-    { date: "", startTime: "", endTime: "" }
-    ]);
-
-    const addSchedule = () => {
+  const addSchedule = () => {
     setShowSchedules([
-        ...showSchedules,
-        { date: "", startTime: "", endTime: "" }
+      ...showSchedules,
+      { date: "", startTime: "", endTime: "" },
     ]);
-    };
+  };
 
-    //예매 날짜
-    const [reserveStartDate, setReserveStartDate] = useState("");
-    // 예매 기간 시간
-    const [reserveStartTime, setReserveStartTime] = useState("");
-     // 티켓 
-    const [ticketOptions, setTicketOptions] = useState([
-    { name: "", detail: "", price: "" }
-    ]);
+  //예매 날짜
+  const [reserveStartDate, setReserveStartDate] = useState("");
+  // 예매 기간 시간
+  const [reserveStartTime, setReserveStartTime] = useState("");
+  // 티켓
+  const [ticketOptions, setTicketOptions] = useState([
+    { name: "", detail: "", price: "" },
+  ]);
 
-    // 입금주
-    const [accountOwner, setAccountOwner] = useState("");
-    // 은행
-    const [selectBank, setSelectBank] = useState("");
-    const [account, setAccount] = useState("");
+  // 입금주
+  const [accountOwner, setAccountOwner] = useState("");
+  // 은행
+  const [selectBank, setSelectBank] = useState("");
+  const [account, setAccount] = useState("");
 
   // 이전 단계로
   const handlePrevious = () => {
     // TODO: 2단계 페이지로 이동
-    navigate('/register-show/step4');
-  }
-
+    navigate("/register-show/step4");
+  };
 
   // 다음 단계로
-const handleSubmit = () => {
-    navigate('/register-show/step2');
-    };
+  const handleSubmit = () => {
+    navigate("/register-show/step2");
+  };
 
-
-
-
-    // 기존 임시 저장 데이터 불러오기
-    useEffect(() => {
-        const saved = JSON.parse(localStorage.getItem('registerShowStep1'));
-        if (saved?.poster) {
-            setPreview(saved.poster);
-        }
-    }, []);
+  // 기존 임시 저장 데이터 불러오기
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("registerShowStep1"));
+    if (saved?.poster) {
+      setPreview(saved.poster);
+    }
+  }, []);
 
   return (
     <>
-
-    <NavbarManager/>
-    <Container>
+      <NavbarManager />
+      <Container>
         <MainContent>
-          <RegisterShowNavbar currentStep={1}/>
+          <RegisterShowNavbar currentStep={1} />
 
           <FormContent>
             <LeftContent>
-                <Name>대표 포스터</Name>
-                    <Poster>
-                        {preview ? (
-                            <>
-                                <img src={preview} alt="포스터 미리보기" />
+              <Name>대표 포스터</Name>
+              <Poster>
+                {preview ? (
+                  <>
+                    <img src={preview} alt="포스터 미리보기" />
 
-                                <HoverOverlay>
-                                    포스터 변경하기
-                                </HoverOverlay>
-                            </>
-                        ) : (
-                            <EmptyBox>
-                                <BsUpload size={45} color="#ccc" />
-                                <UploadText>포스터 업로드하기</UploadText>
-                            </EmptyBox>
-                        )}
-                    </Poster>
+                    <HoverOverlay>포스터 변경하기</HoverOverlay>
+                  </>
+                ) : (
+                  <EmptyBox>
+                    <BsUpload size={45} color="#ccc" />
+                    <UploadText>포스터 업로드하기</UploadText>
+                  </EmptyBox>
+                )}
+              </Poster>
             </LeftContent>
 
             <RightContent>
-                <Q>
+              <Q>
                 {/* 공연명 */}
                 <Name>공연명</Name>
                 <Input
-                value={showName}
-                className={showName === "" ? "placeholder" : ""}
-                placeholder="제4회 정기공연"/>
+                  value={showName}
+                  className={showName === "" ? "placeholder" : ""}
+                  placeholder="제4회 정기공연"
+                />
+              </Q>
 
-
-                </Q>
-
-                <Q>
+              <Q>
                 {/* 공연 날짜/회차 */}
-                <Name>공연 날짜/회차
-                    <AddButton onClick={addSchedule}>추가하기</AddButton>
+                <Name>
+                  공연 날짜/회차
+                  <AddButton onClick={addSchedule}>추가하기</AddButton>
                 </Name>
                 {showSchedules.map((sch, idx) => (
-                <DateRow key={idx}>
+                  <DateRow key={idx}>
                     <Column>
-                    <DateWrapper>
-                    <DateInput
-                    type="date"
-                    value={sch.date}
-                    className={sch.date === "" ? "placeholder" : ""}
-                    />
+                      <DateWrapper>
+                        <DateInput
+                          type="date"
+                          value={sch.date}
+                          className={sch.date === "" ? "placeholder" : ""}
+                        />
 
-                    <CalendarIcon />
-                    </DateWrapper>
+                        <CalendarIcon />
+                      </DateWrapper>
                     </Column>
 
-
                     <Column>
-                    <TimeSelect
-                    value={sch.startTime}
-                    className={sch.startTime === "" ? "placeholder" : ""}
-                    >
-                    </TimeSelect>
+                      <TimeSelect
+                        value={sch.startTime}
+                        className={sch.startTime === "" ? "placeholder" : ""}
+                      ></TimeSelect>
                     </Column>
-
 
                     <span>~</span>
 
                     <Column>
-                    <TimeSelect
-                    value={sch.endTime}
-                    className={sch.endTime === "" ? "placeholder" : ""}
-                    >
-                    </TimeSelect>
+                      <TimeSelect
+                        value={sch.endTime}
+                        className={sch.endTime === "" ? "placeholder" : ""}
+                      ></TimeSelect>
                     </Column>
-                    </DateRow>
+                  </DateRow>
                 ))}
-                </Q>
+              </Q>
 
-                <Q>
+              <Q>
                 {/* 예매 기간 */}
                 <Name>예매 기간</Name>
                 <DateRow>
-                <Column>
-                <DateWrapper>
-                <DateInput
-                type="date"
-                value={reserveStartDate}
-                className={reserveStartDate === "" ? "placeholder" : ""}
-                />
-                <CalendarIcon />
-                </DateWrapper>
-                </Column>
+                  <Column>
+                    <DateWrapper>
+                      <DateInput
+                        type="date"
+                        value={reserveStartDate}
+                        className={reserveStartDate === "" ? "placeholder" : ""}
+                      />
+                      <CalendarIcon />
+                    </DateWrapper>
+                  </Column>
 
+                  <Column>
+                    <TimeSelect
+                      value={reserveStartTime}
+                      className={reserveStartTime === "" ? "placeholder" : ""}
+                    ></TimeSelect>
+                  </Column>
 
+                  <span>~</span>
 
-                <Column>
-                <TimeSelect
-                value={reserveStartTime}
-                className={reserveStartTime === "" ? "placeholder" : ""}
-                >
-                </TimeSelect>
-                </Column>
-
-
-
-                <span>~</span>
-
-                <PeriodText>공연 시작 1시간 전</PeriodText>
+                  <PeriodText>공연 시작 1시간 전</PeriodText>
                 </DateRow>
-                </Q>
+              </Q>
 
-                <Q>
-                <Name>
-                    티켓 옵션
-                </Name>
+              <Q>
+                <Name>티켓 옵션</Name>
 
                 {ticketOptions.map((opt, idx) => (
-                    <TicketContent key={idx}>
+                  <TicketContent key={idx}>
                     <Input
-                        placeholder="티켓 옵션 이름 (일반예매 / 학생예매)"
-                        value={opt.name}
-                        className={opt.name === "" ? "placeholder" : ""}
+                      placeholder="티켓 옵션 이름 (일반예매 / 학생예매)"
+                      value={opt.name}
+                      className={opt.name === "" ? "placeholder" : ""}
                     />
 
                     <Input
-                        placeholder="티켓 옵션 설명"
-                        value={opt.detail}
-                        className={opt.detail === "" ? "placeholder" : ""}
+                      placeholder="티켓 옵션 설명"
+                      value={opt.detail}
+                      className={opt.detail === "" ? "placeholder" : ""}
                     />
 
                     <PriceRow>
-                        <span>판매가</span>
-                        <PriceInput
+                      <span>판매가</span>
+                      <PriceInput
                         placeholder="0"
                         value={opt.price}
                         className={opt.price === "" ? "placeholder" : ""}
-                        />
-                        <span>원</span>
+                      />
+                      <span>원</span>
                     </PriceRow>
-                    </TicketContent>
+                  </TicketContent>
                 ))}
-                </Q>
+              </Q>
 
-
-                <Q>
+              <Q>
                 {/* 입금주 */}
                 <Name>입금주</Name>
-                <Input 
-                placeholder="홍길동"
-                value={accountOwner}
-                />
-
+                <Input placeholder="홍길동" value={accountOwner} />
 
                 {/* 입금 계좌 */}
                 <Name>입금 계좌</Name>
                 <AccountRow>
-                    <BankSelect
+                  <BankSelect
                     value={selectBank}
-                    className={selectBank === "" ? "placeholder" : ""}>
-                    </BankSelect>
-                    <Input 
-                    placeholder="0000-000-000000"
-                    value={account}
-                    />
+                    className={selectBank === "" ? "placeholder" : ""}
+                  ></BankSelect>
+                  <Input placeholder="0000-000-000000" value={account} />
                 </AccountRow>
-                </Q>
+              </Q>
             </RightContent>
-
           </FormContent>
-
         </MainContent>
 
-
-          {/* 하단 버튼 */}
+        {/* 하단 버튼 */}
         <Footer>
           <PrevButton onClick={handlePrevious}>←이전</PrevButton>
           <RightButtonGroup>
             <NextButton onClick={handleSubmit}>다음→</NextButton>
           </RightButtonGroup>
         </Footer>
-     </Container>
-    
-
-
-    
+      </Container>
     </>
-  )
-}
+  );
+};
 
-export default RegisterShowStep1
-
+export default RegisterShowStep1;
 
 const Container = styled.div`
   width: 1440px;
@@ -305,7 +269,7 @@ const NavButton = styled.button`
   border: none;
   background: #fc2847;
   color: #fffffe;
-  
+
   font-weight: 300;
   font-size: 20px;
   cursor: pointer;
@@ -330,28 +294,27 @@ const TempSaveButton = styled(NavButton)``;
 const NextButton = styled(NavButton)``;
 
 const FormContent = styled.div`
-    display: flex;
-    gap: 100px;
-`
+  display: flex;
+  gap: 100px;
+`;
 
 const LeftContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
 
 const RightContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
 const Name = styled.div`
-    font-size: 25px;
-    font-weight: 500;
-    display: flex;
-    gap: 20px;
-    
-`
+  font-size: 25px;
+  font-weight: 500;
+  display: flex;
+  gap: 20px;
+`;
 
 const Poster = styled.div`
   width: 320px;
@@ -383,7 +346,7 @@ const HoverOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   color: #fff;
   opacity: 0;
   display: flex;
@@ -393,7 +356,6 @@ const HoverOverlay = styled.div`
   font-weight: 500;
   transition: 0.25s ease;
 `;
-
 
 const EmptyBox = styled.div`
   display: flex;
@@ -409,10 +371,9 @@ const UploadText = styled.div`
   color: #999;
 `;
 
-
 const HiddenInput = styled.input`
   display: none;
-`
+`;
 const Input = styled.input`
   width: 100%;
   height: 55px;
@@ -429,7 +390,6 @@ const Input = styled.input`
   &:focus {
     border-color: #fc2847;
   }
-
 `;
 
 const DateRow = styled.div`
@@ -440,10 +400,9 @@ const DateRow = styled.div`
 
   span {
     font-size: 18px;
-    color: #999;;
+    color: #999;
   }
 `;
-
 
 const AddButton = styled.button`
   background: var(--color-tertiary);
@@ -464,7 +423,6 @@ const PeriodText = styled.div`
   font-size: 17px;
   color: #999;
   margin-left: 10px;
-
 `;
 
 const PriceRow = styled.div`
@@ -502,16 +460,16 @@ const BankSelect = styled.select`
   &:focus {
     border-color: #fc2847;
   }
-    option {
+  option {
     color: #333;
   }
 
-    &.placeholder {
+  &.placeholder {
     color: #999;
-    }
-     option.placeholder {
-        color: #999;
-        }
+  }
+  option.placeholder {
+    color: #999;
+  }
 `;
 
 const DateInput = styled.input`
@@ -544,7 +502,6 @@ const DateInput = styled.input`
   }
 `;
 
-
 const TimeSelect = styled.select`
   width: 140px;
   height: 55px;
@@ -559,23 +516,23 @@ const TimeSelect = styled.select`
   &:focus {
     border-color: #fc2847;
   }
-    option {
+  option {
     color: #333;
   }
 
-    &.placeholder {
+  &.placeholder {
     color: #999;
-    }
-     option.placeholder {
-        color: #999;
-        }
+  }
+  option.placeholder {
+    color: #999;
+  }
 `;
 
 const Q = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
 const DateWrapper = styled.div`
   position: relative;
   display: flex;
@@ -603,10 +560,10 @@ const DeleteIcon = styled(AiOutlineClose)`
 `;
 
 const TicketContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
 const ErrorMessage = styled.div`
   color: #fc2847;
   font-size: 15px;
@@ -617,7 +574,7 @@ const ErrorMessage = styled.div`
 `;
 
 const Column = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;

@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import { RiArrowRightSLine } from 'react-icons/ri';
-import { AiOutlinePlus } from 'react-icons/ai';
-import { BiSolidTrash } from 'react-icons/bi';
-import { IoIosArrowDown } from 'react-icons/io';
-import NavbarManager from '../../../components/Navbar/NavbarManager';
-import { useToast } from '../../../components/Toast/UseToast';
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { RiArrowRightSLine } from "react-icons/ri";
+import { AiOutlinePlus } from "react-icons/ai";
+import { BiSolidTrash } from "react-icons/bi";
+import { IoIosArrowDown } from "react-icons/io";
+import NavbarManager from "../../../components/Navbar/NavbarManager";
+import { useToast } from "../../../components/Toast/useToast";
 
 const RegisterVenue3 = () => {
   const navigate = useNavigate();
@@ -16,11 +16,17 @@ const RegisterVenue3 = () => {
 
   // 2단계 데이터 불러오기 (useMemo로 메모이제이션)
   const { initialSeatLayout, initialFloors } = useMemo(() => {
-    const venue1Data = JSON.parse(localStorage.getItem('registerVenue1') || '{}');
-    const venue2Data = JSON.parse(localStorage.getItem('registerVenue2') || '{}');
+    const venue1Data = JSON.parse(
+      localStorage.getItem("registerVenue1") || "{}"
+    );
+    const venue2Data = JSON.parse(
+      localStorage.getItem("registerVenue2") || "{}"
+    );
 
     // 1단계에서 설정한 층수 가져오기
-    const floorCount = venue1Data.floorCount ? Number(venue1Data.floorCount) : 1;
+    const floorCount = venue1Data.floorCount
+      ? Number(venue1Data.floorCount)
+      : 1;
     const floors = Array.from({ length: floorCount }, (_, i) => i + 1);
 
     return {
@@ -33,8 +39,8 @@ const RegisterVenue3 = () => {
   const [currentFloor, setCurrentFloor] = useState(1);
   const [rowLabeling, setRowLabeling] = useState(false);
   const [sectionLabeling, setSectionLabeling] = useState(false);
-  const [rowOrder, setRowOrder] = useState('korean');
-  const [rowStart, setRowStart] = useState('top'); // 'top', 'bottom', 'left', 'right'
+  const [rowOrder, setRowOrder] = useState("korean");
+  const [rowStart, setRowStart] = useState("top"); // 'top', 'bottom', 'left', 'right'
   const [sections, setSections] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState(new Set());
   const [isDragging, setIsDragging] = useState(false);
@@ -47,34 +53,55 @@ const RegisterVenue3 = () => {
   const [floorSettings, setFloorSettings] = useState({});
 
   // 구역 색상
-  const SECTION_COLORS = ['#D72B2B', '#E38A03', '#7CD550', '#03C2E3', '#A974C5'];
+  const SECTION_COLORS = [
+    "#D72B2B",
+    "#E38A03",
+    "#7CD550",
+    "#03C2E3",
+    "#A974C5",
+  ];
 
   // 드롭다운 옵션
   const rowOrderOptions = [
-    { value: 'korean', label: '가나다 순' },
-    { value: 'number', label: '123 순' },
-    { value: 'lowercase', label: 'abc 순' },
-    { value: 'uppercase', label: 'ABC 순' },
+    { value: "korean", label: "가나다 순" },
+    { value: "number", label: "123 순" },
+    { value: "lowercase", label: "abc 순" },
+    { value: "uppercase", label: "ABC 순" },
   ];
 
   const rowStartOptions = [
-    { value: 'top', label: '위에서 시작' },
-    { value: 'bottom', label: '아래에서 시작' },
-    { value: 'left', label: '왼쪽에서 시작' },
-    { value: 'right', label: '오른쪽에서 시작' },
+    { value: "top", label: "위에서 시작" },
+    { value: "bottom", label: "아래에서 시작" },
+    { value: "left", label: "왼쪽에서 시작" },
+    { value: "right", label: "오른쪽에서 시작" },
   ];
 
   // 행 라벨 생성 함수
   const generateRowLabel = (index, type) => {
     switch (type) {
-      case 'korean':
-        const koreanChars = ['가', '나', '다', '라', '마', '바', '사', '아', '자', '차', '카', '타', '파', '하'];
+      case "korean":
+        const koreanChars = [
+          "가",
+          "나",
+          "다",
+          "라",
+          "마",
+          "바",
+          "사",
+          "아",
+          "자",
+          "차",
+          "카",
+          "타",
+          "파",
+          "하",
+        ];
         return koreanChars[index % koreanChars.length];
-      case 'number':
+      case "number":
         return (index + 1).toString();
-      case 'lowercase':
+      case "lowercase":
         return String.fromCharCode(97 + (index % 26)); // a-z
-      case 'uppercase':
+      case "uppercase":
         return String.fromCharCode(65 + (index % 26)); // A-Z
       default:
         return (index + 1).toString();
@@ -98,9 +125,14 @@ const RegisterVenue3 = () => {
     // 모든 층에 대해 라벨링 적용 (각 층의 설정에 따라)
     floors.forEach((floor) => {
       // 현재 층이면 현재 설정 사용, 아니면 저장된 설정 사용
-      const floorSetting = floor === currentFloor
-        ? { rowLabeling, rowOrder, rowStart }
-        : (floorSettings[floor] || { rowLabeling: false, rowOrder: 'korean', rowStart: 'top' });
+      const floorSetting =
+        floor === currentFloor
+          ? { rowLabeling, rowOrder, rowStart }
+          : floorSettings[floor] || {
+              rowLabeling: false,
+              rowOrder: "korean",
+              rowStart: "top",
+            };
 
       if (!floorSetting.rowLabeling) return;
 
@@ -117,7 +149,10 @@ const RegisterVenue3 = () => {
       });
 
       // 방향에 따라 순서 변경
-      if (floorSetting.rowStart === 'left' || floorSetting.rowStart === 'right') {
+      if (
+        floorSetting.rowStart === "left" ||
+        floorSetting.rowStart === "right"
+      ) {
         // 열 기준 정렬 (좌우)
         const colMap = new Map();
         floorSeats.forEach((seat) => {
@@ -128,7 +163,7 @@ const RegisterVenue3 = () => {
         });
 
         const sortedCols = Array.from(colMap.keys()).sort((a, b) => a - b);
-        if (floorSetting.rowStart === 'right') {
+        if (floorSetting.rowStart === "right") {
           sortedCols.reverse();
         }
 
@@ -141,13 +176,14 @@ const RegisterVenue3 = () => {
 
           const rowLabel = generateRowLabel(colIndex, floorSetting.rowOrder);
           // 기존 라벨에서 열 번호만 추출
-          const originalLabel = seatLayout.find((s) => s.id === seat.id)?.label || '';
+          const originalLabel =
+            seatLayout.find((s) => s.id === seat.id)?.label || "";
           const colMatch = originalLabel.match(/\d+$/);
-          const colNumber = colMatch ? colMatch[0] : '';
+          const colNumber = colMatch ? colMatch[0] : "";
 
           return {
             ...seat,
-            label: rowLabel + '-' + colNumber,
+            label: rowLabel + "-" + colNumber,
           };
         });
       } else {
@@ -155,7 +191,7 @@ const RegisterVenue3 = () => {
         const sortedRows = Array.from(rowMap.keys()).sort((a, b) => a - b);
 
         // 아래에서 시작인 경우 역순
-        if (floorSetting.rowStart === 'bottom') {
+        if (floorSetting.rowStart === "bottom") {
           sortedRows.reverse();
         }
 
@@ -167,13 +203,14 @@ const RegisterVenue3 = () => {
 
           const rowLabel = generateRowLabel(rowIndex, floorSetting.rowOrder);
           // 기존 라벨에서 열 번호만 추출
-          const originalLabel = seatLayout.find((s) => s.id === seat.id)?.label || '';
+          const originalLabel =
+            seatLayout.find((s) => s.id === seat.id)?.label || "";
           const colMatch = originalLabel.match(/\d+$/);
-          const colNumber = colMatch ? colMatch[0] : '';
+          const colNumber = colMatch ? colMatch[0] : "";
 
           return {
             ...seat,
-            label: rowLabel + '-' + colNumber,
+            label: rowLabel + "-" + colNumber,
           };
         });
       }
@@ -183,7 +220,17 @@ const RegisterVenue3 = () => {
     // (실제 라벨 표시는 유지하되, section 정보는 별도로 관리)
 
     setLabeledSeats(newLabeledSeats);
-  }, [rowLabeling, rowOrder, rowStart, currentFloor, sectionLabeling, sections, floorSettings, floors, seatLayout]);
+  }, [
+    rowLabeling,
+    rowOrder,
+    rowStart,
+    currentFloor,
+    sectionLabeling,
+    sections,
+    floorSettings,
+    floors,
+    seatLayout,
+  ]);
 
   // 드래그 종료 글로벌 이벤트
   useEffect(() => {
@@ -194,8 +241,8 @@ const RegisterVenue3 = () => {
         setCurrentDragCoords(null);
       }
     };
-    window.addEventListener('mouseup', handleMouseUpGlobal);
-    return () => window.removeEventListener('mouseup', handleMouseUpGlobal);
+    window.addEventListener("mouseup", handleMouseUpGlobal);
+    return () => window.removeEventListener("mouseup", handleMouseUpGlobal);
   }, [isDragging]);
 
   // 마우스 다운 - 드래그 시작
@@ -225,7 +272,7 @@ const RegisterVenue3 = () => {
         seat.col >= minCol &&
         seat.col <= maxCol &&
         seat.floor === currentFloor &&
-        seat.type === 'seat'
+        seat.type === "seat"
       ) {
         newSelected.add(seat.id);
       }
@@ -245,7 +292,9 @@ const RegisterVenue3 = () => {
   const createSection = (seatIds) => {
     if (seatIds.size === 0) return;
 
-    const sectionIndex = sections.filter((s) => s.floor === currentFloor).length;
+    const sectionIndex = sections.filter(
+      (s) => s.floor === currentFloor
+    ).length;
     const sectionName = String.fromCharCode(65 + (sectionIndex % 26)); // A, B, C...
     const color = SECTION_COLORS[sectionIndex % SECTION_COLORS.length];
 
@@ -259,19 +308,21 @@ const RegisterVenue3 = () => {
 
     setSections([...sections, newSection]);
     setSelectedSeats(new Set());
-    addToast(`${sectionName} 구역이 생성되었습니다.`, 'success');
+    addToast(`${sectionName} 구역이 생성되었습니다.`, "success");
   };
 
   // 구역 삭제
   const deleteSection = (sectionId) => {
     const section = sections.find((s) => s.id === sectionId);
     setSections(sections.filter((s) => s.id !== sectionId));
-    addToast(`${section?.name} 구역이 삭제되었습니다.`, 'success');
+    addToast(`${section?.name} 구역이 삭제되었습니다.`, "success");
   };
 
   // 구역 색상 변경
   const changeSectionColor = (sectionId, color) => {
-    setSections(sections.map((s) => (s.id === sectionId ? { ...s, color } : s)));
+    setSections(
+      sections.map((s) => (s.id === sectionId ? { ...s, color } : s))
+    );
   };
 
   // 구역 이름 변경
@@ -300,8 +351,8 @@ const RegisterVenue3 = () => {
     const newFloorSettings = floorSettings[floor] || {
       rowLabeling: false,
       sectionLabeling: false,
-      rowOrder: 'korean',
-      rowStart: 'top',
+      rowOrder: "korean",
+      rowStart: "top",
       sections: [],
     };
 
@@ -317,7 +368,7 @@ const RegisterVenue3 = () => {
     ]);
 
     setSelectedSeats(new Set());
-    addToast(`${floor}층으로 이동`, 'info');
+    addToast(`${floor}층으로 이동`, "info");
   };
 
   // 좌석이 어느 구역에 속하는지 확인
@@ -333,7 +384,7 @@ const RegisterVenue3 = () => {
 
   // 이전 단계로
   const handlePrevious = () => {
-    navigate('/register-venue/step2');
+    navigate("/register-venue/step2");
   };
 
   // 등록하기
@@ -352,23 +403,23 @@ const RegisterVenue3 = () => {
 
     // 좌석 라벨 검증
     const invalidSeats = labeledSeats.filter((seat) => {
-      if (seat.type !== 'seat') return false; // 무대 등은 제외
+      if (seat.type !== "seat") return false; // 무대 등은 제외
 
-      const label = seat.label || '';
+      const label = seat.label || "";
       // 라벨이 비어있는 경우
       if (!label || label.length === 0) {
         return true;
       }
 
       // "행-열" 형태 체크 (A-1, 가-1, 1-1 등)
-      const parts = label.split('-');
+      const parts = label.split("-");
       if (parts.length !== 2) {
         return true; // "-"로 구분되지 않으면 유효하지 않음
       }
 
       const [row, col] = parts;
       // 행과 열 모두 비어있지 않아야 함
-      if (!row || !col || row.trim() === '' || col.trim() === '') {
+      if (!row || !col || row.trim() === "" || col.trim() === "") {
         return true;
       }
 
@@ -381,8 +432,11 @@ const RegisterVenue3 = () => {
     });
 
     if (invalidSeats.length > 0) {
-      console.log('Invalid seats:', invalidSeats);
-      addToast('모든 좌석에 행과 열 정보가 필요합니다. 누락된 좌석을 확인해주세요.', 'error');
+      console.log("Invalid seats:", invalidSeats);
+      addToast(
+        "모든 좌석에 행과 열 정보가 필요합니다. 누락된 좌석을 확인해주세요.",
+        "error"
+      );
       return;
     }
 
@@ -404,19 +458,19 @@ const RegisterVenue3 = () => {
 
     // 좌석 정보를 seat_map과 seat_data에 배치
     labeledSeats.forEach((seat) => {
-      if (seat.type === 'stage') {
+      if (seat.type === "stage") {
         // 무대는 -1
         seatMap[seat.row][seat.col] = -1;
-      } else if (seat.type === 'seat') {
+      } else if (seat.type === "seat") {
         // 좌석은 라벨 사용 (이미 "행-열" 형태)
-        const label = seat.label || '';
+        const label = seat.label || "";
         const seatId = label; // 이미 "A-1", "가-1", "1-1" 형태
 
         seatMap[seat.row][seat.col] = seatId;
 
         // 좌석이 속한 구역 찾기
         const section = sections.find((s) => s.seats.includes(seat.id));
-        const sectionName = section ? section.name : 'X'; // 구역 없으면 기본값 'X'
+        const sectionName = section ? section.name : "X"; // 구역 없으면 기본값 'X'
 
         // seat_data에 상세 정보 저장
         seatData[seatId] = {
@@ -431,11 +485,14 @@ const RegisterVenue3 = () => {
     });
 
     // 1단계에서 저장한 공연장 정보 불러오기
-    const venue1Data = JSON.parse(localStorage.getItem('registerVenue1') || '{}');
+    const venue1Data = JSON.parse(
+      localStorage.getItem("registerVenue1") || "{}"
+    );
 
     // 1단계에서 저장해 둔 location_id 불러오기
     // RegisterVenue1에서 registerVenue1.locationId 또는 별도의 localStorage('locationId')에 저장됨
-    const storedLocationId = venue1Data.locationId || localStorage.getItem('locationId');
+    const storedLocationId =
+      venue1Data.locationId || localStorage.getItem("locationId");
     const location_id = storedLocationId ? Number(storedLocationId) : undefined;
 
     // API 요청 데이터 준비
@@ -447,24 +504,27 @@ const RegisterVenue3 = () => {
       seat_data: seatData,
     };
 
-    console.log('=== 공연장 등록 API 요청 ===');
-    console.log('Request Data:', JSON.stringify(requestData, null, 2));
+    console.log("=== 공연장 등록 API 요청 ===");
+    console.log("Request Data:", JSON.stringify(requestData, null, 2));
 
     try {
       // API 호출
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/venue/seatmap`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // 쿠키 포함
-        body: JSON.stringify(requestData),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/venue/seatmap`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // 쿠키 포함
+          body: JSON.stringify(requestData),
+        }
+      );
 
-      console.log('Response Status:', response.status);
+      console.log("Response Status:", response.status);
 
       const result = await response.json();
-      console.log('Response Data:', result);
+      console.log("Response Data:", result);
 
       if (response.ok && result.success) {
         // localStorage에 저장
@@ -477,22 +537,22 @@ const RegisterVenue3 = () => {
           labeledSeats,
           venueData: requestData,
         };
-        localStorage.setItem('registerVenue3', JSON.stringify(labelingData));
+        localStorage.setItem("registerVenue3", JSON.stringify(labelingData));
 
-        addToast('좌석 배치 정보가 성공적으로 등록되었습니다!', 'success');
+        addToast("좌석 배치 정보가 성공적으로 등록되었습니다!", "success");
 
         // 홈화면으로 이동
         setTimeout(() => {
-          navigate('/homemanager');
+          navigate("/homemanager");
         }, 1000);
       } else {
         // 에러 처리
-        console.error('API 에러 응답:', result);
-        addToast(result.message || '좌석 배치 등록에 실패했습니다.', 'error');
+        console.error("API 에러 응답:", result);
+        addToast(result.message || "좌석 배치 등록에 실패했습니다.", "error");
       }
     } catch (error) {
-      console.error('API 요청 오류:', error);
-      addToast('서버와의 통신 중 오류가 발생했습니다.', 'error');
+      console.error("API 요청 오류:", error);
+      addToast("서버와의 통신 중 오류가 발생했습니다.", "error");
     }
   };
 
@@ -505,11 +565,17 @@ const RegisterVenue3 = () => {
           <HeaderRow>
             <Title>내 공연장 등록하기</Title>
             <ProgressSteps>
-              <StepItem active={false} onClick={() => navigate('/register-venue/step1')}>
+              <StepItem
+                active={false}
+                onClick={() => navigate("/register-venue/step1")}
+              >
                 ① 공연장 기본 정보 입력
               </StepItem>
               <ArrowIcon />
-              <StepItem active={false} onClick={() => navigate('/register-venue/step2')}>
+              <StepItem
+                active={false}
+                onClick={() => navigate("/register-venue/step2")}
+              >
                 ② 좌석배치표 업로드 및 수정
               </StepItem>
               <ArrowIcon />
@@ -540,8 +606,12 @@ const RegisterVenue3 = () => {
                             type={seat.type}
                             sectionColor={section?.color}
                             selected={isSelected}
-                            onMouseDown={() => handleMouseDown(seat.row, seat.col)}
-                            onMouseMove={() => handleMouseMove(seat.row, seat.col)}
+                            onMouseDown={() =>
+                              handleMouseDown(seat.row, seat.col)
+                            }
+                            onMouseMove={() =>
+                              handleMouseMove(seat.row, seat.col)
+                            }
                             onMouseUp={() => handleMouseUp(seat.row, seat.col)}
                           >
                             {seat.label}
@@ -581,7 +651,10 @@ const RegisterVenue3 = () => {
                   {rowLabeling && (
                     <OptionsPanel>
                       <DropdownContainer>
-                        <Dropdown value={rowOrder} onChange={(e) => setRowOrder(e.target.value)}>
+                        <Dropdown
+                          value={rowOrder}
+                          onChange={(e) => setRowOrder(e.target.value)}
+                        >
                           {rowOrderOptions.map((opt) => (
                             <option key={opt.value} value={opt.value}>
                               {opt.label}
@@ -589,7 +662,10 @@ const RegisterVenue3 = () => {
                           ))}
                         </Dropdown>
 
-                        <Dropdown value={rowStart} onChange={(e) => setRowStart(e.target.value)}>
+                        <Dropdown
+                          value={rowStart}
+                          onChange={(e) => setRowStart(e.target.value)}
+                        >
                           {rowStartOptions.map((opt) => (
                             <option key={opt.value} value={opt.value}>
                               {opt.label}
@@ -613,7 +689,9 @@ const RegisterVenue3 = () => {
                   </CheckboxRow>
 
                   {sectionLabeling && (
-                    <InstructionText>* 생성할 구역을 드래그 해주세요.</InstructionText>
+                    <InstructionText>
+                      * 생성할 구역을 드래그 해주세요.
+                    </InstructionText>
                   )}
                 </SettingSection>
 
@@ -629,11 +707,15 @@ const RegisterVenue3 = () => {
                             <SectionLabel>구역 명칭</SectionLabel>
                             <SectionInput
                               value={section.name}
-                              onChange={(e) => changeSectionName(section.id, e.target.value)}
+                              onChange={(e) =>
+                                changeSectionName(section.id, e.target.value)
+                              }
                               maxLength={10}
                             />
                             <SectionText>구역</SectionText>
-                            <DeleteButton onClick={() => deleteSection(section.id)}>
+                            <DeleteButton
+                              onClick={() => deleteSection(section.id)}
+                            >
                               <BiSolidTrash size={21} />
                             </DeleteButton>
                           </SectionHeader>
@@ -645,7 +727,9 @@ const RegisterVenue3 = () => {
                                 key={color}
                                 color={color}
                                 active={section.color === color}
-                                onClick={() => changeSectionColor(section.id, color)}
+                                onClick={() =>
+                                  changeSectionColor(section.id, color)
+                                }
                               />
                             ))}
                           </ColorPalette>
@@ -661,7 +745,7 @@ const RegisterVenue3 = () => {
                       if (selectedSeats.size > 0) {
                         createSection(selectedSeats);
                       } else {
-                        addToast('좌석을 드래그하여 선택해주세요.', 'warning');
+                        addToast("좌석을 드래그하여 선택해주세요.", "warning");
                       }
                     }}
                   >
@@ -758,11 +842,11 @@ const StepItem = styled.div`
   font-weight: 500;
   font-size: 20px;
   padding: 10px;
-  color: ${(props) => (props.active ? '#FC2847' : '#737373')};
-  border-bottom: ${(props) => (props.active ? '2px solid #FC2847' : 'none')};
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  color: ${(props) => (props.active ? "#FC2847" : "#737373")};
+  border-bottom: ${(props) => (props.active ? "2px solid #FC2847" : "none")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   opacity: ${(props) => (props.disabled ? 0.5 : 1)};
-  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
+  pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
 `;
 
 const ArrowIcon = styled(RiArrowRightSLine)`
@@ -828,9 +912,15 @@ const SeatCell = styled.div`
   width: 28px;
   height: 20px;
   background: ${(props) =>
-    props.sectionColor ? props.sectionColor : props.type === 'stage' ? '#FFD700' : '#9E5656'};
-  border: ${(props) => (props.selected ? '2px solid #ff0000' : '0.5px solid #000000')};
-  box-shadow: ${(props) => (props.selected ? '0 0 8px rgba(255, 0, 0, 0.7)' : 'none')};
+    props.sectionColor
+      ? props.sectionColor
+      : props.type === "stage"
+      ? "#FFD700"
+      : "#9E5656"};
+  border: ${(props) =>
+    props.selected ? "2px solid #ff0000" : "0.5px solid #000000"};
+  box-shadow: ${(props) =>
+    props.selected ? "0 0 8px rgba(255, 0, 0, 0.7)" : "none"};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -872,8 +962,9 @@ const FloorTab = styled.div`
   font-weight: 500;
   font-size: 16px;
   padding: 4px 8px;
-  color: ${(props) => (props.active ? '#FC2847' : '#787878')};
-  border-bottom: ${(props) => (props.active ? '1px solid #FC2847' : '1px solid #787878')};
+  color: ${(props) => (props.active ? "#FC2847" : "#787878")};
+  border-bottom: ${(props) =>
+    props.active ? "1px solid #FC2847" : "1px solid #787878"};
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -1038,7 +1129,7 @@ const ColorCircle = styled.div`
   border-radius: 50%;
   background: ${(props) => props.color};
   cursor: pointer;
-  border: ${(props) => (props.active ? '2px solid #000000' : 'none')};
+  border: ${(props) => (props.active ? "2px solid #000000" : "none")};
   transition: all 0.2s ease;
 
   &:hover {
