@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ToastProvider } from "./components/Toast/ToastProvider";
 
 //여기서부터 자기 이름 밑으로 import 하기!!
@@ -38,6 +38,7 @@ import RegisterVenue1 from "./pages/Manager/ManageShow/RegisterVenue1";
 import RegisterVenue2 from "./pages/Manager/ManageShow/RegisterVenue2";
 import RegisterVenue3 from "./pages/Manager/ManageShow/RegisterVenue3";
 import KakaoCallback from "./pages/Auth/KakaoCallback";
+import RegisteredVenues from "./pages/Manager/RegisteredVenues";
 
 // Protected Route 컴포넌트
 const ProtectedRoute = ({ element: Element, ...rest }) => {
@@ -58,7 +59,32 @@ const ProtectedRoute = ({ element: Element, ...rest }) => {
     />
   );
 };
-import RegisteredVenues from "./pages/Manager/RegisteredVenues";
+
+// 루트 경로 처리 컴포넌트
+const RootRedirect = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { setIsLoggedIn } = useAuth();
+
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const loginSuccess = urlParams.get('login');
+
+    if (loginSuccess === 'success') {
+      console.log("✅ 루트 경로에서 로그인 성공 감지");
+      setIsLoggedIn(true);
+      localStorage.setItem('isLoggedIn', 'true');
+      // URL 파라미터 제거하고 /homemanager 또는 /homeuser로 이동
+      // 임시로 /homemanager로 이동 (나중에 role 기반으로 변경 가능)
+      navigate('/homemanager', { replace: true });
+    } else {
+      // 로그인 성공 파라미터가 없으면 로그인 페이지로
+      navigate('/login', { replace: true });
+    }
+  }, [location, navigate, setIsLoggedIn]);
+
+  return null;
+};
 
 const App = () => {
   return (
@@ -66,8 +92,8 @@ const App = () => {
       <AuthProvider>
         <ToastProvider>
           <Routes>
-            {/* 루트 경로를 로그인으로 리다이렉트 */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            {/* 루트 경로 처리 */}
+            <Route path="/" element={<RootRedirect />} />
 
             {/* 비보호 라우트: 로그인, 카카오 콜백, 랜딩 */}
             <Route path="/login" element={<Login />} />

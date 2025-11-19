@@ -15,11 +15,13 @@ const RegisterShowStep3 = () => {
   const { addToast } = useToast();
 
   // 상태 관리
-  const [selectedVenues, setSelectedVenues] = useState([]); // 다중 선택
-  const [selectedMethod, setSelectedMethod] = useState('스탠딩석'); // 단일 선택
+  const [selectedVenue, setSelectedVenue] = useState(null); // 단일 선택
+  const [selectedMethod, setSelectedMethod] = useState(null); // 기본 선택 없음
   const [quantity, setQuantity] = useState(100);
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
   const [excludedSeats, setExcludedSeats] = useState([]); // 제외된 좌석
+  const [totalAvailableSeats, setTotalAvailableSeats] = useState(null); // 총 판매 가능 좌석
+  const [updatedSeatCount, setUpdatedSeatCount] = useState(0); // 제외/VIP 좌석 수
 
   // 공연 장소 목록 (API에서 가져옴)
   const [venues, setVenues] = useState([]);
@@ -76,13 +78,9 @@ const RegisterShowStep3 = () => {
   // 좌석 판매 방법 옵션
   const salesMethods = ['스탠딩석', '주최 측 배정', '예매자 선택', '자동 배정'];
 
-  // 공연 장소 선택 핸들러 (다중 선택)
-  const handleVenueToggle = (venue) => {
-    setSelectedVenues((prev) =>
-      prev.some((v) => v.id === venue.id)
-        ? prev.filter((v) => v.id !== venue.id)
-        : [...prev, venue]
-    );
+  // 공연 장소 선택 핸들러 (단일 선택)
+  const handleVenueSelect = (venue) => {
+    setSelectedVenue(venue);
   };
 
   // 좌석 판매 방법 선택 핸들러 (단일 선택)
@@ -92,8 +90,9 @@ const RegisterShowStep3 = () => {
     // 예매자 선택 또는 자동 배정인 경우 모달 열기
     if (method === '예매자 선택' || method === '자동 배정') {
       // 공연장이 선택되어 있는지 확인
-      if (selectedVenues.length === 0) {
+      if (!selectedVenue) {
         addToast('먼저 공연 장소를 선택해주세요!', 'error');
+        setSelectedMethod(null); // 선택 취소
         return;
       }
       setIsModalOpen(true);
@@ -102,24 +101,30 @@ const RegisterShowStep3 = () => {
 
   // 모달에서 좌석 저장
   const handleSaveSeats = (seatData) => {
-    setExcludedSeats(seatData.excludedSeats);
-
-    if (selectedMethod === '예매자 선택') {
-      addToast(`${seatData.excludedSeats.length}개의 좌석이 제외되었습니다.`, 'success');
-    } else if (selectedMethod === '자동 배정') {
-      addToast(`${seatData.vipSeats.length}개의 VIP석이 지정되었습니다.`, 'success');
+    // totalAvailableSeats 저장
+    if (seatData.totalAvailableSeats !== undefined) {
+      setTotalAvailableSeats(seatData.totalAvailableSeats);
+      setQuantity(seatData.totalAvailableSeats);
     }
-  };
 
-  // 수량 조절 핸들러
-  const handleQuantityChange = (delta) => {
-    setQuantity((prev) => Math.max(1, Math.min(9999, prev + delta)));
+    // 예매자 선택인 경우
+    if (selectedMethod === '예매자 선택') {
+      setExcludedSeats(seatData.excludedSeats || []);
+      setUpdatedSeatCount(seatData.excludedSeats?.length || 0);
+      addToast(`${seatData.excludedSeats?.length || 0}개의 좌석이 제외되었습니다.`, 'success');
+    }
+    // 자동 배정인 경우
+    else if (selectedMethod === '자동 배정') {
+      setExcludedSeats(seatData.vipSeats || []);
+      setUpdatedSeatCount(seatData.vipSeats?.length || 0);
+      addToast(`${seatData.vipSeats?.length || 0}개의 VIP석이 지정되었습니다.`, 'success');
+    }
   };
 
   // 임시 저장 핸들러
   const handleTempSave = () => {
     const formData = {
-      venues: selectedVenues,
+      venue: selectedVenue,
       salesMethod: selectedMethod,
       quantity: quantity,
     };
@@ -135,8 +140,19 @@ const RegisterShowStep3 = () => {
 
   // 다음 단계로
   const handleNext = () => {
-    if (selectedVenues.length === 0) {
+    // 유효성 검사
+    if (!selectedVenue) {
       addToast('공연 장소를 선택해주세요!', 'error');
+      return;
+    }
+
+    if (!selectedMethod) {
+      addToast('좌석 판매 방법을 선택해주세요!', 'error');
+      return;
+    }
+
+    if (!quantity || quantity <= 0) {
+      addToast('판매 수량을 확인해주세요!', 'error');
       return;
     }
 
@@ -159,10 +175,10 @@ const RegisterShowStep3 = () => {
                 {venues.map((venue) => (
                   <SelectButton
                     key={venue.id}
-                    active={selectedVenues.some((v) => v.id === venue.id)}
-                    onClick={() => handleVenueToggle(venue)}
+                    active={selectedVenue?.id === venue.id}
+                    onClick={() => handleVenueSelect(venue)}
                   >
-                    {selectedVenues.some((v) => v.id === venue.id) ? (
+                    {selectedVenue?.id === venue.id ? (
                       <CheckboxIconSelected />
                     ) : (
                       <CheckboxIcon />
@@ -199,21 +215,39 @@ const RegisterShowStep3 = () => {
             </Section>
 
             {/* 판매 수량 섹션 */}
-            <QuantitySection>
+            <Section>
               <SectionTitle>판매 수량</SectionTitle>
-              <QuantityControl>
-                <QuantityButtons>
-                  <MinusButton onClick={() => handleQuantityChange(-1)}>
-                    <AiOutlineMinus />
-                  </MinusButton>
-                  <QuantityDisplay>{quantity}</QuantityDisplay>
-                  <PlusButton onClick={() => handleQuantityChange(1)}>
-                    <AiOutlinePlus />
-                  </PlusButton>
-                </QuantityButtons>
-                <Unit>개</Unit>
-              </QuantityControl>
-            </QuantitySection>
+              {selectedMethod === '예매자 선택' && totalAvailableSeats !== null ? (
+                <QuantityInfoWrapper>
+                  <QuantityInfoRow>
+                    <QuantityLabel>판매 가능 좌석:</QuantityLabel>
+                    <QuantityValue>{totalAvailableSeats}개</QuantityValue>
+                  </QuantityInfoRow>
+                  <QuantityInfoRow>
+                    <QuantityLabel>제외한 좌석:</QuantityLabel>
+                    <QuantityValue>{updatedSeatCount}개</QuantityValue>
+                  </QuantityInfoRow>
+                </QuantityInfoWrapper>
+              ) : selectedMethod === '자동 배정' && totalAvailableSeats !== null ? (
+                <QuantityInfoWrapper>
+                  <QuantityInfoRow>
+                    <QuantityLabel>판매 가능 좌석:</QuantityLabel>
+                    <QuantityValue>{totalAvailableSeats}개</QuantityValue>
+                  </QuantityInfoRow>
+                  <QuantityInfoRow>
+                    <QuantityLabel>VIP 좌석:</QuantityLabel>
+                    <QuantityValue>{updatedSeatCount}개</QuantityValue>
+                  </QuantityInfoRow>
+                </QuantityInfoWrapper>
+              ) : (
+                <QuantityControl>
+                  <QuantityButtons>
+                    <QuantityDisplay>{quantity}</QuantityDisplay>
+                  </QuantityButtons>
+                  <Unit>개</Unit>
+                </QuantityControl>
+              )}
+            </Section>
           </FormContent>
         </MainContent>
 
@@ -233,7 +267,7 @@ const RegisterShowStep3 = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveSeats}
         salesMethod={selectedMethod}
-        locationId={selectedVenues[0]?.id || null}
+        locationId={selectedVenue?.id || null}
       />
     </>
   );
@@ -369,16 +403,10 @@ const InfoIcon = styled(RiInformationLine)`
 `;
 
 const InfoText = styled.span`
-  
+
   font-weight: 300;
   font-size: 15px;
   color: #d72b2b;
-`;
-
-const QuantitySection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 20px;
 `;
 
 const QuantityControl = styled.div`
@@ -445,10 +473,36 @@ const QuantityDisplay = styled.div`
 `;
 
 const Unit = styled.span`
-  
+
   font-weight: 500;
   font-size: 20px;
   color: #000000;
+`;
+
+const QuantityInfoWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 10px 0;
+`;
+
+const QuantityInfoRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 15px;
+`;
+
+const QuantityLabel = styled.span`
+  font-weight: 500;
+  font-size: 20px;
+  color: #333333;
+  min-width: 160px;
+`;
+
+const QuantityValue = styled.span`
+  font-weight: 700;
+  font-size: 24px;
+  color: #FC2847;
 `;
 
 const Footer = styled.div`

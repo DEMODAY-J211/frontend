@@ -1,9 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import NavbarManager from "../../../components/Navbar/NavbarManager";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MdOutlineUnfoldMore } from "react-icons/md";
 import { BiSearch } from "react-icons/bi";
 import { AiOutlineClose } from "react-icons/ai";
 import { useState } from "react";
@@ -22,11 +20,21 @@ const ManageUser = () => {
   const [activeTab, setActiveTab] = useState("전체");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [currentShowtimeId, setCurrentShowtimeId] = useState(null);
 
-  const {showId} = useParams();
-  
- const { reservationData, setReservationData, initialData } = useReservationData();
-// const [initialData, setInitialData] = useState([]); // 초기 데이터 저장
+  const { showId } = useParams();
+
+  const {
+    reservationData,
+    setReservationData,
+    initialData,
+    showTimeList,
+    selectedShowTime,
+    selectedShowTimeId,
+    setSelectedShowTimeId,
+    isLoading,
+    error
+  } = useReservationData(showId, currentShowtimeId);
 
 
 
@@ -100,10 +108,80 @@ const handleStatusChange = (id, newStatus) => {
 
 
 
-const handleSave = () => {
-  // 이 자리에 API 요청 코드 들어갈 수도 있음
-  console.log("저장 완료:", reservationData);
-  setIsChanged(false); // ✅ 저장 후 변경상태 리셋
+const handleSave = async () => {
+  if (changedUsers.length === 0) {
+    alert("변경된 내용이 없습니다.");
+    return;
+  }
+
+  // 한글 상태를 영어로 매핑
+  const statusToEnglish = {
+    "입금대기": "PENDING_PAYMENT",
+    "입금확정": "CONFIRMED",
+    "입금확인": "CONFIRMED", // 백엔드에서 입금확인으로 오는 경우도 처리
+    "환불대기": "PENDING_REFUND",
+    "취소완료": "CANCELED"
+  };
+
+  try {
+    // changedUsers에서 변경된 예매자 정보만 추출
+    const changedReservations = changedUsers.map(reservation => ({
+      reservationId: reservation.reservationId,
+      name: reservation.name,
+      status: statusToEnglish[reservation.status] || reservation.status,
+      isReserved: reservation.isReserved
+    }));
+
+    console.log('=== PATCH 요청 데이터 ===');
+    console.log('변경된 예매자 수:', changedReservations.length);
+    console.log('요청 데이터:', { reservations: changedReservations });
+
+    // Query parameter 구성
+    const queryParams = currentShowtimeId ? `?showtimeId=${currentShowtimeId}` : '';
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/customers${queryParams}`,
+      {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reservations: changedReservations
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    console.log('=== PATCH 응답 ===');
+    console.log('응답 데이터:', result);
+
+    if (!response.ok || result.success !== true) {
+      throw new Error(result.message || '예매 상태 변경 실패');
+    }
+
+    const { updatedCount, failedIds = [] } = result.data;
+
+    if (failedIds.length > 0) {
+      alert(`일부 예매 정보 업데이트에 실패했습니다.\n성공: ${updatedCount}건\n실패 ID: ${failedIds.join(', ')}`);
+    } else {
+      alert(`${updatedCount}건의 예매 정보가 성공적으로 업데이트되었습니다.`);
+    }
+
+    // 변경 상태 초기화
+    setIsChanged(false);
+    setChangedUsers([]);
+
+    // 데이터 새로고침 - currentShowtimeId를 토글해서 useEffect 재실행
+    setCurrentShowtimeId(prev => prev === null ? prev : prev);
+
+  } catch (error) {
+    console.error('예매 상태 변경 중 오류:', error);
+    alert(`저장 실패: ${error.message}`);
+  }
 };
 
 const handleExportExcel = () => {
@@ -168,7 +246,38 @@ const closeSaveModal = () => {
 setShowChangeStatusModal(false);
 };
 
-//api
+// 회차 선택 핸들러
+  const handleShowtimeChange = (showtimeId) => {
+    setCurrentShowtimeId(showtimeId);
+    setSelectedUsers([]); // 회차 변경 시 선택 초기화
+  };
+
+  // 로딩 및 에러 처리
+  if (isLoading) {
+    return (
+      <Content>
+        <NavbarManager />
+        <ManageUserContent>
+          <div style={{ padding: '100px', textAlign: 'center', fontSize: '20px' }}>
+            불러오는 중...
+          </div>
+        </ManageUserContent>
+      </Content>
+    );
+  }
+
+  if (error) {
+    return (
+      <Content>
+        <NavbarManager />
+        <ManageUserContent>
+          <div style={{ padding: '100px', textAlign: 'center', fontSize: '20px', color: 'red' }}>
+            {error}
+          </div>
+        </ManageUserContent>
+      </Content>
+    );
+  }
 
   return (
     <Content>
@@ -177,13 +286,25 @@ setShowChangeStatusModal(false);
         {/* 제목 + 시간 선택 */}
         <Header>
           <Title>예매자 관리</Title>
-          <SelectTime>
-            <ShowName>제21회 정기공연</ShowName>
-            <Time>
-              <ShowTime>2025.10.14 15:00</ShowTime>
-              <MdOutlineUnfoldMore size={16} color="var(--color-primary)" />
-            </Time>
-          </SelectTime>
+          {showTimeList && showTimeList.length > 0 && (
+            <ShowtimeSelectWrapper>
+              {showTimeList.map((showtime) => (
+                <ShowtimeButton
+                  key={showtime.showTimeId}
+                  $active={selectedShowTimeId === showtime.showTimeId}
+                  onClick={() => handleShowtimeChange(showtime.showTimeId)}
+                >
+                  {new Date(showtime.showTime).toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </ShowtimeButton>
+              ))}
+            </ShowtimeSelectWrapper>
+          )}
         </Header>
 
 
@@ -256,43 +377,56 @@ setShowChangeStatusModal(false);
             <ColumnTitle>상세 내역</ColumnTitle>
           </TableHeader>
 
-          {/* 더미데이터!! */}
+          {/* 예매자 데이터 */}
           {filteredData.length > 0 ? (
-            filteredData.map((data) => (
-            <TableRow key={data.reservationId}>
-            <Checkbox type="checkbox" checked={selectedUsers.some(u => u.reservationId === data.reservationId)}
-        onChange={() => handleCheckboxChange(data)}/>
+            filteredData.map((data, index) => {
+              // 각 예매자의 상태 로그
+              if (index === 0) {
+                console.log('=== 렌더링 중인 예매자 데이터 (첫번째) ===');
+                console.log('예매자 상태:', data.status);
+                console.log('전체 데이터:', data);
+              }
 
-            <TableData>{data.reservationNumber}</TableData>
-            <TableData>{data.name}</TableData>
-            <TableData>{data.phone}</TableData>
-            {/* ✅ 여기에서 formatKoreanDate 사용 */}
-          <TableData>{formatKoreanDate(data.reservationTime)}</TableData>
+              return (
+                <TableRow key={data.reservationId}>
+                  <Checkbox
+                    type="checkbox"
+                    checked={selectedUsers.some(u => u.reservationId === data.reservationId)}
+                    onChange={() => handleCheckboxChange(data)}
+                  />
 
-              {/* ✅ 각 행별 상태 변경 */}
-                <StatusContainer>
-                  {["입금대기", "입금확정", "환불대기", "취소완료"].map(
-                    (status) => (
-                      <Status
-                        key={status}
-                        $active={data.status === status}
-                        onClick={() =>
-                          handleStatusChange(data.reservationId, status)
-                        }
-                      >
-                        {status}
-                      </Status>
-                    )
-                  )}
-                </StatusContainer>
+                  <TableData>{data.reservationNumber}</TableData>
+                  <TableData>{data.name}</TableData>
+                  <TableData>{data.phone}</TableData>
+                  <TableData>{formatKoreanDate(data.reservationTime)}</TableData>
 
-              <TableDataDetail>
-                {data.detailed.ticketOptionName} ({data.detailed.ticketPrice.toLocaleString()}원) ·{" "}
-            {data.detailed.quantity}매
-            </TableDataDetail>
-            </TableRow>
-          ))
-        ) : (
+                  {/* ✅ 각 행별 상태 변경 */}
+                  <StatusContainer>
+                    {["입금대기", "입금확정", "환불대기", "취소완료"].map((status) => {
+                      const isActive = data.status === status;
+                      if (index === 0) {
+                        console.log(`상태버튼 "${status}": ${isActive ? '활성' : '비활성'}`);
+                      }
+                      return (
+                        <Status
+                          key={status}
+                          $active={isActive}
+                          onClick={() => handleStatusChange(data.reservationId, status)}
+                        >
+                          {status}
+                        </Status>
+                      );
+                    })}
+                  </StatusContainer>
+
+                  <TableDataDetail>
+                    {data.detailed.ticketOptionName} ({data.detailed.ticketPrice.toLocaleString()}원) ·{" "}
+                    {data.detailed.quantity}매
+                  </TableDataDetail>
+                </TableRow>
+              );
+            })
+          ) : (
             <TableRow>
               <NoDataRow>검색 결과가 없습니다.</NoDataRow>
             </TableRow>
@@ -391,32 +525,28 @@ const Title = styled.div`
   padding-left: 5px;
 `;
 
-const SelectTime = styled.div`
+const ShowtimeSelectWrapper = styled.div`
   display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
+const ShowtimeButton = styled.button`
+  padding: 8px 16px;
   border-radius: 15px;
   border: 1px solid var(--color-primary);
-  background: #fff;
-  padding: 5px 20px;
-  gap: 40px;
-`;
-
-const ShowName = styled.div`
-  color: var(--color-primary);
-  font-size: 20px;
+  background: ${({ $active }) => ($active ? 'var(--color-primary)' : '#fff')};
+  color: ${({ $active }) => ($active ? '#fff' : 'var(--color-primary)')};
+  font-size: 16px;
   font-weight: 500;
-`;
-
-const ShowTime = styled.div`
-  color: var(--color-primary);
-  font-size: 20px;
-  font-weight: 500;
-`;
-
-const Time = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
   cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${({ $active }) => ($active ? 'var(--color-primary)' : 'var(--color-tertiary)')};
+    transform: translateY(-2px);
+  }
 `;
 
 /* ---------------- 검색 ---------------- */
@@ -581,7 +711,7 @@ const TableSection = styled.div`
 
 const TableHeader = styled.div`
   display: grid;
-  grid-template-columns: 50px 100px 150px 200px 200px 350px 1fr;
+  grid-template-columns: 50px 120px 100px 150px 180px 400px 200px;
   padding: 15px 10px;
   border-bottom: 1px solid #979797;
   align-items: center;
@@ -594,8 +724,8 @@ const TableHeader = styled.div`
 
 const TableRow = styled.div`
   display: grid;
-  grid-template-columns: 50px 100px 150px 200px 200px 350px 1fr;
-  padding: 5px 10px;
+  grid-template-columns: 50px 120px 100px 150px 180px 400px 200px;
+  padding: 10px;
   border-bottom: 1px solid #eee;
   align-items: center;
 
@@ -616,40 +746,54 @@ const ColumnTitle = styled.div`
 `;
 
 const TableData = styled.div`
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 300;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const TableDataDetail = styled.div`
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 300;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const StatusContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 `;
 
 const Status = styled.button`
-  font-size: 13px;
+  font-size: 11px;
   display: flex;
-  padding: 7px 10px;
+  padding: 5px 8px;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
+  cursor: pointer;
 
   color: ${({ $active }) => ($active ? "#fff" : "#121212")};
   font-weight: ${({ $active }) => ($active ? "700" : "300")};
 
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
 
   background-color: ${({ $active }) =>
-    $active ? "var(--color-primary)" : "#fff"};
+    $active ? "var(--color-primary)" : "#f0f0f0"};
+
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${({ $active }) =>
+      $active ? "#d63232" : "#e0e0e0"};
+  }
 `;
 
 

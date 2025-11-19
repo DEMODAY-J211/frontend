@@ -18,9 +18,11 @@ const fadeOut = keyframes`
 
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
+  const [toastCounter, setToastCounter] = useState(0);
 
   const addToast = useCallback((message, type = "info") => {
-    const id = Date.now();
+    const id = `${Date.now()}-${toastCounter}`;
+    setToastCounter(prev => prev + 1);
     setToasts((prev) => [...prev, { id, message, type, leaving: false }]);
 
     // 2초 후 페이드 아웃 시작
@@ -34,7 +36,7 @@ export const ToastProvider = ({ children }) => {
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 2500);
-  }, []);
+  }, [toastCounter]);
 
   return (
     <ToastContext.Provider value={{ addToast }}>

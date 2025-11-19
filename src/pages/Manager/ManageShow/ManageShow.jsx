@@ -80,7 +80,11 @@ const ManageShow = () => {
 const handleMenuClick = (item) => {
   // QR 코드 확인은 showId 없이 이동
   if (item.menuname === "QR 코드 확인") {
-    navigate(item.path);
+    if (!selectedShow) {
+      alert("먼저 공연을 선택해주세요.");
+      return;
+    }
+    navigate(`${item.path}/${selectedShow.showId}`);
     return;
   }
 

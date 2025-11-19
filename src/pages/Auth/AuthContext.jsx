@@ -4,7 +4,16 @@ import { createContext, useContext, useState, useEffect } from "react";
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // localStorage에서 초기값 가져오기 (리렌더링 방지)
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginSuccess = urlParams.get('login');
+    if (loginSuccess === 'success') {
+      return true;
+    }
+    return localStorage.getItem('isLoggedIn') === 'true';
+  });
+
   const [user, setUser] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -21,23 +30,10 @@ export function AuthProvider({ children }) {
 
     if (loginSuccess === 'success') {
       console.log("✅ 카카오 로그인 성공 - 로그인 상태로 설정");
-      setIsLoggedIn(true);
       localStorage.setItem('isLoggedIn', 'true');
 
       // URL에서 파라미터 제거 (깔끔하게)
       window.history.replaceState({}, document.title, window.location.pathname);
-    } else {
-      // localStorage에서 로그인 상태 확인
-      const savedLoginState = localStorage.getItem('isLoggedIn');
-      console.log("💾 localStorage isLoggedIn:", savedLoginState);
-
-      if (savedLoginState === 'true') {
-        console.log("✅ 저장된 로그인 상태 확인");
-        setIsLoggedIn(true);
-      } else {
-        console.log("❌ 로그아웃 상태");
-        setIsLoggedIn(false);
-      }
     }
 
     // 초기화 완료

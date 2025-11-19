@@ -115,7 +115,7 @@ const HomeManager = () => {
             </ModalTitle>
             <ModalButtonGroup>
               <ModalButton
-                primary
+                $primary
                 onClick={() => navigate("/register-venue/step1")}
               >
                 공연장 등록하기
@@ -136,7 +136,7 @@ const HomeManager = () => {
             </ModalTitle>
             <ModalButtonGroup>
               <ModalButton
-                primary
+                $primary
                 onClick={() => navigate("/register-show/step1")}
               >
                 네, 등록할래요
@@ -165,7 +165,7 @@ const HomeManager = () => {
                 공연장 등록하기
               </ModalButton>
               <ModalButton
-                primary
+                $primary
                 onClick={() => navigate("/register-show/step1")}
               >
                 이미 등록했어요
@@ -190,7 +190,7 @@ const HomeManager = () => {
             </ModalSubtitle>
             <ModalButtonGroup>
               <ModalButton
-                primary
+                $primary
                 onClick={() => navigate("/register-show/step1?mode=continue")}
               >
                 이어서 등록하기
@@ -218,7 +218,7 @@ const HomeManager = () => {
             </ModalSubtitle>
             <ModalButtonGroup>
               <ModalButton
-                primary
+                $primary
                 onClick={() => {
                   /* 임시저장 로직 */
                 }}
@@ -591,7 +591,7 @@ const ModalButton = styled.button`
   min-width: 180px;
 
   ${(props) =>
-    props.primary
+    props.$primary
       ? `
         background: var(--color-primary);
         color: white;

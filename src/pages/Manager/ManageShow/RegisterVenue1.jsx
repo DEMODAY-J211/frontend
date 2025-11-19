@@ -73,12 +73,8 @@ const RegisterVenue1 = () => {
       addToast('스탠딩석 또는 좌석 중 하나 이상 선택해주세요.', 'error');
       return false;
     }
-    if (isStanding && (!standingCapacity || Number(standingCapacity) <= 0)) {
-      addToast('스탠딩석 허용 인원을 입력해주세요.', 'error');
-      return false;
-    }
-    if (isSeat && (!seatCount || Number(seatCount) <= 0)) {
-      addToast('좌석 수를 입력해주세요.', 'error');
+    if (isSeat && (!floorCount || Number(floorCount) <= 0)) {
+      addToast('층 수를 입력해주세요.', 'error');
       return false;
     }
     return true;

@@ -1,106 +1,95 @@
 import { useEffect, useState } from "react";
 
-export const useReservationData = () => {
+export const useReservationData = (showId, showtimeId) => {
   const [reservationData, setReservationData] = useState([]);
   const [initialData, setInitialData] = useState([]);
+  const [showTimeList, setShowTimeList] = useState([]);
+  const [selectedShowTime, setSelectedShowTime] = useState(null);
+  const [selectedShowTimeId, setSelectedShowTimeId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-useEffect(() => {
+  useEffect(() => {
+    const fetchReservationData = async () => {
+      if (!showId) return;
 
-  const data =[
-    {
-      reservationId: 101,
-      showTimeId: 45,
-      kakaoId: 1,
-      reservationNumber: "10010010",
-      name: "홍길동",
-      phone: "010-1234-5678",
-      reservationTime: "2025-10-06T14:30:00",
-      status: "입금확정",
-      isReserved: true,
-      detailed: {
-        ticketOptionId: 3,
-        ticketOptionName: "일반예매",
-        ticketPrice: 9000,
-        quantity: 2,
-      },
-    },
-    {
-      reservationId: 102,
-      showTimeId: 45,
-      kakaoId: 2,
-      reservationNumber: "10010011",
-      name: "김철수",
-      phone: "010-2345-6789",
-      reservationTime: "2025-10-06T14:35:00",
-      status: "입금대기",
-      isReserved: true,
-      detailed: {
-        ticketOptionId: 3,
-        ticketOptionName: "일반예매",
-        ticketPrice: 9000,
-        quantity: 3,
-      },
-    },
-    {
-      reservationId: 103,
-      showTimeId: 45,
-      kakaoId: 3,
-      reservationNumber: "10010012",
-      name: "이영희",
-      phone: "010-3456-7890",
-      reservationTime: "2025-10-06T14:40:00",
-      status: "환불대기",
-      isReserved: true,
-      detailed: {
-        ticketOptionId: 3,
-        ticketOptionName: "일반예매",
-        ticketPrice: 9000,
-        quantity: 1,
-      },
-    },
-    {
-      reservationId: 104,
-      showTimeId: 45,
-      kakaoId: 4,
-      reservationNumber: "10010013",
-      name: "박민수",
-      phone: "010-4567-8901",
-      reservationTime: "2025-10-06T14:45:00",
-      status: "취소완료",
-      isReserved: true,
-      detailed: {
-        ticketOptionId: 3,
-        ticketOptionName: "일반예매",
-        ticketPrice: 9000,
-        quantity: 4,
-      },
-    },
-    {
-      reservationId: 105,
-      showTimeId: 45,
-      kakaoId: 5,
-      reservationNumber: "10010014",
-      name: "정수진",
-      phone: "010-5678-9012",
-      reservationTime: "2025-10-06T14:50:00",
-      status: "입금확정",
-      isReserved: true,
-      detailed: {
-        ticketOptionId: 3,
-        ticketOptionName: "일반예매",
-        ticketPrice: 9000,
-        quantity: 2,
-      },
-    },
-  ];
-    
-   setReservationData(data);
-  setInitialData(JSON.parse(JSON.stringify(data))); // 깊은 복사 (원본 보존)
-}, []);
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Query parameter 구성
+        const queryParams = showtimeId ? `?showtimeId=${showtimeId}` : '';
+
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/customers${queryParams}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        const result = await response.json();
+
+        console.log('=== API 응답 전체 ===');
+        console.log('Full API Response:', result);
+
+        if (!response.ok || result.success !== true) {
+          throw new Error(result.message || '예매자 목록 조회 실패');
+        }
+
+        // API 응답 데이터 설정
+        const { showTimeList = [], selectedshowTime, selectedshowTimeId, reservationList = [] } = result.data;
+
+        console.log('=== 파싱된 데이터 ===');
+        console.log('회차 목록 (showTimeList):', showTimeList);
+        console.log('선택된 회차 시간 (selectedshowTime):', selectedshowTime);
+        console.log('선택된 회차 ID (selectedshowTimeId):', selectedshowTimeId);
+        console.log('예매자 목록 (reservationList):', reservationList);
+        console.log('예매자 수:', reservationList.length);
+
+        // 각 예매자의 상태 확인
+        if (reservationList.length > 0) {
+          console.log('=== 예매자별 상태 확인 ===');
+          reservationList.forEach((reservation, index) => {
+            console.log(`예매자 ${index + 1}:`, {
+              name: reservation.name,
+              status: reservation.status,
+              reservationId: reservation.reservationId,
+              reservationNumber: reservation.reservationNumber,
+            });
+          });
+        }
+
+        setShowTimeList(showTimeList);
+        setSelectedShowTime(selectedshowTime);
+        setSelectedShowTimeId(selectedshowTimeId);
+        setReservationData(reservationList);
+        setInitialData(JSON.parse(JSON.stringify(reservationList))); // 깊은 복사
+
+      } catch (error) {
+        console.error('Error fetching reservation data:', error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReservationData();
+  }, [showId, showtimeId]);
 
   return {
     reservationData,
     setReservationData,
     initialData,
+    showTimeList,
+    selectedShowTime,
+    selectedShowTimeId,
+    setSelectedShowTimeId,
+    isLoading,
+    error,
   };
 };
