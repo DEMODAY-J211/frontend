@@ -1,5 +1,6 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
@@ -7,7 +8,7 @@ export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
-
+  const navigate = useNavigate();
   // ✅ 로그인 상태 확인: URL 파라미터 또는 localStorage
   useEffect(() => {
     console.log("=== AuthContext 초기화 ===");
@@ -16,22 +17,23 @@ export function AuthProvider({ children }) {
 
     // URL에서 login=success 파라미터 확인
     const urlParams = new URLSearchParams(window.location.search);
-    const loginSuccess = urlParams.get('login');
+    const loginSuccess = urlParams.get("login");
     console.log("🔍 login 파라미터:", loginSuccess);
 
-    if (loginSuccess === 'success') {
+    if (loginSuccess === "success") {
       console.log("✅ 카카오 로그인 성공 - 로그인 상태로 설정");
       setIsLoggedIn(true);
-      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem("isLoggedIn", "true");
 
       // URL에서 파라미터 제거 (깔끔하게)
       window.history.replaceState({}, document.title, window.location.pathname);
+      navigate("/5/homeuser");
     } else {
       // localStorage에서 로그인 상태 확인
-      const savedLoginState = localStorage.getItem('isLoggedIn');
+      const savedLoginState = localStorage.getItem("isLoggedIn");
       console.log("💾 localStorage isLoggedIn:", savedLoginState);
 
-      if (savedLoginState === 'true') {
+      if (savedLoginState === "true") {
         console.log("✅ 저장된 로그인 상태 확인");
         setIsLoggedIn(true);
       } else {
@@ -45,7 +47,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser, isInitialized }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, setIsLoggedIn, user, setUser, isInitialized }}
+    >
       {children}
     </AuthContext.Provider>
   );

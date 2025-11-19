@@ -47,14 +47,15 @@ const ProtectedRoute = ({ element: Element, ...rest }) => {
   if (!isInitialized) {
     return null; // 또는 로딩 스피너
   }
-
+  const currentPath = location.pathname + location.search;
+  const isLoginPage = location.pathname === "/login";
   return isLoggedIn ? (
     <Element {...rest} />
   ) : (
     <Navigate
       to="/login"
       replace
-      state={{ from: location.pathname + location.search }}
+      state={isLoginPage ? null : { from: currentPath }}
     />
   );
 };

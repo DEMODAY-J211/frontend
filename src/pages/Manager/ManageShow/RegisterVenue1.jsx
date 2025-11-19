@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import { RiArrowRightSLine } from 'react-icons/ri';
-import { GrCheckbox, GrCheckboxSelected } from 'react-icons/gr';
-import { BsUpload } from 'react-icons/bs';
-import { BiSolidMap } from 'react-icons/bi';
-import DaumPostcode from 'react-daum-postcode';
-import NavbarManager from '../../../components/Navbar/NavbarManager';
-import { useToast } from '../../../components/Toast/UseToast';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { RiArrowRightSLine } from "react-icons/ri";
+import { GrCheckbox, GrCheckboxSelected } from "react-icons/gr";
+import { BsUpload } from "react-icons/bs";
+import { BiSolidMap } from "react-icons/bi";
+import DaumPostcode from "react-daum-postcode";
+import NavbarManager from "../../../components/Navbar/NavbarManager";
+import { useToast } from "../../../components/Toast/useToast";
 
 const RegisterVenue1 = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
   // 상태 관리
-  const [venueName, setVenueName] = useState('');
-  const [address, setAddress] = useState('');
-  const [detailAddress, setDetailAddress] = useState('');
+  const [venueName, setVenueName] = useState("");
+  const [address, setAddress] = useState("");
+  const [detailAddress, setDetailAddress] = useState("");
   const [isStanding, setIsStanding] = useState(false);
-  const [standingCapacity, setStandingCapacity] = useState('');
+  const [standingCapacity, setStandingCapacity] = useState("");
   const [isSeat, setIsSeat] = useState(false);
-  const [floorCount, setFloorCount] = useState('');
-  const [seatCount, setSeatCount] = useState('');
+  const [floorCount, setFloorCount] = useState("");
+  const [seatCount, setSeatCount] = useState("");
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
@@ -30,7 +30,7 @@ const RegisterVenue1 = () => {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         setUploadedImage(file);
 
         // 이미지 미리보기 생성
@@ -40,9 +40,9 @@ const RegisterVenue1 = () => {
         };
         reader.readAsDataURL(file);
 
-        addToast('좌석표가 업로드되었습니다.', 'success');
+        addToast("좌석표가 업로드되었습니다.", "success");
       } else {
-        addToast('이미지 파일만 업로드 가능합니다.', 'error');
+        addToast("이미지 파일만 업로드 가능합니다.", "error");
       }
     }
   };
@@ -56,29 +56,29 @@ const RegisterVenue1 = () => {
   const handleComplete = (data) => {
     setAddress(data.address);
     setIsPostcodeOpen(false);
-    addToast('주소가 입력되었습니다.', 'success');
+    addToast("주소가 입력되었습니다.", "success");
   };
 
   // 유효성 검사
   const validateForm = () => {
     if (!venueName.trim()) {
-      addToast('공연장명을 입력해주세요.', 'error');
+      addToast("공연장명을 입력해주세요.", "error");
       return false;
     }
     if (!address.trim()) {
-      addToast('주소를 입력해주세요.', 'error');
+      addToast("주소를 입력해주세요.", "error");
       return false;
     }
     if (!isStanding && !isSeat) {
-      addToast('스탠딩석 또는 좌석 중 하나 이상 선택해주세요.', 'error');
+      addToast("스탠딩석 또는 좌석 중 하나 이상 선택해주세요.", "error");
       return false;
     }
     if (isStanding && (!standingCapacity || Number(standingCapacity) <= 0)) {
-      addToast('스탠딩석 허용 인원을 입력해주세요.', 'error');
+      addToast("스탠딩석 허용 인원을 입력해주세요.", "error");
       return false;
     }
     if (isSeat && (!seatCount || Number(seatCount) <= 0)) {
-      addToast('좌석 수를 입력해주세요.', 'error');
+      addToast("좌석 수를 입력해주세요.", "error");
       return false;
     }
     return true;
@@ -95,67 +95,91 @@ const RegisterVenue1 = () => {
     const venueRegisterRequest = {
       locationName: venueName,
       locationAddress: address,
-      locationAddressDetail: detailAddress || '',
+      locationAddressDetail: detailAddress || "",
       locationStandingCount: isStanding ? Number(standingCapacity) : 0,
       locationSeatFloor: isSeat ? Number(floorCount) : 1,
       locationSeatCount: 0,
     };
 
-    formData.append('venueRegisterRequest', new Blob([JSON.stringify(venueRegisterRequest)], { type: 'application/json' }));
+    formData.append(
+      "venueRegisterRequest",
+      new Blob([JSON.stringify(venueRegisterRequest)], {
+        type: "application/json",
+      })
+    );
 
     // 이미지 파일 추가 (있는 경우)
     if (uploadedImage) {
-      formData.append('locationPicture', uploadedImage);
+      formData.append("locationPicture", uploadedImage);
     }
 
-    console.log('=== 백엔드로 보내는 데이터 ===');
-    console.log('Request Body (FormData):');
+    console.log("=== 백엔드로 보내는 데이터 ===");
+    console.log("Request Body (FormData):");
     for (let [key, value] of formData.entries()) {
       if (value instanceof Blob) {
-        console.log(`  ${key}:`, value instanceof File ? `File(${value.name}, ${value.size} bytes, ${value.type})` : `Blob(${value.size} bytes)`);
+        console.log(
+          `  ${key}:`,
+          value instanceof File
+            ? `File(${value.name}, ${value.size} bytes, ${value.type})`
+            : `Blob(${value.size} bytes)`
+        );
       } else {
         console.log(`  ${key}:`, value);
       }
     }
 
     // venueRegisterRequest JSON 내용 출력
-    console.log('venueRegisterRequest:', JSON.stringify(venueRegisterRequest, null, 2));
-    console.log('locationPicture:', uploadedImage ? `File: ${uploadedImage.name}` : 'null');
+    console.log(
+      "venueRegisterRequest:",
+      JSON.stringify(venueRegisterRequest, null, 2)
+    );
+    console.log(
+      "locationPicture:",
+      uploadedImage ? `File: ${uploadedImage.name}` : "null"
+    );
 
     try {
       // 세션 기반 로그인: 쿠키로 인증
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/venue/register`, {
-        method: 'POST',
-        credentials: 'include', // 세션 쿠키 자동 전송
-        body: formData,
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/venue/register`,
+        {
+          method: "POST",
+          credentials: "include", // 세션 쿠키 자동 전송
+          body: formData,
+        }
+      );
 
-      console.log('Response Status:', response.status);
-      console.log('Response Content-Type:', response.headers.get('content-type'));
+      console.log("Response Status:", response.status);
+      console.log(
+        "Response Content-Type:",
+        response.headers.get("content-type")
+      );
 
       // 응답이 JSON인지 확인
-      const contentType = response.headers.get('content-type');
+      const contentType = response.headers.get("content-type");
       let result;
 
-      if (contentType && contentType.includes('application/json')) {
+      if (contentType && contentType.includes("application/json")) {
         result = await response.json();
       } else {
         // JSON이 아닌 경우 텍스트로 읽기
         const text = await response.text();
-        console.log('Response Text:', text);
+        console.log("Response Text:", text);
         result = { success: response.ok, message: text };
       }
 
-      console.log('Parsed Result:', result);
+      console.log("Parsed Result:", result);
 
       if (response.ok) {
         // 백엔드에서 내려준 location_id 추출
         const locationId = result?.data?.location_id;
 
-        console.log('등록된 공연장 location_id:', locationId);
+        console.log("등록된 공연장 location_id:", locationId);
 
         if (!locationId) {
-          console.warn('location_id가 응답에 없습니다. 이후 단계에서 문제가 될 수 있습니다.');
+          console.warn(
+            "location_id가 응답에 없습니다. 이후 단계에서 문제가 될 수 있습니다."
+          );
         }
 
         // localStorage에 저장 (2,3단계에서 필요할 수 있음)
@@ -170,34 +194,34 @@ const RegisterVenue1 = () => {
           seatCount,
           locationId,
         };
-        localStorage.setItem('registerVenue1', JSON.stringify(venueData));
+        localStorage.setItem("registerVenue1", JSON.stringify(venueData));
 
         // locationId를 따로도 저장 (다른 페이지에서 바로 사용할 수 있도록)
         if (locationId) {
-          localStorage.setItem('locationId', String(locationId));
+          localStorage.setItem("locationId", String(locationId));
         }
 
-        addToast('공연장이 등록되었습니다!', 'success');
+        addToast("공연장이 등록되었습니다!", "success");
 
         // 스탠딩석만 선택한 경우 홈으로, 좌석이 있는 경우 2단계로
         if (isStanding && !isSeat) {
-          setTimeout(() => navigate('/homemanager'), 1000);
+          setTimeout(() => navigate("/homemanager"), 1000);
         } else {
-          setTimeout(() => navigate('/register-venue/step2'), 1000);
+          setTimeout(() => navigate("/register-venue/step2"), 1000);
         }
       } else {
-        console.error('API 에러 응답:', result);
-        addToast(result.message || '공연장 등록에 실패했습니다.', 'error');
+        console.error("API 에러 응답:", result);
+        addToast(result.message || "공연장 등록에 실패했습니다.", "error");
       }
     } catch (error) {
-      console.error('API 요청 오류:', error);
-      addToast('서버와의 통신 중 오류가 발생했습니다.', 'error');
+      console.error("API 요청 오류:", error);
+      addToast("서버와의 통신 중 오류가 발생했습니다.", "error");
     }
   };
 
   // 이전 단계로
   const handlePrevious = () => {
-    navigate('/homemanager');
+    navigate("/homemanager");
   };
 
   return (
@@ -211,9 +235,13 @@ const RegisterVenue1 = () => {
             <ProgressSteps>
               <StepItem $active={true}>① 공연장 기본 정보 입력</StepItem>
               <ArrowIcon />
-              <StepItem $active={false} disabled>② 좌석배치표 업로드 및 수정</StepItem>
+              <StepItem $active={false} disabled>
+                ② 좌석배치표 업로드 및 수정
+              </StepItem>
               <ArrowIcon />
-              <StepItem $active={false} disabled>③ 좌석 라벨링</StepItem>
+              <StepItem $active={false} disabled>
+                ③ 좌석 라벨링
+              </StepItem>
             </ProgressSteps>
           </HeaderRow>
 
@@ -221,7 +249,9 @@ const RegisterVenue1 = () => {
           <ContentArea>
             {/* 좌석표 업로드 */}
             <UploadSection>
-              <UploadBox onClick={() => document.getElementById('fileInput').click()}>
+              <UploadBox
+                onClick={() => document.getElementById("fileInput").click()}
+              >
                 {imagePreview ? (
                   <UploadedImage src={imagePreview} alt="업로드된 좌석표" />
                 ) : (
@@ -235,7 +265,7 @@ const RegisterVenue1 = () => {
                 id="fileInput"
                 type="file"
                 accept="image/*"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 onChange={handleFileUpload}
               />
             </UploadSection>
@@ -261,7 +291,7 @@ const RegisterVenue1 = () => {
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="주소를 검색해주세요"
                     readOnly
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                     onClick={handleAddressSearch}
                   />
                   <MapIcon onClick={handleAddressSearch}>
@@ -282,12 +312,14 @@ const RegisterVenue1 = () => {
 
               {/* 스탠딩석 */}
               <FormField>
-                <CheckboxContainer onClick={() => {
-                  if (!isStanding && isSeat) {
-                    setIsSeat(false);
-                  }
-                  setIsStanding(!isStanding);
-                }}>
+                <CheckboxContainer
+                  onClick={() => {
+                    if (!isStanding && isSeat) {
+                      setIsSeat(false);
+                    }
+                    setIsStanding(!isStanding);
+                  }}
+                >
                   {isStanding ? <CheckboxIconSelected /> : <CheckboxIcon />}
                   <Label>스탠딩석</Label>
                 </CheckboxContainer>
@@ -307,12 +339,14 @@ const RegisterVenue1 = () => {
 
               {/* 좌석 */}
               <FormField>
-                <CheckboxContainer onClick={() => {
-                  if (!isSeat && isStanding) {
-                    setIsStanding(false);
-                  }
-                  setIsSeat(!isSeat);
-                }}>
+                <CheckboxContainer
+                  onClick={() => {
+                    if (!isSeat && isStanding) {
+                      setIsStanding(false);
+                    }
+                    setIsSeat(!isSeat);
+                  }}
+                >
                   {isSeat ? <CheckboxIconSelected /> : <CheckboxIcon />}
                   <Label>좌석</Label>
                 </CheckboxContainer>
@@ -357,7 +391,9 @@ const RegisterVenue1 = () => {
             <PostcodeContainer onClick={(e) => e.stopPropagation()}>
               <PostcodeHeader>
                 <PostcodeTitle>주소 검색</PostcodeTitle>
-                <CloseButton onClick={() => setIsPostcodeOpen(false)}>✕</CloseButton>
+                <CloseButton onClick={() => setIsPostcodeOpen(false)}>
+                  ✕
+                </CloseButton>
               </PostcodeHeader>
               <DaumPostcode onComplete={handleComplete} autoClose={false} />
             </PostcodeContainer>
@@ -430,11 +466,11 @@ const StepItem = styled.div`
   font-weight: 500;
   font-size: 20px;
   padding: 10px;
-  color: ${(props) => (props.$active ? '#FC2847' : '#737373')};
-  border-bottom: ${(props) => (props.$active ? '2px solid #FC2847' : 'none')};
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  color: ${(props) => (props.$active ? "#FC2847" : "#737373")};
+  border-bottom: ${(props) => (props.$active ? "2px solid #FC2847" : "none")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   opacity: ${(props) => (props.disabled ? 0.5 : 1)};
-  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
+  pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
 `;
 
 const ArrowIcon = styled(RiArrowRightSLine)`

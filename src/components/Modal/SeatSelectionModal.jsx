@@ -1,20 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { AiOutlineClose, AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
-import { RiInformationLine } from 'react-icons/ri';
-import { FaMousePointer } from 'react-icons/fa';
-import { BsFillEraserFill } from 'react-icons/bs';
-import { BiUndo, BiRedo, BiSolidSave } from 'react-icons/bi';
-import { useToast } from '../Toast/UseToast';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { AiOutlineClose, AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
+import { RiInformationLine } from "react-icons/ri";
+import { FaMousePointer } from "react-icons/fa";
+import { BsFillEraserFill } from "react-icons/bs";
+import { BiUndo, BiRedo, BiSolidSave } from "react-icons/bi";
+import { useToast } from "../Toast/useToast";
 
-const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }) => {
+const SeatSelectionModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  salesMethod,
+  locationId,
+}) => {
   const { addToast } = useToast();
   // 탭 상태 관리 (예매자 선택: exclude, 자동 배정: vip)
-  const [activeTab, setActiveTab] = useState(salesMethod === '자동 배정' ? 'vip' : 'exclude');
+  const [activeTab, setActiveTab] = useState(
+    salesMethod === "자동 배정" ? "vip" : "exclude"
+  );
   const [excludedSeats, setExcludedSeats] = useState(new Set()); // 판매 제외 좌석
   const [vipSeats, setVipSeats] = useState(new Set()); // VIP석
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [activeTool, setActiveTool] = useState('select'); // select, drag, erase
+  const [activeTool, setActiveTool] = useState("select"); // select, drag, erase
   const [excludeHistory, setExcludeHistory] = useState([new Set()]);
   const [vipHistory, setVipHistory] = useState([new Set()]);
   const [excludeHistoryIndex, setExcludeHistoryIndex] = useState(0);
@@ -34,27 +42,27 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/manager/shows/${locationId}/seatmap`,
           {
-            method: 'GET',
-            credentials: 'include',
+            method: "GET",
+            credentials: "include",
           }
         );
 
         if (response.ok) {
           const result = await response.json();
-          console.log('Seat map data:', result);
+          console.log("Seat map data:", result);
 
           if (result.success && result.data) {
             setSeatMapData(result.data);
           } else {
-            addToast('좌석표를 불러오는데 실패했습니다.', 'error');
+            addToast("좌석표를 불러오는데 실패했습니다.", "error");
           }
         } else {
-          console.error('Failed to fetch seat map:', response.status);
-          addToast('좌석표를 불러오는데 실패했습니다.', 'error');
+          console.error("Failed to fetch seat map:", response.status);
+          addToast("좌석표를 불러오는데 실패했습니다.", "error");
         }
       } catch (error) {
-        console.error('Error fetching seat map:', error);
-        addToast('서버와의 통신 중 오류가 발생했습니다.', 'error');
+        console.error("Error fetching seat map:", error);
+        addToast("서버와의 통신 중 오류가 발생했습니다.", "error");
       } finally {
         setIsLoading(false);
       }
@@ -64,29 +72,33 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
   }, [isOpen, locationId, addToast]);
 
   // 현재 탭에 따른 좌석 상태
-  const selectedSeats = activeTab === 'exclude' ? excludedSeats : vipSeats;
-  const setSelectedSeats = activeTab === 'exclude' ? setExcludedSeats : setVipSeats;
-  const history = activeTab === 'exclude' ? excludeHistory : vipHistory;
-  const setHistory = activeTab === 'exclude' ? setExcludeHistory : setVipHistory;
-  const historyIndex = activeTab === 'exclude' ? excludeHistoryIndex : vipHistoryIndex;
-  const setHistoryIndex = activeTab === 'exclude' ? setExcludeHistoryIndex : setVipHistoryIndex;
+  const selectedSeats = activeTab === "exclude" ? excludedSeats : vipSeats;
+  const setSelectedSeats =
+    activeTab === "exclude" ? setExcludedSeats : setVipSeats;
+  const history = activeTab === "exclude" ? excludeHistory : vipHistory;
+  const setHistory =
+    activeTab === "exclude" ? setExcludeHistory : setVipHistory;
+  const historyIndex =
+    activeTab === "exclude" ? excludeHistoryIndex : vipHistoryIndex;
+  const setHistoryIndex =
+    activeTab === "exclude" ? setExcludeHistoryIndex : setVipHistoryIndex;
 
   // 좌석 데이터 생성 (API 데이터 또는 기본값)
   const seatRows = seatMapData?.seat_map || [
-    { id: 'A', seats: 10 }, // 10개 좌석
-    { id: 'B', seats: 10 }, // 10개 좌석
-    { id: 'C', seats: 10 }, // 10개 좌석
-    { id: 'D', seats: 10 }, // 10개 좌석
-    { id: 'E', seats: 9 },  // 9개 좌석
+    { id: "A", seats: 10 }, // 10개 좌석
+    { id: "B", seats: 10 }, // 10개 좌석
+    { id: "C", seats: 10 }, // 10개 좌석
+    { id: "D", seats: 10 }, // 10개 좌석
+    { id: "E", seats: 9 }, // 9개 좌석
   ];
 
   // 좌석 선택/해제
   const handleSeatClick = (seatId) => {
-    if (activeTool === 'drag') return;
+    if (activeTool === "drag") return;
 
     const newSelected = new Set(selectedSeats);
 
-    if (activeTool === 'erase') {
+    if (activeTool === "erase") {
       newSelected.delete(seatId);
     } else {
       if (newSelected.has(seatId)) {
@@ -165,25 +177,21 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
           <TabSection>
             <TabHeader>
               {/* 예매자 선택: 판매제외 좌석만 표시 */}
-              {salesMethod === '예매자 선택' && (
-                <TabItem active={true}>
-                  판매제외 좌석
-                </TabItem>
+              {salesMethod === "예매자 선택" && (
+                <TabItem active={true}>판매제외 좌석</TabItem>
               )}
 
               {/* 자동 배정: VIP석만 표시 */}
-              {salesMethod === '자동 배정' && (
-                <TabItem active={true}>
-                  VIP석
-                </TabItem>
+              {salesMethod === "자동 배정" && (
+                <TabItem active={true}>VIP석</TabItem>
               )}
             </TabHeader>
             <InfoMessage>
               <InfoIcon />
               <InfoText>
-                {salesMethod === '예매자 선택'
-                  ? '제외할 좌석을 선택해주세요.'
-                  : '🎭 자동으로 배정할 좌석을 선택해주세요! 이 좌석들은 VIP석으로 지정되어, 선착순 예매자에게 자동으로 배정돼요.'}
+                {salesMethod === "예매자 선택"
+                  ? "제외할 좌석을 선택해주세요."
+                  : "🎭 자동으로 배정할 좌석을 선택해주세요! 이 좌석들은 VIP석으로 지정되어, 선착순 예매자에게 자동으로 배정돼요."}
               </InfoText>
             </InfoMessage>
           </TabSection>
@@ -196,7 +204,7 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
               <SeatGrid>
                 {seatMapData.seat_map.map((row, rowIndex) =>
                   row.map((seat, colIndex) => {
-                    const seatId = typeof seat === 'string' ? seat : null;
+                    const seatId = typeof seat === "string" ? seat : null;
                     const isEmpty = seat === 0;
                     const isStage = seat === -1;
                     const isSelected = seatId && selectedSeats.has(seatId);
@@ -235,7 +243,7 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
                         style={{
                           gridRow: rowIndex + 1,
                           gridColumn: colIndex + 1,
-                          cursor: activeTool === 'drag' ? 'grab' : 'pointer',
+                          cursor: activeTool === "drag" ? "grab" : "pointer",
                         }}
                       >
                         {seatId}
@@ -247,7 +255,10 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
             ) : (
               <SeatOverlay style={{ transform: `scale(${zoomLevel})` }}>
                 {seatRows.map((row) => (
-                  <SeatRow key={row.id} align={row.seats === 9 ? 'end' : 'center'}>
+                  <SeatRow
+                    key={row.id}
+                    align={row.seats === 9 ? "end" : "center"}
+                  >
                     {Array.from({ length: row.seats }, (_, i) => {
                       const seatId = `${row.id}${i + 1}`;
                       const isSelected = selectedSeats.has(seatId);
@@ -256,7 +267,9 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
                           key={seatId}
                           selected={isSelected}
                           onClick={() => handleSeatClick(seatId)}
-                          style={{ cursor: activeTool === 'drag' ? 'grab' : 'pointer' }}
+                          style={{
+                            cursor: activeTool === "drag" ? "grab" : "pointer",
+                          }}
                         />
                       );
                     })}
@@ -277,11 +290,17 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
 
             {/* 하단 도구 모음 */}
             <Toolbar>
-              <ToolItem onClick={() => setActiveTool('drag')} active={activeTool === 'drag'}>
+              <ToolItem
+                onClick={() => setActiveTool("drag")}
+                active={activeTool === "drag"}
+              >
                 <FaMousePointer size={24} />
                 <ToolLabel>드래그</ToolLabel>
               </ToolItem>
-              <ToolItem onClick={() => setActiveTool('erase')} active={activeTool === 'erase'}>
+              <ToolItem
+                onClick={() => setActiveTool("erase")}
+                active={activeTool === "erase"}
+              >
                 <BsFillEraserFill size={24} />
                 <ToolLabel>좌석 상태 변경</ToolLabel>
               </ToolItem>
@@ -297,7 +316,10 @@ const SeatSelectionModal = ({ isOpen, onClose, onSave, salesMethod, locationId }
                 <BiUndo size={32} />
                 <ToolLabel>실행 취소</ToolLabel>
               </ToolItem>
-              <ToolItem onClick={handleRedo} disabled={historyIndex >= history.length - 1}>
+              <ToolItem
+                onClick={handleRedo}
+                disabled={historyIndex >= history.length - 1}
+              >
                 <BiRedo size={32} />
                 <ToolLabel>재실행</ToolLabel>
               </ToolItem>
@@ -407,8 +429,8 @@ const TabItem = styled.div`
   font-weight: 500;
   font-size: 20px;
   padding: 10px;
-  color: ${(props) => (props.active ? '#FC2847' : '#737373')};
-  border-bottom: ${(props) => (props.active ? '2px solid #FC2847' : 'none')};
+  color: ${(props) => (props.active ? "#FC2847" : "#737373")};
+  border-bottom: ${(props) => (props.active ? "2px solid #FC2847" : "none")};
   display: inline-block;
   cursor: pointer;
 `;
@@ -464,7 +486,7 @@ const SeatGrid = styled.div`
 
 const SeatRow = styled.div`
   display: flex;
-  justify-content: ${(props) => props.align || 'center'};
+  justify-content: ${(props) => props.align || "center"};
   gap: 0px;
   width: 100%;
 `;
@@ -472,7 +494,7 @@ const SeatRow = styled.div`
 const SeatCell = styled.div`
   width: 28px;
   height: 20px;
-  background: ${(props) => (props.selected ? '#FC2847' : '#9E5656')};
+  background: ${(props) => (props.selected ? "#FC2847" : "#9E5656")};
   border: 0.5px solid #000000;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -571,15 +593,15 @@ const ToolItem = styled.button`
   gap: 5px;
   background: transparent;
   border: none;
-  border-right: ${(props) => (props.noBorder ? 'none' : '1px solid #a8a8a8')};
+  border-right: ${(props) => (props.noBorder ? "none" : "1px solid #a8a8a8")};
   padding: 5px 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   opacity: ${(props) => (props.disabled ? 0.3 : 1)};
-  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
+  pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
 
   svg {
-    color: ${(props) => (props.active ? '#FC2847' : '#333333')};
+    color: ${(props) => (props.active ? "#FC2847" : "#333333")};
   }
 
   &:hover {

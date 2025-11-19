@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import { RiArrowRightSLine } from 'react-icons/ri';
-import { AiOutlinePlus } from 'react-icons/ai';
-import { BiSolidTrash, BiUndo, BiRedo } from 'react-icons/bi';
-import { IoIosArrowDown } from 'react-icons/io';
-import * as XLSX from 'xlsx';
-import NavbarManager from '../../../components/Navbar/NavbarManager';
-import { useToast } from '../../../components/Toast/UseToast';
+import React, { useState, useRef, useEffect } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { RiArrowRightSLine } from "react-icons/ri";
+import { AiOutlinePlus } from "react-icons/ai";
+import { BiSolidTrash, BiUndo, BiRedo } from "react-icons/bi";
+import { IoIosArrowDown } from "react-icons/io";
+import * as XLSX from "xlsx";
+import NavbarManager from "../../../components/Navbar/NavbarManager";
+import { useToast } from "../../../components/Toast/useToast";
 
 const RegisterVenue2 = () => {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ const RegisterVenue2 = () => {
   const gridRef = useRef(null);
 
   // 1단계 데이터 불러오기
-  const venueData = JSON.parse(localStorage.getItem('registerVenue1') || '{}');
+  const venueData = JSON.parse(localStorage.getItem("registerVenue1") || "{}");
 
   // 층 수 계산
   const floorCount = Number(venueData.floorCount) || 2;
@@ -24,7 +24,7 @@ const RegisterVenue2 = () => {
 
   // 상태 관리
   const [uploadedImage, setUploadedImage] = useState(null);
-  const [activeTool, setActiveTool] = useState('stage');
+  const [activeTool, setActiveTool] = useState("stage");
   const [currentFloor, setCurrentFloor] = useState(1);
   const [floors, setFloors] = useState(floorArray);
   const [isFloorDropdownOpen, setIsFloorDropdownOpen] = useState(false);
@@ -38,7 +38,7 @@ const RegisterVenue2 = () => {
   const [floorAssignments, setFloorAssignments] = useState({}); // {row-col: floorNumber}
   const [assignmentTargetFloor, setAssignmentTargetFloor] = useState(1); // 할당할 층
   const [isLabelInputOpen, setIsLabelInputOpen] = useState(false);
-  const [labelInputValue, setLabelInputValue] = useState('');
+  const [labelInputValue, setLabelInputValue] = useState("");
   const [selectedSeatForLabel, setSelectedSeatForLabel] = useState(null); // {row, col}
   const [isLabelingMode, setIsLabelingMode] = useState(false);
 
@@ -47,34 +47,42 @@ const RegisterVenue2 = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (
-        file.type === 'application/vnd.ms-excel' ||
-        file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        file.type === "application/vnd.ms-excel" ||
+        file.type ===
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       ) {
         const reader = new FileReader();
         reader.onload = (evt) => {
           try {
             const bstr = evt.target.result;
-            const wb = XLSX.read(bstr, { type: 'binary' });
+            const wb = XLSX.read(bstr, { type: "binary" });
             const wsname = wb.SheetNames[0];
             const ws = wb.Sheets[wsname];
-            const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+            const data = XLSX.utils.sheet_to_json(ws, {
+              header: 1,
+              defval: null,
+            });
 
             // 2D 배열로 변환
             const layout = data.map((row) =>
-              row.map((cell) => (cell && cell !== null ? { label: String(cell), type: 'seat' } : null))
+              row.map((cell) =>
+                cell && cell !== null
+                  ? { label: String(cell), type: "seat" }
+                  : null
+              )
             );
 
             setSeatLayout(layout);
             setHistory([layout]);
             setHistoryIndex(0);
-            addToast('엑셀 파일이 업로드되었습니다.', 'success');
+            addToast("엑셀 파일이 업로드되었습니다.", "success");
           } catch (error) {
-            addToast('엑셀 파일 파싱 중 오류가 발생했습니다.', 'error');
+            addToast("엑셀 파일 파싱 중 오류가 발생했습니다.", "error");
           }
         };
         reader.readAsBinaryString(file);
       } else {
-        addToast('엑셀 파일만 업로드 가능합니다.', 'error');
+        addToast("엑셀 파일만 업로드 가능합니다.", "error");
       }
     }
   };
@@ -99,10 +107,10 @@ const RegisterVenue2 = () => {
       return;
     }
 
-    if (activeTool === 'delete' || activeTool === 'seat') {
+    if (activeTool === "delete" || activeTool === "seat") {
       setIsDragging(true);
       setDragStart({ row, col });
-      if (activeTool === 'delete') {
+      if (activeTool === "delete") {
         setSelectedSeats(new Set());
       }
     } else if (isFloorAssignmentMode) {
@@ -116,7 +124,7 @@ const RegisterVenue2 = () => {
   const handleMouseMove = (row, col) => {
     if (!isDragging || !dragStart) return;
 
-    if (activeTool === 'delete' || isFloorAssignmentMode) {
+    if (activeTool === "delete" || isFloorAssignmentMode) {
       const minRow = Math.min(dragStart.row, row);
       const maxRow = Math.max(dragStart.row, row);
       const minCol = Math.min(dragStart.col, col);
@@ -138,7 +146,7 @@ const RegisterVenue2 = () => {
   const handleMouseUp = (row, col) => {
     if (!isDragging || !dragStart) return;
 
-    if (activeTool === 'seat') {
+    if (activeTool === "seat") {
       const minRow = Math.min(dragStart.row, row);
       const maxRow = Math.max(dragStart.row, row);
       const minCol = Math.min(dragStart.col, col);
@@ -160,7 +168,7 @@ const RegisterVenue2 = () => {
 
         for (let c = minCol; c <= maxCol; c++) {
           if (!newLayout[r][c]) {
-            newLayout[r][c] = { label: '', type: 'seat' };
+            newLayout[r][c] = { label: "", type: "seat" };
             addedCount++;
           }
         }
@@ -168,7 +176,7 @@ const RegisterVenue2 = () => {
 
       if (addedCount > 0) {
         updateLayout(newLayout);
-        addToast(`${addedCount}개의 좌석이 추가되었습니다.`, 'success');
+        addToast(`${addedCount}개의 좌석이 추가되었습니다.`, "success");
       }
     }
 
@@ -184,8 +192,8 @@ const RegisterVenue2 = () => {
         setDragStart(null);
       }
     };
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+    return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
   }, [isDragging]);
 
   // 레이아웃 업데이트 (히스토리 포함)
@@ -199,7 +207,7 @@ const RegisterVenue2 = () => {
   // 좌석 삭제
   const deleteSelectedSeats = () => {
     if (selectedSeats.size === 0) {
-      addToast('삭제할 좌석을 선택해주세요.', 'warning');
+      addToast("삭제할 좌석을 선택해주세요.", "warning");
       return;
     }
 
@@ -214,7 +222,7 @@ const RegisterVenue2 = () => {
 
     updateLayout(newLayout);
     setSelectedSeats(new Set());
-    addToast(`${selectedSeats.size}개의 좌석이 삭제되었습니다.`, 'success');
+    addToast(`${selectedSeats.size}개의 좌석이 삭제되었습니다.`, "success");
   };
 
   // Undo
@@ -222,7 +230,7 @@ const RegisterVenue2 = () => {
     if (historyIndex > 0) {
       setHistoryIndex(historyIndex - 1);
       setSeatLayout(history[historyIndex - 1]);
-      addToast('실행 취소', 'info');
+      addToast("실행 취소", "info");
     }
   };
 
@@ -231,23 +239,23 @@ const RegisterVenue2 = () => {
     if (historyIndex < history.length - 1) {
       setHistoryIndex(historyIndex + 1);
       setSeatLayout(history[historyIndex + 1]);
-      addToast('재실행', 'info');
+      addToast("재실행", "info");
     }
   };
 
   // 키보드 단축키
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         e.preventDefault();
         handleUndo();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "y") {
         e.preventDefault();
         handleRedo();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [historyIndex, history]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 도구 선택
@@ -257,31 +265,31 @@ const RegisterVenue2 = () => {
     setIsFloorAssignmentMode(false);
     setIsLabelingMode(false);
     const toolNames = {
-      stage: '무대 추가 모드',
-      seat: '좌석 추가 모드',
-      delete: '좌석 삭제 모드',
-      floor: '층 설정 모드',
+      stage: "무대 추가 모드",
+      seat: "좌석 추가 모드",
+      delete: "좌석 삭제 모드",
+      floor: "층 설정 모드",
     };
-    addToast(toolNames[tool] || '', 'info');
+    addToast(toolNames[tool] || "", "info");
   };
 
   // 층수 변경 모드 활성화
   const handleFloorAssignmentModeToggle = () => {
     setIsFloorAssignmentMode(!isFloorAssignmentMode);
-    setActiveTool('');
+    setActiveTool("");
     setIsLabelingMode(false);
     setSelectedSeats(new Set());
     if (!isFloorAssignmentMode) {
-      addToast('각 층수를 선택해주세요', 'info');
+      addToast("각 층수를 선택해주세요", "info");
     } else {
-      addToast('층수 변경 모드 종료', 'info');
+      addToast("층수 변경 모드 종료", "info");
     }
   };
 
   // 선택된 좌석을 특정 층에 할당
   const assignSelectedSeatsToFloor = () => {
     if (selectedSeats.size === 0) {
-      addToast('할당할 좌석을 선택해주세요.', 'warning');
+      addToast("할당할 좌석을 선택해주세요.", "warning");
       return;
     }
 
@@ -293,7 +301,10 @@ const RegisterVenue2 = () => {
 
     setFloorAssignments(newAssignments);
     setSelectedSeats(new Set());
-    addToast(`${count}개의 좌석이 ${assignmentTargetFloor}층에 할당되었습니다.`, 'success');
+    addToast(
+      `${count}개의 좌석이 ${assignmentTargetFloor}층에 할당되었습니다.`,
+      "success"
+    );
   };
 
   // 할당 대상 층 변경
@@ -305,7 +316,7 @@ const RegisterVenue2 = () => {
   const handleFloorChange = (floor) => {
     setCurrentFloor(floor);
     setIsFloorDropdownOpen(false);
-    addToast(`${floor}층으로 이동`, 'info');
+    addToast(`${floor}층으로 이동`, "info");
   };
 
   // 좌석 클릭
@@ -313,12 +324,12 @@ const RegisterVenue2 = () => {
     if (isLabelingMode) {
       // 라벨링 모드: 단일 좌석 선택 (드래그 안됨)
       const seat = seatLayout[row]?.[col];
-      if (seat && seat.type === 'seat') {
+      if (seat && seat.type === "seat") {
         setSelectedSeatForLabel({ row, col });
-        setLabelInputValue(seat.label || '');
+        setLabelInputValue(seat.label || "");
         setIsLabelInputOpen(true);
       }
-    } else if (activeTool === 'delete') {
+    } else if (activeTool === "delete") {
       const seatId = `${row}-${col}`;
       const newSelected = new Set(selectedSeats);
       if (newSelected.has(seatId)) {
@@ -327,10 +338,10 @@ const RegisterVenue2 = () => {
         newSelected.add(seatId);
       }
       setSelectedSeats(newSelected);
-    } else if (activeTool === 'stage') {
+    } else if (activeTool === "stage") {
       const newLayout = [...seatLayout];
       if (newLayout[row] && newLayout[row][col]) {
-        newLayout[row][col] = { ...newLayout[row][col], type: 'stage' };
+        newLayout[row][col] = { ...newLayout[row][col], type: "stage" };
         updateLayout(newLayout);
       }
     }
@@ -339,7 +350,7 @@ const RegisterVenue2 = () => {
   // 다음/이전 단계
   const handleNext = () => {
     if (seatLayout.length === 0) {
-      addToast('좌석 배치표를 업로드해주세요.', 'warning');
+      addToast("좌석 배치표를 업로드해주세요.", "warning");
       return;
     }
 
@@ -347,14 +358,18 @@ const RegisterVenue2 = () => {
     let hasEmptyLabel = false;
     seatLayout.forEach((row) => {
       row.forEach((seat) => {
-        if (seat && seat.type === 'seat' && (!seat.label || seat.label.trim() === '')) {
+        if (
+          seat &&
+          seat.type === "seat" &&
+          (!seat.label || seat.label.trim() === "")
+        ) {
           hasEmptyLabel = true;
         }
       });
     });
 
     if (hasEmptyLabel) {
-      addToast('모든 좌석에 열 번호를 입력해주세요.', 'warning');
+      addToast("모든 좌석에 열 번호를 입력해주세요.", "warning");
       return;
     }
 
@@ -368,8 +383,8 @@ const RegisterVenue2 = () => {
 
           flattenedSeats.push({
             id: `seat-${assignedFloor}-${rowIndex}-${colIndex}`,
-            label: seat.label || '',
-            type: seat.type || 'seat',
+            label: seat.label || "",
+            type: seat.type || "seat",
             row: rowIndex,
             col: colIndex,
             floor: assignedFloor,
@@ -384,25 +399,25 @@ const RegisterVenue2 = () => {
       floors,
       floorAssignments,
     };
-    localStorage.setItem('registerVenue2', JSON.stringify(editorData));
-    addToast('좌석 배치가 저장되었습니다.', 'success');
-    navigate('/register-venue/step3');
+    localStorage.setItem("registerVenue2", JSON.stringify(editorData));
+    addToast("좌석 배치가 저장되었습니다.", "success");
+    navigate("/register-venue/step3");
   };
 
   const handlePrevious = () => {
-    navigate('/register-venue/step1');
+    navigate("/register-venue/step1");
   };
 
   // 라벨링 모드 토글
   const handleLabelingModeToggle = () => {
     setIsLabelingMode(!isLabelingMode);
-    setActiveTool('');
+    setActiveTool("");
     setIsFloorAssignmentMode(false);
     setSelectedSeats(new Set());
     if (!isLabelingMode) {
-      addToast('좌석을 클릭하여 라벨을 입력하세요.', 'info');
+      addToast("좌석을 클릭하여 라벨을 입력하세요.", "info");
     } else {
-      addToast('라벨링 모드 종료', 'info');
+      addToast("라벨링 모드 종료", "info");
     }
   };
 
@@ -416,18 +431,18 @@ const RegisterVenue2 = () => {
     if (newLayout[row] && newLayout[row][col]) {
       newLayout[row][col] = { ...newLayout[row][col], label: labelInputValue };
       updateLayout(newLayout);
-      addToast('좌석 라벨이 업데이트되었습니다.', 'success');
+      addToast("좌석 라벨이 업데이트되었습니다.", "success");
     }
 
     setIsLabelInputOpen(false);
-    setLabelInputValue('');
+    setLabelInputValue("");
     setSelectedSeatForLabel(null);
   };
 
   // 라벨 입력 취소
   const handleLabelCancel = () => {
     setIsLabelInputOpen(false);
-    setLabelInputValue('');
+    setLabelInputValue("");
     setSelectedSeatForLabel(null);
   };
 
@@ -446,13 +461,18 @@ const RegisterVenue2 = () => {
           <HeaderRow>
             <Title>내 공연장 등록하기</Title>
             <ProgressSteps>
-              <StepItem active={false} onClick={() => navigate('/register-venue/step1')}>
+              <StepItem
+                active={false}
+                onClick={() => navigate("/register-venue/step1")}
+              >
                 ① 공연장 기본 정보 입력
               </StepItem>
               <ArrowIcon />
               <StepItem active={true}>② 좌석배치표 업로드 및 수정</StepItem>
               <ArrowIcon />
-              <StepItem active={false} disabled>③ 좌석 라벨링</StepItem>
+              <StepItem active={false} disabled>
+                ③ 좌석 라벨링
+              </StepItem>
             </ProgressSteps>
           </HeaderRow>
 
@@ -462,7 +482,10 @@ const RegisterVenue2 = () => {
               {/* 좌석표 영역 */}
               <SeatingChartArea ref={gridRef}>
                 {uploadedImage && (
-                  <SeatingChartImage src={URL.createObjectURL(uploadedImage)} alt="좌석표" />
+                  <SeatingChartImage
+                    src={URL.createObjectURL(uploadedImage)}
+                    alt="좌석표"
+                  />
                 )}
 
                 {/* 좌석 그리드 */}
@@ -481,19 +504,33 @@ const RegisterVenue2 = () => {
                               type={seat.type}
                               selected={isSelected}
                               assignedFloor={assignedFloor}
-                              onClick={() => handleSeatClick(rowIndex, colIndex)}
-                              onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
-                              onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
-                              onMouseUp={() => handleMouseUp(rowIndex, colIndex)}
+                              onClick={() =>
+                                handleSeatClick(rowIndex, colIndex)
+                              }
+                              onMouseDown={() =>
+                                handleMouseDown(rowIndex, colIndex)
+                              }
+                              onMouseMove={() =>
+                                handleMouseMove(rowIndex, colIndex)
+                              }
+                              onMouseUp={() =>
+                                handleMouseUp(rowIndex, colIndex)
+                              }
                             >
                               {seat.label}
                             </SeatCell>
                           ) : (
                             <EmptyCell
                               key={colIndex}
-                              onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
-                              onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
-                              onMouseUp={() => handleMouseUp(rowIndex, colIndex)}
+                              onMouseDown={() =>
+                                handleMouseDown(rowIndex, colIndex)
+                              }
+                              onMouseMove={() =>
+                                handleMouseMove(rowIndex, colIndex)
+                              }
+                              onMouseUp={() =>
+                                handleMouseUp(rowIndex, colIndex)
+                              }
                             />
                           );
                         })}
@@ -505,31 +542,56 @@ const RegisterVenue2 = () => {
 
               {/* 하단 도구 모음 */}
               <Toolbar>
-                <ToolItem active={activeTool === 'stage'} onClick={() => handleToolSelect('stage')}>
-                  <StageIcon active={activeTool === 'stage'} />
-                  <ToolLabel active={activeTool === 'stage'}>무대 추가</ToolLabel>
+                <ToolItem
+                  active={activeTool === "stage"}
+                  onClick={() => handleToolSelect("stage")}
+                >
+                  <StageIcon active={activeTool === "stage"} />
+                  <ToolLabel active={activeTool === "stage"}>
+                    무대 추가
+                  </ToolLabel>
                 </ToolItem>
 
-                <ToolItem active={activeTool === 'seat'} onClick={() => handleToolSelect('seat')}>
+                <ToolItem
+                  active={activeTool === "seat"}
+                  onClick={() => handleToolSelect("seat")}
+                >
                   <AiOutlinePlus size={24} />
-                  <ToolLabel active={activeTool === 'seat'}>좌석 추가</ToolLabel>
+                  <ToolLabel active={activeTool === "seat"}>
+                    좌석 추가
+                  </ToolLabel>
                 </ToolItem>
 
-                <ToolItem active={activeTool === 'delete'} onClick={() => handleToolSelect('delete')}>
+                <ToolItem
+                  active={activeTool === "delete"}
+                  onClick={() => handleToolSelect("delete")}
+                >
                   <BiSolidTrash size={24} />
-                  <ToolLabel active={activeTool === 'delete'}>좌석 삭제</ToolLabel>
+                  <ToolLabel active={activeTool === "delete"}>
+                    좌석 삭제
+                  </ToolLabel>
                 </ToolItem>
 
-                {activeTool === 'delete' && selectedSeats.size > 0 && (
-                  <ToolItem onClick={deleteSelectedSeats} style={{ backgroundColor: '#dc3545' }}>
+                {activeTool === "delete" && selectedSeats.size > 0 && (
+                  <ToolItem
+                    onClick={deleteSelectedSeats}
+                    style={{ backgroundColor: "#dc3545" }}
+                  >
                     <BiSolidTrash size={24} color="#fff" />
-                    <ToolLabel style={{ color: '#fff' }}>삭제({selectedSeats.size})</ToolLabel>
+                    <ToolLabel style={{ color: "#fff" }}>
+                      삭제({selectedSeats.size})
+                    </ToolLabel>
                   </ToolItem>
                 )}
 
-                <ToolItem active={isLabelingMode} onClick={handleLabelingModeToggle}>
+                <ToolItem
+                  active={isLabelingMode}
+                  onClick={handleLabelingModeToggle}
+                >
                   <AiOutlinePlus size={24} />
-                  <ToolLabel active={isLabelingMode}>좌석 라벨링 추가</ToolLabel>
+                  <ToolLabel active={isLabelingMode}>
+                    좌석 라벨링 추가
+                  </ToolLabel>
                 </ToolItem>
 
                 {floorCount >= 2 && (
@@ -537,15 +599,24 @@ const RegisterVenue2 = () => {
                     active={isFloorAssignmentMode}
                     onClick={handleFloorAssignmentModeToggle}
                   >
-                    <FloorCircle active={isFloorAssignmentMode} style={{ width: '24px', height: '24px' }} />
-                    <ToolLabel active={isFloorAssignmentMode}>층수 변경</ToolLabel>
+                    <FloorCircle
+                      active={isFloorAssignmentMode}
+                      style={{ width: "24px", height: "24px" }}
+                    />
+                    <ToolLabel active={isFloorAssignmentMode}>
+                      층수 변경
+                    </ToolLabel>
                   </ToolItem>
                 )}
 
                 {isFloorAssignmentMode && selectedSeats.size > 0 && (
                   <>
                     <FloorAssignmentDropdown>
-                      <FloorAssignmentButton onClick={() => setIsFloorDropdownOpen(!isFloorDropdownOpen)}>
+                      <FloorAssignmentButton
+                        onClick={() =>
+                          setIsFloorDropdownOpen(!isFloorDropdownOpen)
+                        }
+                      >
                         <FloorCircle active={true} />
                         <span>{assignmentTargetFloor}층</span>
                         <IoIosArrowDown size={16} />
@@ -560,16 +631,23 @@ const RegisterVenue2 = () => {
                                 setIsFloorDropdownOpen(false);
                               }}
                             >
-                              <FloorCircle active={assignmentTargetFloor === floor} />
+                              <FloorCircle
+                                active={assignmentTargetFloor === floor}
+                              />
                               <DropdownText>{floor}층</DropdownText>
                             </DropdownOption>
                           ))}
                         </DropdownMenu>
                       )}
                     </FloorAssignmentDropdown>
-                    <ToolItem onClick={assignSelectedSeatsToFloor} style={{ backgroundColor: '#28a745' }}>
+                    <ToolItem
+                      onClick={assignSelectedSeatsToFloor}
+                      style={{ backgroundColor: "#28a745" }}
+                    >
                       <AiOutlinePlus size={24} color="#fff" />
-                      <ToolLabel style={{ color: '#fff' }}>층수 배정({selectedSeats.size})</ToolLabel>
+                      <ToolLabel style={{ color: "#fff" }}>
+                        층수 배정({selectedSeats.size})
+                      </ToolLabel>
                     </ToolItem>
                   </>
                 )}
@@ -579,12 +657,14 @@ const RegisterVenue2 = () => {
                   <ToolLabel>실행 취소</ToolLabel>
                 </ToolItem>
 
-                <ToolItem onClick={handleRedo} disabled={historyIndex >= history.length - 1}>
+                <ToolItem
+                  onClick={handleRedo}
+                  disabled={historyIndex >= history.length - 1}
+                >
                   <BiRedo size={32} />
                   <ToolLabel>재실행</ToolLabel>
                 </ToolItem>
               </Toolbar>
-
             </EditorArea>
 
             {/* 엑셀 업로드 */}
@@ -596,7 +676,7 @@ const RegisterVenue2 = () => {
                 ref={fileInputRef}
                 type="file"
                 accept=".xlsx,.xls"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 onChange={handleExcelUpload}
               />
               <UploadInstructions>
@@ -619,14 +699,18 @@ const RegisterVenue2 = () => {
                 placeholder="좌석 라벨을 입력하세요"
                 autoFocus
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     handleLabelSubmit();
                   }
                 }}
               />
               <ModalButtons>
-                <ModalCancelButton onClick={handleLabelCancel}>취소</ModalCancelButton>
-                <ModalSubmitButton onClick={handleLabelSubmit}>확인</ModalSubmitButton>
+                <ModalCancelButton onClick={handleLabelCancel}>
+                  취소
+                </ModalCancelButton>
+                <ModalSubmitButton onClick={handleLabelSubmit}>
+                  확인
+                </ModalSubmitButton>
               </ModalButtons>
             </ModalContent>
           </LabelInputModal>
@@ -718,11 +802,11 @@ const StepItem = styled.div`
   font-weight: 500;
   font-size: 20px;
   padding: 10px;
-  color: ${(props) => (props.active ? '#FC2847' : '#737373')};
-  border-bottom: ${(props) => (props.active ? '2px solid #FC2847' : 'none')};
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  color: ${(props) => (props.active ? "#FC2847" : "#737373")};
+  border-bottom: ${(props) => (props.active ? "2px solid #FC2847" : "none")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   opacity: ${(props) => (props.disabled ? 0.5 : 1)};
-  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
+  pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
   white-space: nowrap;
 
   @media (max-width: 768px) {
@@ -828,20 +912,29 @@ const SeatRow = styled.div`
 `;
 
 const getFloorColor = (floor) => {
-  const colors = ['#9E5656', '#5656D7', '#56D756', '#D79E56', '#D756D7', '#56D7D7'];
-  return colors[(floor - 1) % colors.length] || '#9E5656';
+  const colors = [
+    "#9E5656",
+    "#5656D7",
+    "#56D756",
+    "#D79E56",
+    "#D756D7",
+    "#56D7D7",
+  ];
+  return colors[(floor - 1) % colors.length] || "#9E5656";
 };
 
 const SeatCell = styled.div`
   width: 22px;
   height: 16px;
   background: ${(props) => {
-    if (props.type === 'stage') return '#FFD700';
+    if (props.type === "stage") return "#FFD700";
     if (props.assignedFloor) return getFloorColor(props.assignedFloor);
-    return '#9E5656';
+    return "#9E5656";
   }};
-  border: ${(props) => (props.selected ? '2px solid #ff0000' : '0.5px solid #000000')};
-  box-shadow: ${(props) => (props.selected ? '0 0 8px rgba(255, 0, 0, 0.7)' : 'none')};
+  border: ${(props) =>
+    props.selected ? "2px solid #ff0000" : "0.5px solid #000000"};
+  box-shadow: ${(props) =>
+    props.selected ? "0 0 8px rgba(255, 0, 0, 0.7)" : "none"};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -920,13 +1013,13 @@ const ToolItem = styled.div`
   gap: 5px;
   cursor: pointer;
   opacity: ${(props) => (props.disabled ? 0.3 : 1)};
-  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
+  pointer-events: ${(props) => (props.disabled ? "none" : "auto")};
   padding: 5px 10px;
   border-radius: 15px;
   transition: all 0.2s ease;
 
   svg {
-    color: ${(props) => (props.active ? '#FC2847' : '#333333')};
+    color: ${(props) => (props.active ? "#FC2847" : "#333333")};
   }
 
   &:hover {
@@ -966,9 +1059,9 @@ const ToolItem = styled.div`
 `;
 
 const ToolLabel = styled.span`
-  font-weight: ${(props) => (props.active ? '500' : '300')};
+  font-weight: ${(props) => (props.active ? "500" : "300")};
   font-size: 13px;
-  color: ${(props) => (props.active ? '#FC2847' : '#333333')};
+  color: ${(props) => (props.active ? "#FC2847" : "#333333")};
   text-align: center;
   white-space: nowrap;
 
@@ -988,12 +1081,12 @@ const ToolLabel = styled.span`
 const StageIcon = styled.div`
   width: 24px;
   height: 24px;
-  background: ${(props) => (props.active ? '#FC2847' : '#333333')};
+  background: ${(props) => (props.active ? "#FC2847" : "#333333")};
   border-radius: 2px;
   position: relative;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 19px;
     height: 14px;
@@ -1074,7 +1167,7 @@ const FloorCircle = styled.div`
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: ${(props) => (props.active ? '#D72B2B' : '#D9D9D9')};
+  background: ${(props) => (props.active ? "#D72B2B" : "#D9D9D9")};
 `;
 
 const FloorLabel = styled.span`
