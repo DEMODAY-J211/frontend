@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import { RiArrowRightSLine, RiInformationLine } from 'react-icons/ri';
-import { GrCheckbox, GrCheckboxSelected } from 'react-icons/gr';
-import { AiOutlineMinus, AiOutlinePlus } from 'react-icons/ai';
-import NavbarManager from '../../../components/Navbar/NavbarManager';
-import { useToast } from '../../../components/Toast/UseToast';
-import SeatSelectionModal from '../../../components/Modal/SeatSelectionModal';
-import RegisterShowNavbar from './RegisterShowNavbar';
-
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { RiArrowRightSLine, RiInformationLine } from "react-icons/ri";
+import { GrCheckbox, GrCheckboxSelected } from "react-icons/gr";
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import NavbarManager from "../../../components/Navbar/NavbarManager";
+import { useToast } from "../../../components/Toast/useToast";
+import SeatSelectionModal from "../../../components/Modal/SeatSelectionModal";
+import RegisterShowNavbar from "./RegisterShowNavbar";
 
 const RegisterShowStep3 = () => {
   const navigate = useNavigate();
@@ -32,40 +31,43 @@ const RegisterShowStep3 = () => {
     const fetchFavoriteVenues = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/shows/venues?favorite=true`, {
-          method: 'GET',
-          credentials: 'include',
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/manager/shows/venues?favorite=true`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
         if (response.ok) {
           const result = await response.json();
-          console.log('Favorite venues:', result);
+          console.log("Favorite venues:", result);
 
           if (result.success && result.data && Array.isArray(result.data)) {
             // API 응답에서 공연장 목록 설정
             setVenues(result.data);
           } else {
             setVenues([]);
-            addToast('즐겨찾기한 공연장이 없습니다.', 'info');
+            addToast("즐겨찾기한 공연장이 없습니다.", "info");
           }
         } else {
-          console.error('Failed to fetch venues:', response.status);
-          addToast('공연장 목록을 불러오는데 실패했습니다.', 'error');
+          console.error("Failed to fetch venues:", response.status);
+          addToast("공연장 목록을 불러오는데 실패했습니다.", "error");
           // API 실패 시 더미 데이터 사용
           setVenues([
-            { id: 1, name: '올림픽공원 KSPO DOME' },
-            { id: 2, name: '잠실실내체육관' },
-            { id: 3, name: '고척스카이돔' },
+            { id: 1, name: "올림픽공원 KSPO DOME" },
+            { id: 2, name: "잠실실내체육관" },
+            { id: 3, name: "고척스카이돔" },
           ]);
         }
       } catch (error) {
-        console.error('Error fetching favorite venues:', error);
-        addToast('서버와의 통신 중 오류가 발생했습니다.', 'error');
+        console.error("Error fetching favorite venues:", error);
+        addToast("서버와의 통신 중 오류가 발생했습니다.", "error");
         // 네트워크 오류 시 더미 데이터 사용
         setVenues([
-          { id: 1, name: '올림픽공원 KSPO DOME' },
-          { id: 2, name: '잠실실내체육관' },
-          { id: 3, name: '고척스카이돔' },
+          { id: 1, name: "올림픽공원 KSPO DOME" },
+          { id: 2, name: "잠실실내체육관" },
+          { id: 3, name: "고척스카이돔" },
         ]);
       } finally {
         setIsLoading(false);
@@ -76,7 +78,7 @@ const RegisterShowStep3 = () => {
   }, []);
 
   // 좌석 판매 방법 옵션
-  const salesMethods = ['스탠딩석', '주최 측 배정', '예매자 선택', '자동 배정'];
+  const salesMethods = ["스탠딩석", "주최 측 배정", "예매자 선택", "자동 배정"];
 
   // 공연 장소 선택 핸들러 (단일 선택)
   const handleVenueSelect = (venue) => {
@@ -88,10 +90,10 @@ const RegisterShowStep3 = () => {
     setSelectedMethod(method);
 
     // 예매자 선택 또는 자동 배정인 경우 모달 열기
-    if (method === '예매자 선택' || method === '자동 배정') {
+    if (method === "예매자 선택" || method === "자동 배정") {
       // 공연장이 선택되어 있는지 확인
       if (!selectedVenue) {
-        addToast('먼저 공연 장소를 선택해주세요!', 'error');
+        addToast("먼저 공연 장소를 선택해주세요!", "error");
         setSelectedMethod(null); // 선택 취소
         return;
       }
@@ -108,16 +110,22 @@ const RegisterShowStep3 = () => {
     }
 
     // 예매자 선택인 경우
-    if (selectedMethod === '예매자 선택') {
+    if (selectedMethod === "예매자 선택") {
       setExcludedSeats(seatData.excludedSeats || []);
       setUpdatedSeatCount(seatData.excludedSeats?.length || 0);
-      addToast(`${seatData.excludedSeats?.length || 0}개의 좌석이 제외되었습니다.`, 'success');
+      addToast(
+        `${seatData.excludedSeats?.length || 0}개의 좌석이 제외되었습니다.`,
+        "success"
+      );
     }
     // 자동 배정인 경우
-    else if (selectedMethod === '자동 배정') {
+    else if (selectedMethod === "자동 배정") {
       setExcludedSeats(seatData.vipSeats || []);
       setUpdatedSeatCount(seatData.vipSeats?.length || 0);
-      addToast(`${seatData.vipSeats?.length || 0}개의 VIP석이 지정되었습니다.`, 'success');
+      addToast(
+        `${seatData.vipSeats?.length || 0}개의 VIP석이 지정되었습니다.`,
+        "success"
+      );
     }
   };
 
@@ -128,36 +136,36 @@ const RegisterShowStep3 = () => {
       salesMethod: selectedMethod,
       quantity: quantity,
     };
-    localStorage.setItem('registerShowStep3', JSON.stringify(formData));
-    addToast('임시 저장되었습니다!', 'success');
+    localStorage.setItem("registerShowStep3", JSON.stringify(formData));
+    addToast("임시 저장되었습니다!", "success");
   };
 
   // 이전 단계로
   const handlePrevious = () => {
     // TODO: 2단계 페이지로 이동
-    navigate('/register-show/step2');
+    navigate("/register-show/step2");
   };
 
   // 다음 단계로
   const handleNext = () => {
     // 유효성 검사
     if (!selectedVenue) {
-      addToast('공연 장소를 선택해주세요!', 'error');
+      addToast("공연 장소를 선택해주세요!", "error");
       return;
     }
 
     if (!selectedMethod) {
-      addToast('좌석 판매 방법을 선택해주세요!', 'error');
+      addToast("좌석 판매 방법을 선택해주세요!", "error");
       return;
     }
 
     if (!quantity || quantity <= 0) {
-      addToast('판매 수량을 확인해주세요!', 'error');
+      addToast("판매 수량을 확인해주세요!", "error");
       return;
     }
 
     // TODO: 4단계 페이지로 이동
-    navigate('/register-show/step4');
+    navigate("/register-show/step4");
   };
 
   return (
@@ -165,7 +173,7 @@ const RegisterShowStep3 = () => {
       <NavbarManager />
       <Container>
         <MainContent>
-          <RegisterShowNavbar currentStep={3}/>
+          <RegisterShowNavbar currentStep={3} />
 
           <FormContent>
             {/* 공연 장소 섹션 */}
@@ -217,7 +225,8 @@ const RegisterShowStep3 = () => {
             {/* 판매 수량 섹션 */}
             <Section>
               <SectionTitle>판매 수량</SectionTitle>
-              {selectedMethod === '예매자 선택' && totalAvailableSeats !== null ? (
+              {selectedMethod === "예매자 선택" &&
+              totalAvailableSeats !== null ? (
                 <QuantityInfoWrapper>
                   <QuantityInfoRow>
                     <QuantityLabel>판매 가능 좌석:</QuantityLabel>
@@ -228,7 +237,8 @@ const RegisterShowStep3 = () => {
                     <QuantityValue>{updatedSeatCount}개</QuantityValue>
                   </QuantityInfoRow>
                 </QuantityInfoWrapper>
-              ) : selectedMethod === '자동 배정' && totalAvailableSeats !== null ? (
+              ) : selectedMethod === "자동 배정" &&
+                totalAvailableSeats !== null ? (
                 <QuantityInfoWrapper>
                   <QuantityInfoRow>
                     <QuantityLabel>판매 가능 좌석:</QuantityLabel>
@@ -294,7 +304,6 @@ const MainContent = styled.div`
 `;
 
 const Title = styled.h1`
-  
   font-weight: 500;
   font-size: 30px;
   color: #000000;
@@ -310,12 +319,11 @@ const ProgressSteps = styled.div`
 `;
 
 const StepItem = styled.div`
-  
   font-weight: 500;
   font-size: 20px;
   padding: 10px;
-  color: ${(props) => (props.active ? '#FC2847' : '#737373')};
-  border-bottom: ${(props) => (props.active ? '2px solid #FC2847' : 'none')};
+  color: ${(props) => (props.active ? "#FC2847" : "#737373")};
+  border-bottom: ${(props) => (props.active ? "2px solid #FC2847" : "none")};
   cursor: pointer;
 `;
 
@@ -339,7 +347,6 @@ const Section = styled.div`
 `;
 
 const SectionTitle = styled.h2`
-  
   font-weight: 500;
   font-size: 25px;
   color: #000000;
@@ -362,11 +369,11 @@ const SelectButton = styled.button`
   height: 45px;
   padding: 5px 10px;
   border-radius: 10px;
-  border: ${(props) => (props.active ? 'none' : '1px solid #C5C5C5')};
-  background: ${(props) => (props.active ? '#FC2847' : '#FFFFFE')};
-  color: ${(props) => (props.active ? '#FFFFFE' : '#333333')};
-  
-  font-weight: ${(props) => (props.active ? 'bold' : '300')};
+  border: ${(props) => (props.active ? "none" : "1px solid #C5C5C5")};
+  background: ${(props) => (props.active ? "#FC2847" : "#FFFFFE")};
+  color: ${(props) => (props.active ? "#FFFFFE" : "#333333")};
+
+  font-weight: ${(props) => (props.active ? "bold" : "300")};
   font-size: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -403,7 +410,6 @@ const InfoIcon = styled(RiInformationLine)`
 `;
 
 const InfoText = styled.span`
-
   font-weight: 300;
   font-size: 15px;
   color: #d72b2b;
@@ -461,7 +467,6 @@ const PlusButton = styled.button`
 `;
 
 const QuantityDisplay = styled.div`
-  
   font-weight: 500;
   font-size: 20px;
   color: #fffffe;
@@ -473,7 +478,6 @@ const QuantityDisplay = styled.div`
 `;
 
 const Unit = styled.span`
-
   font-weight: 500;
   font-size: 20px;
   color: #000000;
@@ -502,7 +506,7 @@ const QuantityLabel = styled.span`
 const QuantityValue = styled.span`
   font-weight: 700;
   font-size: 24px;
-  color: #FC2847;
+  color: #fc2847;
 `;
 
 const Footer = styled.div`
@@ -523,7 +527,7 @@ const NavButton = styled.button`
   border: none;
   background: #fc2847;
   color: #fffffe;
-  
+
   font-weight: 300;
   font-size: 20px;
   cursor: pointer;
