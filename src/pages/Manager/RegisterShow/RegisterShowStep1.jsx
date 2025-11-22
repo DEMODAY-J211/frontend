@@ -450,7 +450,7 @@ const RegisterShowStep1 = () => {
                     <option>토스뱅크</option>
                   </BankSelect>
                   <Input
-                    placeholder="0000-000-000000"
+                    placeholder="0000000000000"
                     value={account}
                     onChange={(e) => setAccount(e.target.value)}
                   />
