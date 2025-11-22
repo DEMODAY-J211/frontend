@@ -116,7 +116,7 @@ const HomeManager = () => {
             <ModalButtonGroup>
               <ModalButton
                 $primary
-                onClick={() => navigate("/register-venue/step1")}
+                onClick={() => navigate("/registeredvenues")}
               >
                 공연장 등록하기
               </ModalButton>
@@ -161,7 +161,7 @@ const HomeManager = () => {
               공연장을 등록해주세요!
             </ModalTitle>
             <ModalButtonGroup>
-              <ModalButton onClick={() => navigate("/register-venue/step1")}>
+              <ModalButton onClick={() => navigate("/registeredvenues")}>
                 공연장 등록하기
               </ModalButton>
               <ModalButton
