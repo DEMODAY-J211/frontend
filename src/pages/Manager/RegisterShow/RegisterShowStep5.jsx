@@ -8,8 +8,12 @@ import { useState, useEffect } from "react";
 import { BsUpload } from "react-icons/bs";
 import { AiOutlineCalendar } from "react-icons/ai";
 import { AiOutlineClose } from "react-icons/ai";
+import RegisterShowStep1 from "./RegisterShowStep1";
+import RegisterShowStep2 from "./RegisterShowStep2";
+import RegisterShowStep3 from "./RegisterShowStep3";
+import RegisterShowStep4 from "./RegisterShowStep4";
 // UseToast -> useToast 로 수정
-const RegisterShowStep1 = () => {
+const RegisterShowStep5 = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -56,7 +60,7 @@ const RegisterShowStep1 = () => {
 
   // 다음 단계로
   const handleSubmit = () => {
-    navigate("/register-show/step2");
+    // navigate("/register-show/step2");
   };
 
   // 기존 임시 저장 데이터 불러오기
@@ -69,11 +73,21 @@ const RegisterShowStep1 = () => {
 
   return (
     <>
-      <NavbarManager />
+      {/* <NavbarManager /> */}
       <Container>
         <MainContent>
-          <RegisterShowNavbar currentStep={1} />
-
+          {/* <RegisterShowNavbar currentStep={5} /> */}
+          <RegisterShowStep1 viewer={true} />
+          <RegisterShowStep2 viewer={true} />
+          <RegisterShowStep3 viewer={true} />
+          <RegisterShowStep4 viewer={true} />
+          <Footer>
+            <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+            <RightButtonGroup>
+              {/* <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton> */}
+              <NextButton onClick={handleSubmit}>등록하기</NextButton>
+            </RightButtonGroup>
+          </Footer>
           <FormContent>
             <LeftContent>
               <Name>대표 포스터</Name>
@@ -232,7 +246,7 @@ const RegisterShowStep1 = () => {
   );
 };
 
-export default RegisterShowStep1;
+export default RegisterShowStep5;
 
 const Container = styled.div`
   width: 1440px;

@@ -7,11 +7,11 @@ export function AuthProvider({ children }) {
   // localStorage에서 초기값 가져오기 (리렌더링 방지)
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const loginSuccess = urlParams.get('login');
-    if (loginSuccess === 'success') {
+    const loginSuccess = urlParams.get("login");
+    if (loginSuccess === "success") {
       return true;
     }
-    return localStorage.getItem('isLoggedIn') === 'true';
+    return localStorage.getItem("isLoggedIn") === "true";
   });
 
   const [user, setUser] = useState(null);
@@ -25,12 +25,12 @@ export function AuthProvider({ children }) {
 
     // URL에서 login=success 파라미터 확인
     const urlParams = new URLSearchParams(window.location.search);
-    const loginSuccess = urlParams.get('login');
+    const loginSuccess = urlParams.get("login");
     console.log("🔍 login 파라미터:", loginSuccess);
 
-    if (loginSuccess === 'success') {
+    if (loginSuccess === "success") {
       console.log("✅ 카카오 로그인 성공 - 로그인 상태로 설정");
-      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem("isLoggedIn", "true");
 
       // URL에서 파라미터 제거 (깔끔하게)
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -41,7 +41,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, user, setUser, isInitialized }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, setIsLoggedIn, user, setUser, isInitialized }}
+    >
       {children}
     </AuthContext.Provider>
   );

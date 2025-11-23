@@ -27,7 +27,7 @@ const checkboxItems = [
   { id: "survey", label: "공연 후 설문 안내" },
 ];
 
-const RegisterShowStep4 = () => {
+const RegisterShowStep4 = ({ viewer = false }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -104,6 +104,7 @@ const RegisterShowStep4 = () => {
   };
 
   const handlePrevious = () => navigate("/register-show/step3");
+
   const handleNext = () => {
     const performanceTextarea = document.getElementById("textarea-performance");
     if (!performanceTextarea) return;
@@ -134,10 +135,10 @@ const RegisterShowStep4 = () => {
   return (
     <>
       <GlobalStyle />
-      <NavbarManager />
+      {/* <NavbarManager /> */}
       <Container>
         <MainContent>
-          <RegisterShowNavbar currentStep={4} />
+          {/* <RegisterShowNavbar currentStep={4} /> */}
           <Flex>
             <Name>알림 메시지 양식</Name>
             <Desc>
@@ -175,13 +176,15 @@ const RegisterShowStep4 = () => {
           ))}
         </MainContent>
 
-        <Footer>
-          <PrevButton onClick={handlePrevious}>←이전</PrevButton>
-          <RightButtonGroup>
-            <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
-            <NextButton onClick={handleNext}>다음→</NextButton>
-          </RightButtonGroup>
-        </Footer>
+        {!viewer && (
+          <Footer>
+            <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+            <RightButtonGroup>
+              <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
+              <NextButton onClick={handleNext}>다음→</NextButton>
+            </RightButtonGroup>
+          </Footer>
+        )}
       </Container>
     </>
   );

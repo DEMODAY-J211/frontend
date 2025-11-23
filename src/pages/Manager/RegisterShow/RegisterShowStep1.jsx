@@ -9,7 +9,7 @@ import { BsUpload } from "react-icons/bs";
 import { AiOutlineCalendar } from "react-icons/ai";
 import { AiOutlineClose } from "react-icons/ai";
 
-const RegisterShowStep1 = () => {
+const RegisterShowStep1 = ({ viewer = false }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -180,10 +180,10 @@ const RegisterShowStep1 = () => {
 
   return (
     <>
-      <NavbarManager />
+      {/* <NavbarManager /> */}
       <Container>
         <MainContent>
-          <RegisterShowNavbar currentStep={1} />
+          {/* <RegisterShowNavbar currentStep={1} /> */}
 
           <FormContent>
             <LeftContent>
@@ -447,16 +447,26 @@ const RegisterShowStep1 = () => {
           </FormContent>
         </MainContent>
 
-        <Footer>
-          <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+        {/* 하단 버튼 */}
+        {!viewer && (
+          <Footer>
+            <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+            <RightButtonGroup>
+              <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
+              <NextButton onClick={handleNext}>다음→</NextButton>
+            </RightButtonGroup>
+          </Footer>
+        )}
+//         <Footer>
+//           <PrevButton onClick={handlePrevious}>←이전</PrevButton>
 
-          <RightButtonGroup>
-            <TempSaveButton onClick={handleTempSave}>
-              임시저장
-            </TempSaveButton>
-            <NextButton onClick={handleNext}>다음→</NextButton>
-          </RightButtonGroup>
-        </Footer>
+//           <RightButtonGroup>
+//             <TempSaveButton onClick={handleTempSave}>
+//               임시저장
+//             </TempSaveButton>
+//             <NextButton onClick={handleNext}>다음→</NextButton>
+//           </RightButtonGroup>
+//         </Footer>
       </Container>
     </>
   );
