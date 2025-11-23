@@ -151,7 +151,7 @@ const RegisterShowStep2 = ({ viewer = false }) => {
 export default RegisterShowStep2;
 
 const Container = styled.div`
-  width: 1440px;
+  width: 100%;
   margin: 0 auto;
   background: #ffffff;
   display: flex;

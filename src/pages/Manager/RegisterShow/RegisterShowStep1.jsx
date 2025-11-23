@@ -8,10 +8,13 @@ import { useState, useEffect } from "react";
 import { BsUpload } from "react-icons/bs";
 import { AiOutlineCalendar } from "react-icons/ai";
 import { AiOutlineClose } from "react-icons/ai";
+import { useParams } from "react-router-dom";
 
 const RegisterShowStep1 = ({ viewer = false }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
+
+  const {showId} = useParams();
 
   // 대표 포스터
   const [posterFile, setPosterFile] = useState(null); // 파일
@@ -95,15 +98,47 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   const [bookStartTimeError, setBookStartTimeError] = useState(false);
 
   // 포스터 업로드
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setPosterFile(file);
+const handleFileChange = async (e) => {
+  const file = e.target.files[0];
+  setPosterFile(file);  // 선택된 파일 상태 업데이트
 
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setPoster(previewUrl);
+
+  if (file) {
+    // 미리보기 URL 생성
+    const previewUrl = URL.createObjectURL(file);
+    setPoster(previewUrl);  // 미리보기 화면에 표시
+
+    try {
+      // FormData 객체 생성하여 파일 추가
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // 포스터 업로드 API 호출 (showId는 실제 값으로 대체)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/shows/${showId}/poster`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        // 성공적으로 업로드된 포스터의 URL을 반환받음
+        const uploadedUrl = result.data[0];  // URL을 반환 받은 후
+        addToast("포스터 업로드 성공", "success");
+        setPoster(uploadedUrl);  // URL을 상태에 저장
+      } else {
+        // 업로드 실패 시 에러 처리
+        addToast("포스터 업로드 실패", "error");
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+    } catch (error) {
+      // 네트워크 오류 등 다른 에러 처리
+      addToast("포스터 업로드 중 오류 발생", "error");
+      console.error("포스터 업로드 중 오류 발생:", error);
+      
     }
-  };
+  }
+};
+
 
   // 이전 단계
   const handlePrevious = () => {
@@ -457,16 +492,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
             </RightButtonGroup>
           </Footer>
         )}
-{/* //         <Footer>
-//           <PrevButton onClick={handlePrevious}>←이전</PrevButton>
 
-//           <RightButtonGroup>
-//             <TempSaveButton onClick={handleTempSave}>
-//               임시저장
-//             </TempSaveButton>
-//             <NextButton onClick={handleNext}>다음→</NextButton>
-//           </RightButtonGroup>
-//         </Footer> */}
       </Container>
     </>
   );
@@ -476,7 +502,7 @@ export default RegisterShowStep1;
 
 
 const Container = styled.div`
-  width: 1440px;
+  width: 100%;
   margin: 0 auto;
   background: #ffffff;
   display: flex;

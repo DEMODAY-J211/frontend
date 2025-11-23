@@ -289,7 +289,7 @@ export default RegisterShowStep3;
 
 // Styled Components
 const Container = styled.div`
-  width: 1440px;
+  width: 100%;
   margin: 0 auto;
   background: #ffffff;
   display: flex;

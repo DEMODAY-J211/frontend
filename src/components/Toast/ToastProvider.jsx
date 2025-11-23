@@ -22,7 +22,7 @@ export const ToastProvider = ({ children }) => {
 
   const addToast = useCallback((message, type = "info") => {
     const id = `${Date.now()}-${toastCounter}`;
-    setToastCounter(prev => prev + 1);
+    setToastCounter((prev) => prev + 1);
     setToasts((prev) => [...prev, { id, message, type, leaving: false }]);
 
     // 2초 후 페이드 아웃 시작
@@ -43,7 +43,7 @@ export const ToastProvider = ({ children }) => {
       {children}
       <ToastContainer>
         {toasts.map((t) => (
-          <ToastMessage key={t.id} type={t.type} leaving={t.leaving}>
+          <ToastMessage key={t.id} type={t.type} leaving={t.leaving ? "true" : undefined}>
             <ToastIcon src={toast_icon} alt="toast icon" />
             <ToastText>{t.message}</ToastText>
           </ToastMessage>
@@ -52,6 +52,7 @@ export const ToastProvider = ({ children }) => {
     </ToastContext.Provider>
   );
 };
+
 
 const ToastContainer = styled.div`
   position: fixed;
