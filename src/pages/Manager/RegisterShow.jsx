@@ -100,6 +100,7 @@ const RegisterShow = () => {
     <Container>
       <NavbarManager />
       {/* 단계 표시 */}
+      <MainContent>
       <RegisterShowNavbar
         currentStep={currentStep}
         setCurrentStep={setCurrentStep}
@@ -127,126 +128,8 @@ const RegisterShow = () => {
       {currentStep === 3 && <RegisterShowStep3 />}
       {currentStep === 4 && <RegisterShowStep4 />}
       {currentStep === 5 && <RegisterShowStep5 />}
-      <MainContent>
-        <LeftSection>
-          <PageTitle>공연 등록하기</PageTitle>
-
-          {/* 대표 포스터 */}
-          <PosterUploadContainer>
-            <PosterUploadLabel htmlFor="poster-upload">
-              {posterImage ? (
-                <PosterPreview src={posterImage} alt="포스터 미리보기" />
-              ) : (
-                <>
-                  <BsUpload size={32} />
-                  <UploadText>포스터 업로드하기</UploadText>
-                </>
-              )}
-            </PosterUploadLabel>
-            <PosterInput
-              id="poster-upload"
-              type="file"
-              accept="image/*"
-              onChange={handlePosterUpload}
-            />
-          </PosterUploadContainer>
-        </LeftSection>
-
-        <RightSection>
-          {/* 공연명 */}
-          <FormSection>
-            <SectionTitle>공연명</SectionTitle>
-            <Input placeholder="제11회 정기공연" />
-            <RequiredMessage>
-              *필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.
-            </RequiredMessage>
-          </FormSection>
-
-          {/* 공연 날짜/회차 */}
-          <FormSection>
-            <SectionTitleRow>
-              <SectionTitle>공연 날짜/회차</SectionTitle>
-              <AddButton onClick={handleAddShowtime}>추가하기</AddButton>
-            </SectionTitleRow>
-
-            {/* 날짜/시간 선택기 */}
-            <DateTimeContainer>
-              <DateInputWrapper>
-                <AiOutlineCalendar size={24} />
-                <DateInput type="text" placeholder="2025.09.25" />
-              </DateInputWrapper>
-              <TimeInputWrapper>
-                <TimeInput type="text" placeholder="00:00" />
-                <Separator>~</Separator>
-                <TimeInput type="text" placeholder="00:00" />
-              </TimeInputWrapper>
-            </DateTimeContainer>
-
-            {/* 등록된 회차 목록 */}
-            {showTimes.map((showtime) => (
-              <ShowtimeItem key={showtime.id}>
-                <ShowtimeText>2025.10.14 15:00~16:30</ShowtimeText>
-                <DeleteIcon onClick={() => handleRemoveShowtime(showtime.id)}>
-                  <AiOutlineClose size={24} />
-                </DeleteIcon>
-              </ShowtimeItem>
-            ))}
-          </FormSection>
-
-          {/* 예매 기간 */}
-          <FormSection>
-            <SectionTitle>예매 기간</SectionTitle>
-            <ReservationPeriod>
-              <DateTimeContainer>
-                <DateInputWrapper>
-                  <AiOutlineCalendar size={24} />
-                  <DateInput type="text" placeholder="2025.10.12" />
-                </DateInputWrapper>
-                <TimeInputWrapper>
-                  <TimeInput type="text" placeholder="00:00" />
-                </TimeInputWrapper>
-              </DateTimeContainer>
-              <BigSeparator>~</BigSeparator>
-              <EndTimeText>공연시작 1시간 전</EndTimeText>
-            </ReservationPeriod>
-          </FormSection>
-
-          {/* 티켓 옵션 */}
-          <FormSection>
-            <SectionTitleRow>
-              <SectionTitle>티켓 옵션</SectionTitle>
-              <AddButton onClick={handleAddTicketOption}>추가하기</AddButton>
-            </SectionTitleRow>
-
-            <Input placeholder="티켓 옵션 이름 (일반예매/학생예매)" />
-            <Input placeholder="티켓 옵션 설명" />
-            <PriceInputWrapper>
-              <PriceInput type="text" placeholder="0" />
-              <span>원</span>
-            </PriceInputWrapper>
-          </FormSection>
-
-          {/* 입금주 */}
-          <FormSection>
-            <SectionTitle>입금주</SectionTitle>
-            <Input placeholder="홍길동" />
-            <RequiredMessage>
-              *필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.
-            </RequiredMessage>
-          </FormSection>
-
-          {/* 입금 계좌 */}
-          <FormSection>
-            <SectionTitle>입금 계좌</SectionTitle>
-            <AccountInputWrapper>
-              <BankInput placeholder="우리" />
-              <AccountInput placeholder="0000-000-000000" />
-            </AccountInputWrapper>
-            <RequiredMessage>
-              *필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.
-            </RequiredMessage>
-          </FormSection>
-        </RightSection>
+      
+        
       </MainContent>
       {/* Footer 버튼 */}
       {/* <Footer>
@@ -308,7 +191,8 @@ const StepArrow = styled.div`
 
 const MainContent = styled.div`
   display: flex;
-  gap: 100px;
+  flex-direction: column;
+  gap: 30px;
   padding: 50px 100px;
 `;
 

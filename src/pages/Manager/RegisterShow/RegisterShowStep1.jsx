@@ -457,7 +457,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
             </RightButtonGroup>
           </Footer>
         )}
-//         <Footer>
+{/* //         <Footer>
 //           <PrevButton onClick={handlePrevious}>←이전</PrevButton>
 
 //           <RightButtonGroup>
@@ -466,7 +466,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
 //             </TempSaveButton>
 //             <NextButton onClick={handleNext}>다음→</NextButton>
 //           </RightButtonGroup>
-//         </Footer>
+//         </Footer> */}
       </Container>
     </>
   );
