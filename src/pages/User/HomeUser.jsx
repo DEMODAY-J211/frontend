@@ -22,7 +22,7 @@ export default function HomeUser() {
   const navigate = useNavigate();
   // const managerData = JSON.parse(localStorage.getItem("managerData"));
   const { isLoggedIn, setIsLoggedIn } = useAuth();
-
+  console.log("isloggedin", isLoggedIn);
   useEffect(() => {
     console.log("managerId :", managerId);
   }, [managerId]);

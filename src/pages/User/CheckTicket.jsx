@@ -149,14 +149,21 @@ export default function CheckTicket() {
             </Content>
           </Wrapper>
         </TicketWrapper>
-        {showData?.reservationstatus !== "CANCEL_REQUESTED" && (
-          <Footerbtn
-            buttons={[
-              { text: "예매 취소", color: "red", onClick: handleCancel },
-              { text: "좌석 변경", color: "red", onClick: handleSelectSeat },
-            ]}
-          />
-        )}
+        {showData?.reservationstatus !== "CANCEL_REQUESTED" &&
+          (showData?.saleMethod === "Select_by_User" ? (
+            <Footerbtn
+              buttons={[
+                { text: "예매 취소", color: "red", onClick: handleCancel },
+                { text: "좌석 변경", color: "red", onClick: handleSelectSeat },
+              ]}
+            />
+          ) : (
+            <Footerbtn
+              buttons={[
+                { text: "예매 취소", color: "red", onClick: handleCancel },
+              ]}
+            />
+          ))}
       </HomeUserContainer>
     </PageWrapper>
   );

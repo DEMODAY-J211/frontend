@@ -9,7 +9,7 @@ import { useToast } from "../../../components/Toast/useToast";
 import SeatSelectionModal from "../../../components/Modal/SeatSelectionModal";
 import RegisterShowNavbar from "./RegisterShowNavbar";
 
-const RegisterShowStep3 = () => {
+const RegisterShowStep3 = ({ viewer = false }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -170,10 +170,10 @@ const RegisterShowStep3 = () => {
 
   return (
     <>
-      <NavbarManager />
+      {/* <NavbarManager /> */}
       <Container>
         <MainContent>
-          <RegisterShowNavbar currentStep={3} />
+          {/* <RegisterShowNavbar currentStep={3} /> */}
 
           <FormContent>
             {/* 공연 장소 섹션 */}
@@ -262,13 +262,15 @@ const RegisterShowStep3 = () => {
         </MainContent>
 
         {/* 하단 버튼 */}
-        <Footer>
-          <PrevButton onClick={handlePrevious}>←이전</PrevButton>
-          <RightButtonGroup>
-            <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
-            <NextButton onClick={handleNext}>다음→</NextButton>
-          </RightButtonGroup>
-        </Footer>
+        {!viewer && (
+          <Footer>
+            <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+            <RightButtonGroup>
+              <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
+              <NextButton onClick={handleNext}>다음→</NextButton>
+            </RightButtonGroup>
+          </Footer>
+        )}
       </Container>
 
       {/* 좌석 선택 모달 */}

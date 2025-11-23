@@ -1,5 +1,5 @@
 import react from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser.jsx";
 import Footerbtn from "../../components/Save/Footerbtn.jsx";
@@ -7,6 +7,7 @@ import TeamInfo from "../../components/User/TeamInfo";
 
 export default function ViewTeamInfo() {
   const navigate = useNavigate();
+  const { managerId } = useParams();
 
   return (
     <PageWrapper>
@@ -14,7 +15,9 @@ export default function ViewTeamInfo() {
         <NavbarUser />
         <TeamInfo />
         <Footerbtn
-          buttons={[{ text: "확인", color: "red", to: "/homeuser" }]}
+          buttons={[
+            { text: "확인", color: "red", to: `/${managerId}/homeuser` },
+          ]}
         />
       </HomeUserContainer>
     </PageWrapper>

@@ -43,7 +43,7 @@ export default function ReservationComplete({ onClose }) {
   // console.log(resData);
   const handleConfirm = async () => {
     const response = await fetch(
-      `/${serverUrl}/user/${managerId}/booking/confirm`,
+      `${import.meta.env.VITE_API_URL}/user/${managerId}/booking/confirm`,
       {
         method: "POST",
         credentials: "include",
@@ -64,7 +64,7 @@ export default function ReservationComplete({ onClose }) {
     const reservationId = data.data;
     console.log("예매 완료 응답:", data);
 
-    navigate(`${managerId}/checkticket/${reservationId}`);
+    navigate(`/${managerId}/checkticket/${reservationId}`);
   };
 
   useEffect(() => {

@@ -1,34 +1,49 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { IoArrowBack } from "react-icons/io5";
-import { useEffectEvent } from "react";
+import { formatKoreanDate } from "../../utils/dateFormat";
+import NavbarUser from "../../components/Navbar/NavbarUser";
+import Footerbtn from "../../components/Save/Footerbtn";
+
+const getRoundNumber = (showtimeList, showtimeId) => {
+  const sorted = [...showtimeList].sort(
+    (a, b) => new Date(a.showtimeStart) - new Date(b.showtimeStart)
+  );
+
+  const index = sorted.findIndex((item) => item.showtimeId === showtimeId);
+
+  return index !== -1 ? index + 1 : null;
+};
 
 const SelectSeat = () => {
   const navigate = useNavigate();
   const { managerId, showId, showtimeId } = useParams();
   const location = useLocation();
 
+  const { selectedShowtime, selectedOption, quantity, showData } =
+    location.state || {};
+  console.log(
+    "selectedshowtime",
+    selectedShowtime,
+    selectedOption,
+    quantity,
+    showData
+  );
+  const totalPrice = selectedOption.ticketoptionPrice * quantity;
   // 공연 정보 (이전 페이지에서 전달받음)
-  const [showInfo, setShowInfo] = useState({
-    showName: "제11회정기공연",
-    showtimeName: "1회차(15:00)",
-    ticketType: "일반예매",
-    quantity: 2,
-    totalPrice: 18000,
-  });
 
   // API로부터 받아올 데이터
-  const [availableSeats, setAvailableSeats] = useState([]);
-  const [ticketOptions, setTicketOptions] = useState([]);
+  // const [availableSeats, setAvailableSeats] = useState([]);
+  // const [ticketOptions, setTicketOptions] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [seatLayout, setSeatLayout] = useState([]);
 
   useEffect(() => {
     // location.state에서 공연 정보 받기
-    if (location.state) {
-      setShowInfo(location.state);
-    }
+    // if (location.state) {
+    //   setShowInfo(location.state);
+    //   console.log("location.state", location.state);
+    // }
 
     // API 호출
     fetchAvailableSeats();
@@ -36,54 +51,29 @@ const SelectSeat = () => {
   useEffect(() => {
     console.log(selectedSeats);
   }, [selectedSeats]);
+
   const fetchAvailableSeats = async () => {
     try {
-      // const token = localStorage.getItem('accessToken');
-      // const response = await fetch(`/api/showtimes/${showtimeId}/seats`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`,
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
-      // const result = await response.json();
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/user/${managerId}/booking/${showtimeId}/seats`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-type": "application/json",
+          },
+        }
+      );
+      const result = await response.json();
 
-      // Mock 데이터
-      const mockData = {
-        success: true,
-        code: 200,
-        message: "success",
-        data: {
-          showtimeId: 2,
-          showStartTime: "2025-10-28T15:00",
-          availableSeats: [
-            { seatId: 101, seatTable: "A3-7" },
-            { seatId: 102, seatTable: "A3-8" },
-            { seatId: 103, seatTable: "B1-2" },
-            { seatId: 104, seatTable: "B2-5" },
-            { seatId: 105, seatTable: "C1-3" },
-          ],
-          ticketOptionList: [
-            {
-              ticketOptionId: 1,
-              ticketOptionName: "일반예매가",
-              ticketOptionPrice: 9000,
-              selectedQuantity: 0,
-            },
-            {
-              ticketOptionId: 2,
-              ticketOptionName: "학생할인가",
-              ticketOptionPrice: 8000,
-              selectedQuantity: 0,
-            },
-          ],
-          totalPrice: 18000,
-        },
-      };
-
-      if (mockData.success) {
-        setAvailableSeats(mockData.data.availableSeats);
-        setTicketOptions(mockData.data.ticketOptionList);
-        generateSeatLayout(mockData.data.availableSeats);
+      if (result.success) {
+        console.log("result", result);
+        console.log("result's data", result.data);
+        // setAvailableSeats(result.data.seats);
+        // setTicketOptions(result.data.ticketOptionList);
+        generateSeatLayout(result.data.seats);
       }
     } catch (error) {
       console.error("좌석 조회 실패:", error);
@@ -91,33 +81,28 @@ const SelectSeat = () => {
     }
   };
 
-  const generateSeatLayout = (available) => {
-    // 좌석 레이아웃 생성 (8행 x 10열)
-    const rows = ["A", "B", "C", "D", "E", "F", "G", "H"];
-    const cols = 10;
+  const generateSeatLayout = (seats) => {
+    if (!seats || seats.length === 0) return;
 
-    const layout = rows.map((row, rowIndex) => {
-      return Array.from({ length: cols }, (_, colIndex) => {
-        const seatLabel = `${row}${colIndex + 1}`;
+    // 1️⃣ Rows(구역) 추출 (A, B, C ...)
+    const sections = [...new Set(seats.map((s) => s.seatSection))].sort();
 
-        // 예매 가능한 좌석인지 확인
-        const isAvailable = available.some((seat) => {
-          // seatTable 형식: "A3-7" -> A행 3-7번 범위 또는 단일 좌석
-          const [seatRow, seatNum] = seat.seatTable.split(/(\d+)/);
-          return seatRow === row && seatNum.includes(String(colIndex + 1));
-        });
+    // 2️⃣ 각 Section(예: A)에 대해 열(Column) 정렬하여 seat layout 생성
+    const layout = sections.map((section) => {
+      const rowSeats = seats
+        .filter((s) => s.seatSection === section)
+        .sort((a, b) => a.seatColumn - b.seatColumn); // A1, A2, A3 순서
 
-        return {
-          id: `seat-${rowIndex}-${colIndex}`,
-          label: seatLabel,
-          row,
-          col: colIndex + 1,
-          isAvailable,
-          isReserved: !isAvailable, // 예매 불가능한 좌석은 이미 예약된 것
-          seatId:
-            available.find((s) => s.seatTable === seatLabel)?.seatId || null,
-        };
-      });
+      return rowSeats.map((s) => ({
+        id: `seat-${s.showSeatId}`,
+        label: `${s.seatSection}${s.seatColumn}`,
+        row: s.seatSection,
+        col: s.seatColumn,
+        isAvailable: s.isAvailable, // 백엔드 값 그대로 사용
+        isReserved: !s.isAvailable,
+        seatId: s.seatId,
+        showSeatId: s.showSeatId,
+      }));
     });
 
     setSeatLayout(layout);
@@ -131,17 +116,23 @@ const SelectSeat = () => {
 
     if (!seat.isAvailable) return;
 
-    // 좌석 선택/해제
-    const isSelected = selectedSeats.find((s) => s.id === seat.id);
+    // 좌석 선택 여부 (showSeatId 기준)
+    const isSelected = selectedSeats.find(
+      (s) => s.showSeatId === seat.showSeatId
+    );
 
     if (isSelected) {
-      setSelectedSeats(selectedSeats.filter((s) => s.id !== seat.id));
+      // 선택 해제
+      setSelectedSeats(
+        selectedSeats.filter((s) => s.showSeatId !== seat.showSeatId)
+      );
     } else {
-      // 최대 선택 개수 체크 (예: 티켓 수량만큼)
-      if (selectedSeats.length >= showInfo.quantity) {
-        alert(`최대 ${showInfo.quantity}개의 좌석만 선택할 수 있습니다.`);
+      if (selectedSeats.length >= quantity) {
+        alert(`최대 ${quantity}개의 좌석만 선택할 수 있습니다.`);
         return;
       }
+
+      // 좌석 선택
       setSelectedSeats([...selectedSeats, seat]);
     }
   };
@@ -152,62 +143,34 @@ const SelectSeat = () => {
       return;
     }
 
-    if (selectedSeats.length !== showInfo.quantity) {
-      alert(`${showInfo.quantity}개의 좌석을 선택해주세요.`);
+    if (selectedSeats.length !== quantity) {
+      alert(`${quantity}개의 좌석을 선택해주세요.`);
       return;
     }
-    console.log("manaer,", managerId, showtimeId, selectedSeats);
+    console.log("manager,", managerId, showtimeId, selectedSeats);
     fetchSeats();
 
     // // 선택된 좌석 정보와 함께 다음 페이지로 이동
-    navigate(`/${managerId}/payment/${showId}`, {
+    navigate(`/${managerId}/payment/${showData.showId}`, {
       state: {
-        ...showInfo,
-        selectedSeats: selectedSeats.map((s) => s.label),
-        seatIds: selectedSeats.map((s) => s.seatId),
+        selectedShowtime,
+        selectedOption,
+        quantity,
+        showData,
       },
     });
+    // navigate(`/${managerId}/payment/${showId}`, {
+    //   state: {
+    //     ...showInfo,
+    //     selectedSeats: selectedSeats.map((s) => s.label),
+    //     seatIds: selectedSeats.map((s) => s.seatId),
+    //   },
+    // });
   };
-  // const fetchSeats = async () => {
-  //   try {
-  //     // const token = localStorage.getItem('accessToken');
-  //     // const payload = {
-  //     //   showSeatIds: selectedSeats.map((seat, idx) => 1 + idx),
-  //     // };
-  //     const payload = {
-  //       showSeatIds: [3, 4],
-  //     };
 
-  //     console.log("payload", payload);
-  //     const response = await fetch(
-  //       `${
-  //         import.meta.env.VITE_API_URL
-  //       }/user/${managerId}/booking/${showtimeId}/seats/select`,
-  //       {
-  //         method: "POST",
-  //         credentials: "include",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify(payload),
-  //       }
-  //     );
-
-  //     if (!response.ok) throw new Error("네트워크 응답 실패");
-  //     const res = await response.json();
-
-  //     if (res.success) {
-  //       // setResData(res.data);
-  //       console.log("res.data입니다.", res);
-  //     }
-  //   } catch (error) {
-  //     console.error("공연 조회 실패:", error);
-  //     alert("해당 공연 단체를 찾을 수 없습니다.");
-  //   }
-  // };
   const fetchSeats = async () => {
     try {
-      const payload = {
-        showSeatIds: [21, 22],
-      };
+      const payload = { showSeatIds: selectedSeats.map((s) => s.showSeatId) };
 
       console.log("payload", payload);
 
@@ -238,123 +201,111 @@ const SelectSeat = () => {
     }
   };
   return (
-    <Container>
-      {/* 헤더 */}
-      <Header>
-        <BackButton onClick={() => navigate(-1)}>
-          <IoArrowBack size={32} />
-        </BackButton>
-        <Title>좌석 선택</Title>
-        <Spacer />
-      </Header>
+    <PageWrapper>
+      <HomeUserContainer>
+        {/* 헤더 */}
+        <NavbarUser Backmode={true} text="좌석 선택" />
 
-      {/* 공연 정보 */}
-      <InfoSection>
-        <ShowInfoHeader>
-          <ShowTitle>{showInfo.showName}</ShowTitle>
-          <ShowTime>{showInfo.showtimeName}</ShowTime>
-        </ShowInfoHeader>
-        <TicketInfo>
-          <TicketType>
-            {showInfo.ticketType}·{showInfo.quantity}매
-          </TicketType>
-          <TotalPrice>{showInfo.totalPrice?.toLocaleString()}원</TotalPrice>
-        </TicketInfo>
-      </InfoSection>
+        {/* 공연 정보 */}
+        <InfoSection>
+          <ShowInfoHeader>
+            <ShowTitle>{showData.showTitle}</ShowTitle>
+            <ShowTime>
+              {getRoundNumber(
+                showData.showtimeList,
+                selectedShowtime.showtimeId
+              )}
+              회차(
+              {formatKoreanDate(selectedShowtime.showtimeStart).split(" ")[1]})
+            </ShowTime>
+          </ShowInfoHeader>
+          <TicketInfo>
+            <TicketType>
+              {selectedOption.ticketoptionName}·{quantity}매
+            </TicketType>
+            <TotalPrice>{totalPrice?.toLocaleString()}원</TotalPrice>
+          </TicketInfo>
+        </InfoSection>
 
-      {/* 좌석표 */}
-      <SeatMapSection>
-        <SeatMapTitle>Maryhall Grand Theater Seating Plan</SeatMapTitle>
-        <SeatMapGrid>
-          {seatLayout.map((row, rowIndex) => (
-            <SeatRow key={rowIndex}>
-              {row.map((seat, colIndex) => (
-                <SeatButton
-                  key={colIndex}
-                  isAvailable={seat.isAvailable}
-                  isReserved={seat.isReserved}
-                  isSelected={selectedSeats.some((s) => s.id === seat.id)}
-                  onClick={() => handleSeatClick(seat)}
-                  disabled={seat.isReserved}
-                >
-                  {seat.label}
-                </SeatButton>
-              ))}
-            </SeatRow>
-          ))}
-        </SeatMapGrid>
+        {/* 좌석표 */}
+        <SeatMapSection>
+          <SeatMapTitle>{showData.showLocation}</SeatMapTitle>
+          <SeatMapGrid>
+            {seatLayout.map((row, rowIndex) => (
+              <SeatRow key={rowIndex}>
+                {row.map((seat, colIndex) => (
+                  <SeatButton
+                    key={colIndex}
+                    isAvailable={seat.isAvailable}
+                    isReserved={seat.isReserved}
+                    isSelected={selectedSeats.some((s) => s.id === seat.id)}
+                    onClick={() => handleSeatClick(seat)}
+                    disabled={seat.isReserved}
+                  >
+                    {seat.label}
+                  </SeatButton>
+                ))}
+              </SeatRow>
+            ))}
+          </SeatMapGrid>
 
-        {/* 선택된 좌석 표시 */}
-        {selectedSeats.length > 0 && (
-          <SelectedSeatsInfo>
-            선택된 좌석: {selectedSeats.map((s) => s.label).join(", ")}
-          </SelectedSeatsInfo>
-        )}
-      </SeatMapSection>
+          {/* 선택된 좌석 표시 */}
+          {selectedSeats.length > 0 && (
+            <SelectedSeatsInfo>
+              선택된 좌석: {selectedSeats.map((s) => s.label).join(", ")}
+            </SelectedSeatsInfo>
+          )}
+        </SeatMapSection>
 
-      {/* 하단 버튼 */}
-      <BottomSection>
-        <NextButton onClick={handleNext}>다음</NextButton>
-      </BottomSection>
-    </Container>
+        {/* 하단 버튼 */}
+        <Footerbtn
+          buttons={[
+            {
+              text: "다음",
+              color: "red",
+              onClick: handleNext,
+            },
+          ]}
+        />
+      </HomeUserContainer>
+    </PageWrapper>
   );
 };
 
 export default SelectSeat;
 
 // Styled Components
-const Container = styled.div`
-  width: 100%;
-  max-width: 393px;
-  min-height: 100vh;
-  margin: 0 auto;
-  background-color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-`;
 
-const Header = styled.div`
-  position: sticky;
-  top: 0;
-  width: 100%;
-  height: 80px;
-  background-color: #ffffff;
+const PageWrapper = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  z-index: 100;
-  border-bottom: 1px solid #f0f0f0;
-`;
-
-const BackButton = styled.button`
-  width: 32px;
-  height: 32px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  color: #000000;
+  min-height: 100vh;
+  background-color: #fff;
+
+  color: #000;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: normal;
 `;
 
-const Title = styled.h1`
-  font-size: 25px;
-  font-weight: 500;
-  color: #000000;
-  margin: 0;
-`;
-
-const Spacer = styled.div`
-  width: 32px;
+const HomeUserContainer = styled.div`
+  display: flex;
+  // width: 393px;
+  min-width: 375px;
+  max-width: 430px;
+  width: 100vw;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #fff;
+  box-shadow: 0 0 30px 5px rgba(0, 0, 0, 0.25);
 `;
 
 const InfoSection = styled.div`
   background-color: #ffffff;
   padding: 20px;
   display: flex;
+  width: 100%;
   flex-direction: column;
   gap: 10px;
 `;
@@ -401,6 +352,7 @@ const SeatMapSection = styled.div`
   padding: 20px;
   overflow: auto;
   display: flex;
+  width: 100%;
   flex-direction: column;
   align-items: center;
 `;
@@ -432,12 +384,12 @@ const SeatButton = styled.button`
   border-radius: 4px;
   font-size: 10px;
   font-weight: 500;
-  cursor: ${(props) => (props.isReserved ? "not-allowed" : "pointer")};
+  cursor: ${(props) => (props.isAvailable ? "pointer" : "not-allowed")};
   transition: all 0.2s ease;
 
   /* 예약된 좌석 - 회색 */
   ${(props) =>
-    props.isReserved &&
+    !props.isAvailable &&
     `
     background-color: #CCCCCC;
     color: #666666;
@@ -448,18 +400,18 @@ const SeatButton = styled.button`
   ${(props) =>
     props.isAvailable &&
     !props.isSelected &&
-    !props.isReserved &&
+    // !props.isReserved &&
     `
     background-color: #FFFFFF;
     color: #000000;
     border-color: #333333;
   `}
 
-  /* 선택된 좌석 - 노란색 */
+  /* 선택된 좌석 - 분홍색 */
   ${(props) =>
     props.isSelected &&
     `
-    background-color: #FFF4D2;
+    background-color: var(--color-tertiary);
     color: #940C0C;
     border-color: #940C0C;
     border-width: 2px;
@@ -477,37 +429,10 @@ const SeatButton = styled.button`
 const SelectedSeatsInfo = styled.div`
   margin-top: 20px;
   padding: 10px 15px;
-  background-color: #fff4d2;
+  background-color: var(--color-tertiary);
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
   color: #940c0c;
   text-align: center;
-`;
-
-const BottomSection = styled.div`
-  padding: 10px;
-  background-color: #ffffff;
-  border-top: 1px solid #f0f0f0;
-`;
-
-const NextButton = styled.button`
-  width: 100%;
-  height: 50px;
-  background-color: #fff4d2;
-  border: none;
-  border-radius: 10px;
-  font-size: 20px;
-  font-weight: 500;
-  color: #000000;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: #ffe699;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
 `;

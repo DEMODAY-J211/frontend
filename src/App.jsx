@@ -1,5 +1,11 @@
 import React from "react";
-import { Route, Routes, Navigate, useLocation, useNavigate } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { ToastProvider } from "./components/Toast/ToastProvider";
 
 //여기서부터 자기 이름 밑으로 import 하기!!
@@ -49,6 +55,7 @@ const ProtectedRoute = ({ element: Element, ...rest }) => {
     return null; // 또는 로딩 스피너
   }
   const currentPath = location.pathname + location.search;
+  console.log("currentPath", currentPath);
   const isLoginPage = location.pathname === "/login";
   return isLoggedIn ? (
     <Element {...rest} />
@@ -69,18 +76,19 @@ const RootRedirect = () => {
 
   React.useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const loginSuccess = urlParams.get('login');
+    const loginSuccess = urlParams.get("login");
 
-    if (loginSuccess === 'success') {
+    if (loginSuccess === "success") {
       console.log("✅ 루트 경로에서 로그인 성공 감지");
       setIsLoggedIn(true);
-      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem("isLoggedIn", "true");
       // URL 파라미터 제거하고 /homemanager 또는 /homeuser로 이동
       // 임시로 /homemanager로 이동 (나중에 role 기반으로 변경 가능)
-      navigate('/homemanager', { replace: true });
+      // navigate("/homemanager", { replace: true });
+      navigate("/homemanager", { replace: true });
     } else {
       // 로그인 성공 파라미터가 없으면 로그인 페이지로
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
     }
   }, [location, navigate, setIsLoggedIn]);
 
@@ -160,11 +168,19 @@ const App = () => {
               path="/qrmanager/:showId"
               element={<ProtectedRoute element={QRManager} />}
             />
-            <Route
-              path="/registershow"
+            {/* <Route
+              path="/register-show"
               element={<ProtectedRoute element={RegisterShow} />}
-            />
-            <Route
+            /> */}
+            <Route path="/register-show" element={<RegisterShow />}>
+              <Route path="step1" element={<RegisterShowStep1 />} />
+              <Route path="step2" element={<RegisterShowStep2 />} />
+              <Route path="step3" element={<RegisterShowStep3 />} />
+              <Route path="step4" element={<RegisterShowStep4 />} />
+              <Route path="step5" element={<RegisterShowStep5 />} />
+            </Route>
+
+            {/* <Route
               path="/register-show/step1"
               element={<ProtectedRoute element={RegisterShowStep1} />}
             />
@@ -183,7 +199,7 @@ const App = () => {
             <Route
               path="/register-show/step5"
               element={<ProtectedRoute element={RegisterShowStep5} />}
-            />
+            /> */}
             <Route
               path="/register-venue/step1"
               element={<ProtectedRoute element={RegisterVenue1} />}

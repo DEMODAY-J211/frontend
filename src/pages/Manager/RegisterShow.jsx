@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import NavbarManager from '../../components/Navbar/NavbarManager';
-import { RiArrowRightSLine } from 'react-icons/ri';
-import { BsUpload } from 'react-icons/bs';
-import { AiOutlineCalendar, AiOutlineClose } from 'react-icons/ai';
+import React, { useState } from "react";
+import styled from "styled-components";
+import NavbarManager from "../../components/Navbar/NavbarManager";
+import { RiArrowRightSLine } from "react-icons/ri";
+import { BsUpload } from "react-icons/bs";
+import { AiOutlineCalendar, AiOutlineClose } from "react-icons/ai";
+import RegisterShowNavbar from "./RegisterShow/RegisterShowNavbar";
+import RegisterShowStep1 from "./RegisterShow/RegisterShowStep1";
+import RegisterShowStep2 from "./RegisterShow/RegisterShowStep2";
+import RegisterShowStep3 from "./RegisterShow/RegisterShowStep3";
+import RegisterShowStep4 from "./RegisterShow/RegisterShowStep4";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import RegisterShowStep5 from "./RegisterShow/RegisterShowStep5";
 
 const RegisterShow = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -11,34 +19,61 @@ const RegisterShow = () => {
   const [showTimes, setShowTimes] = useState([]);
   const [ticketOptions, setTicketOptions] = useState([]);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const handleNext = () => {
+    if (currentStep < 5) setCurrentStep(currentStep + 1);
+    navigate(`/register-show/step${currentStep + 1}`);
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+    navigate(`/register-show/step${currentStep - 1}`);
+  };
+
+  useEffect(() => {
+    const step = location.pathname.split("/").pop(); // step1, step2...
+    const stepNum = Number(step.replace("step", "")); // 숫자만 추출
+
+    if (!isNaN(stepNum)) {
+      setCurrentStep(stepNum);
+    }
+  }, [location.pathname]);
+
   // 공연 회차 추가
   const handleAddShowtime = () => {
-    setShowTimes([...showTimes, {
-      id: Date.now(),
-      date: '',
-      startTime: '',
-      endTime: ''
-    }]);
+    setShowTimes([
+      ...showTimes,
+      {
+        id: Date.now(),
+        date: "",
+        startTime: "",
+        endTime: "",
+      },
+    ]);
   };
 
   // 공연 회차 삭제
   const handleRemoveShowtime = (id) => {
-    setShowTimes(showTimes.filter(st => st.id !== id));
+    setShowTimes(showTimes.filter((st) => st.id !== id));
   };
 
   // 티켓 옵션 추가
   const handleAddTicketOption = () => {
-    setTicketOptions([...ticketOptions, {
-      id: Date.now(),
-      name: '',
-      description: '',
-      price: ''
-    }]);
+    setTicketOptions([
+      ...ticketOptions,
+      {
+        id: Date.now(),
+        name: "",
+        description: "",
+        price: "",
+      },
+    ]);
   };
 
   // 티켓 옵션 삭제
   const handleRemoveTicketOption = (id) => {
-    setTicketOptions(ticketOptions.filter(to => to.id !== id));
+    setTicketOptions(ticketOptions.filter((to) => to.id !== id));
   };
 
   // 포스터 업로드
@@ -54,19 +89,22 @@ const RegisterShow = () => {
   };
 
   const steps = [
-    { num: 1, name: '공연 기본정보' },
-    { num: 2, name: '공연 상세정보' },
-    { num: 3, name: '공연 장소·좌석' },
-    { num: 4, name: '알림 메시지' },
-    { num: 5, name: '미리 보기' }
+    { num: 1, name: "공연 기본정보" },
+    { num: 2, name: "공연 상세정보" },
+    { num: 3, name: "공연 장소·좌석" },
+    { num: 4, name: "알림 메시지" },
+    { num: 5, name: "미리 보기" },
   ];
 
   return (
     <Container>
       <NavbarManager />
-
       {/* 단계 표시 */}
-      <StepperContainer>
+      <RegisterShowNavbar
+        currentStep={currentStep}
+        setCurrentStep={setCurrentStep}
+      />
+      {/* <StepperContainer>
         <Stepper>
           {steps.map((step, index) => (
             <React.Fragment key={step.num}>
@@ -82,9 +120,13 @@ const RegisterShow = () => {
             </React.Fragment>
           ))}
         </Stepper>
-      </StepperContainer>
-
+      </StepperContainer> */}
       {/* 메인 컨텐츠 */}
+      {currentStep === 1 && <RegisterShowStep1 />}
+      {currentStep === 2 && <RegisterShowStep2 />}
+      {currentStep === 3 && <RegisterShowStep3 />}
+      {currentStep === 4 && <RegisterShowStep4 />}
+      {currentStep === 5 && <RegisterShowStep5 />}
       <MainContent>
         <LeftSection>
           <PageTitle>공연 등록하기</PageTitle>
@@ -115,7 +157,9 @@ const RegisterShow = () => {
           <FormSection>
             <SectionTitle>공연명</SectionTitle>
             <Input placeholder="제11회 정기공연" />
-            <RequiredMessage>*필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.</RequiredMessage>
+            <RequiredMessage>
+              *필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.
+            </RequiredMessage>
           </FormSection>
 
           {/* 공연 날짜/회차 */}
@@ -186,7 +230,9 @@ const RegisterShow = () => {
           <FormSection>
             <SectionTitle>입금주</SectionTitle>
             <Input placeholder="홍길동" />
-            <RequiredMessage>*필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.</RequiredMessage>
+            <RequiredMessage>
+              *필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.
+            </RequiredMessage>
           </FormSection>
 
           {/* 입금 계좌 */}
@@ -196,19 +242,20 @@ const RegisterShow = () => {
               <BankInput placeholder="우리" />
               <AccountInput placeholder="0000-000-000000" />
             </AccountInputWrapper>
-            <RequiredMessage>*필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.</RequiredMessage>
+            <RequiredMessage>
+              *필수 항목을 모두 채워주셔야 다음 단계로 이동합니다.
+            </RequiredMessage>
           </FormSection>
         </RightSection>
       </MainContent>
-
       {/* Footer 버튼 */}
-      <Footer>
-        <PrevButton>← 이전</PrevButton>
-        <ButtonGroup>
-          <TempSaveButton>임시저장</TempSaveButton>
-          <NextButton>다음 →</NextButton>
-        </ButtonGroup>
-      </Footer>
+      {/* <Footer>
+        <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+        <RightButtonGroup>
+          <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
+          <NextButton onClick={handleNext}>다음→</NextButton>
+        </RightButtonGroup>
+      </Footer> */}
     </Container>
   );
 };
@@ -240,7 +287,7 @@ const Step = styled.div`
   align-items: center;
   gap: 10px;
   padding: 20px 0;
-  border-bottom: ${props => props.active ? '2px solid #FC2847' : 'none'};
+  border-bottom: ${(props) => (props.active ? "2px solid #FC2847" : "none")};
   margin-bottom: -1px;
 `;
 
@@ -250,8 +297,9 @@ const StepNumber = styled.div`
 
 const StepName = styled.div`
   font-size: 20px;
-  color: ${props => props.active ? '#FC2847' : 'var(--text-neutral-500)'};
-  font-family: ${props => props.active ? "'GyeonggiTitle:Medium'" : "'GyeonggiTitle:Light'"};
+  color: ${(props) => (props.active ? "#FC2847" : "var(--text-neutral-500)")};
+  font-family: ${(props) =>
+    props.active ? "'GyeonggiTitle:Medium'" : "'GyeonggiTitle:Light'"};
 `;
 
 const StepArrow = styled.div`
@@ -272,7 +320,7 @@ const LeftSection = styled.div`
 
 const PageTitle = styled.h1`
   font-size: 30px;
-  font-family: 'GyeonggiTitle:Medium';
+  font-family: "GyeonggiTitle:Medium";
   color: #333;
   margin: 0;
 `;
@@ -309,7 +357,7 @@ const PosterPreview = styled.img`
 
 const UploadText = styled.div`
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   color: #333;
 `;
 
@@ -332,7 +380,7 @@ const FormSection = styled.div`
 
 const SectionTitle = styled.h2`
   font-size: 25px;
-  font-family: 'GyeonggiTitle:Medium';
+  font-family: "GyeonggiTitle:Medium";
   color: #333;
   margin: 0;
 `;
@@ -350,7 +398,7 @@ const AddButton = styled.button`
   border-radius: 10px;
   padding: 10px 20px;
   font-size: 13px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   cursor: pointer;
 
   &:hover {
@@ -365,7 +413,7 @@ const Input = styled.input`
   border-radius: 16px;
   padding: 20px 10px;
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
 
   &::placeholder {
     color: #878787;
@@ -392,7 +440,7 @@ const DateInput = styled.input`
   border: none;
   outline: none;
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   width: 150px;
 
   &::placeholder {
@@ -414,7 +462,7 @@ const TimeInput = styled.input`
   border: none;
   outline: none;
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   width: 60px;
 
   &::placeholder {
@@ -444,7 +492,7 @@ const ShowtimeItem = styled.div`
 
 const ShowtimeText = styled.span`
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   color: #333;
 `;
 
@@ -466,7 +514,7 @@ const ReservationPeriod = styled.div`
 
 const EndTimeText = styled.span`
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   color: #787878;
 `;
 
@@ -478,7 +526,7 @@ const PriceInputWrapper = styled.div`
 
   span {
     font-size: 20px;
-    font-family: 'GyeonggiTitle:Light';
+    font-family: "GyeonggiTitle:Light";
   }
 `;
 
@@ -489,7 +537,7 @@ const PriceInput = styled.input`
   border-radius: 16px;
   padding: 20px 10px;
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   text-align: right;
 
   &::placeholder {
@@ -510,7 +558,7 @@ const BankInput = styled.input`
   border-radius: 16px;
   padding: 20px 10px;
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
 
   &::placeholder {
     color: #6e6e6e;
@@ -524,7 +572,7 @@ const AccountInput = styled.input`
   border-radius: 16px;
   padding: 20px 10px;
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
 
   &::placeholder {
     color: #6e6e6e;
@@ -533,7 +581,7 @@ const AccountInput = styled.input`
 
 const RequiredMessage = styled.p`
   font-size: 15px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   color: #d72b2b;
   margin: 0;
   line-height: 24px;
@@ -558,7 +606,7 @@ const PrevButton = styled.button`
   border-radius: 20px;
   padding: 20px;
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   cursor: pointer;
 
   &:hover {
@@ -573,7 +621,7 @@ const TempSaveButton = styled.button`
   border-radius: 20px;
   padding: 20px;
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   cursor: pointer;
 
   &:hover {
@@ -588,7 +636,7 @@ const NextButton = styled.button`
   border-radius: 20px;
   padding: 20px;
   font-size: 20px;
-  font-family: 'GyeonggiTitle:Light';
+  font-family: "GyeonggiTitle:Light";
   cursor: pointer;
 
   &:hover {

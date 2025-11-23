@@ -8,7 +8,7 @@ import RegisterShowNavbar from "./RegisterShowNavbar";
 import { BsUpload } from "react-icons/bs";
 import { AiOutlinePlus } from "react-icons/ai";
 
-const RegisterShowStep2 = () => {
+const RegisterShowStep2 = ({ viewer = false }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -80,10 +80,10 @@ const RegisterShowStep2 = () => {
 
   return (
     <>
-      <NavbarManager />
+      {/* <NavbarManager /> */}
       <Container>
         <MainContent>
-          <RegisterShowNavbar currentStep={2} />
+          {/* <RegisterShowNavbar currentStep={2} /> */}
 
           <UpperContent>
             <Name>공연 상세이미지(선택)</Name>
@@ -134,13 +134,15 @@ const RegisterShowStep2 = () => {
         </MainContent>
 
         {/* 하단 버튼 */}
-        <Footer>
-          <PrevButton onClick={handlePrevious}>←이전</PrevButton>
-          <RightButtonGroup>
-            <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
-            <NextButton onClick={handleNext}>다음→</NextButton>
-          </RightButtonGroup>
-        </Footer>
+        {!viewer && (
+          <Footer>
+            <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+            <RightButtonGroup>
+              <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
+              <NextButton onClick={handleNext}>다음→</NextButton>
+            </RightButtonGroup>
+          </Footer>
+        )}
       </Container>
     </>
   );

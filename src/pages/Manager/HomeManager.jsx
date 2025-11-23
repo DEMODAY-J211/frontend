@@ -95,6 +95,39 @@ const HomeManager = () => {
     setRegisterShowModal(null);
   };
 
+  const onClickRegisterShow = () => {
+    const fetchRegisterShow = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/manager/shows`,
+          {
+            method: "POST",
+            credentials: "include",
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log("Register Show :", result);
+
+          // data가 배열이고 길이가 0보다 크면 공연장이 있는 것
+          if (result.success) {
+            console.log(result.message);
+            console.log(result.data);
+            const showId = result.data.showId;
+            navigate(`/register-show/${showId}/step1`);
+          }
+        } else {
+          console.error("Failed to fetch shows:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching shows:", error);
+      }
+    };
+
+    fetchRegisterShow();
+  };
+
   return (
     <Home>
       <NavbarManager />
@@ -135,10 +168,7 @@ const HomeManager = () => {
               이어서 공연도 등록하시겠습니까?
             </ModalTitle>
             <ModalButtonGroup>
-              <ModalButton
-                $primary
-                onClick={() => navigate("/register-show/step1")}
-              >
+              <ModalButton $primary onClick={onClickRegisterShow}>
                 네, 등록할래요
               </ModalButton>
               <ModalButton onClick={handleCloseRegisterModal}>
@@ -164,10 +194,7 @@ const HomeManager = () => {
               <ModalButton onClick={() => navigate("/register-venue/step1")}>
                 공연장 등록하기
               </ModalButton>
-              <ModalButton
-                $primary
-                onClick={() => navigate("/register-show/step1")}
-              >
+              <ModalButton $primary onClick={onClickRegisterShow}>
                 이미 등록했어요
               </ModalButton>
             </ModalButtonGroup>
@@ -195,7 +222,7 @@ const HomeManager = () => {
               >
                 이어서 등록하기
               </ModalButton>
-              <ModalButton onClick={() => navigate("/register-show/step1")}>
+              <ModalButton onClick={onClickRegisterShow}>
                 새로운 공연 등록하기
               </ModalButton>
             </ModalButtonGroup>
