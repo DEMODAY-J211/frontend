@@ -13,42 +13,44 @@ const RegisterShowStep1 = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  // 이미지 파일 저장
-  const [poster, setPoster] = useState(null);
-  // 미리보기 URL 저장
-  const [preview, setPreview] = useState(null);
+  // 대표 포스터
+  const [posterFile, setPosterFile] = useState(null); // 파일
+  const [poster, setPoster] = useState(null); // 미리보기 URL
 
-  //공연명
-  const [showName, setShowName] = useState("");
+  // 공연명
+  const [title, setTitle] = useState("");
 
-  // 공연 날짜/회차들
-  const [showSchedules, setShowSchedules] = useState([
-    { date: "", startTime: "", endTime: "" },
+  // 공연 회차
+  const [showTimes, setShowTimes] = useState([
+    {
+      showStartDate: "",
+      showStartTime: "",
+      showEndTime: "",
+    },
   ]);
 
-  const addSchedule = () => {
-    setShowSchedules([
-      ...showSchedules,
-      { date: "", startTime: "", endTime: "" },
+  const addShowTime = () => {
+    setShowTimes([
+      ...showTimes,
+      { showStartDate: "", showStartTime: "", showEndTime: "" },
     ]);
   };
 
-  const updateSchedule = (index, field, value) => {
-    const updated = [...showSchedules];
+  const updateShowTime = (index, field, value) => {
+    const updated = [...showTimes];
     updated[index][field] = value;
-    setShowSchedules(updated);
+    setShowTimes(updated);
   };
 
-  const removeSchedule = (index) => {
-    setShowSchedules(showSchedules.filter((_, i) => i !== index));
+  const removeShowTime = (index) => {
+    setShowTimes(showTimes.filter((_, i) => i !== index));
   };
 
-  //예매 날짜
-  const [reserveStartDate, setReserveStartDate] = useState("");
-  // 예매 기간 시간
-  const [reserveStartTime, setReserveStartTime] = useState("");
+  // 예매 시작(bookStart)
+  const [bookStartDate, setBookStartDate] = useState("");
+  const [bookStartTime, setBookStartTime] = useState("");
 
-  // 00:00 ~ 23:50 까지 10분 단위 생성
+  // 시간 리스트 (30분 간격)
   const timeOptions = [];
   for (let hour = 0; hour < 24; hour++) {
     for (let min = 0; min < 60; min += 30) {
@@ -57,78 +59,69 @@ const RegisterShowStep1 = () => {
       timeOptions.push(`${h}:${m}`);
     }
   }
-  // 티켓
+
+  // 티켓 옵션
   const [ticketOptions, setTicketOptions] = useState([
-    { name: "", detail: "", price: "" },
+    { name: "", description: "", price: "" },
   ]);
 
   const addTicketOption = () => {
-    setTicketOptions([...ticketOptions, { name: "", detail: "", price: "" }]);
+    setTicketOptions([
+      ...ticketOptions,
+      { name: "", description: "", price: "" },
+    ]);
   };
-  const updateTicketOption = (index, field, value) => {
+
+  const updateTicketOption = (idx, field, value) => {
     const updated = [...ticketOptions];
-    updated[index][field] = value;
+    updated[idx][field] = value;
     setTicketOptions(updated);
   };
-  const removeTicketOption = (index) => {
-    setTicketOptions(ticketOptions.filter((_, i) => i !== index));
+
+  const removeTicketOption = (idx) => {
+    setTicketOptions(ticketOptions.filter((_, i) => i !== idx));
   };
 
-  // 입금주
-  const [accountHolder, setAccountHolder] = useState("");
-  // 은행
-  const [selectBank, setSelectBank] = useState("");
-  const [account, setAccount] = useState("");
+  // 입금 정보
+  const [bankMaster, setBankMaster] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankAccount, setBankAccount] = useState("");
 
-  const [showNameError, setShowNameError] = useState(false);
+  // 오류
+  const [titleError, setTitleError] = useState(false);
   const [showDateError, setShowDateError] = useState(false);
   const [showTimeError, setShowTimeError] = useState(false);
-  const [reserveDateError, setReserveDateError] = useState(false);
-  const [reserveTimeError, setReserveTimeError] = useState(false);
+  const [bookStartDateError, setBookStartDateError] = useState(false);
+  const [bookStartTimeError, setBookStartTimeError] = useState(false);
 
-  const handleTempSave = () => {
-    if (!validateFields()) {
-      addToast("필수 항목을 입력해주세요!", "error");
-      return;
-    }
-
-    const formData = { poster: preview };
-    localStorage.setItem("registerShowStep1", JSON.stringify(formData));
-    addToast("임시 저장되었습니다!", "success");
-  };
-
-  // 파일 업로드 핸들러
+  // 포스터 업로드
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setPoster(file);
+    setPosterFile(file);
 
     if (file) {
       const previewUrl = URL.createObjectURL(file);
-      setPreview(previewUrl);
+      setPoster(previewUrl);
     }
   };
 
-  // 이전 단계로
+  // 이전 단계
   const handlePrevious = () => {
-    // TODO: 2단계 페이지로 이동
     navigate("/homemanager");
   };
 
+  // 검증
   const validateFields = () => {
     let isValid = true;
 
-    // 공연명
-    if (showName.trim() === "") {
-      setShowNameError(true);
+    if (title.trim() === "") {
+      setTitleError(true);
       isValid = false;
     }
 
-    // 공연 날짜/시간 (회차 전체 체크)
-    const hasEmptyDate = showSchedules.some((sch) => sch.date.trim() === "");
-    const hasEmptyStart = showSchedules.some(
-      (sch) => sch.startTime.trim() === ""
-    );
-    const hasEmptyEnd = showSchedules.some((sch) => sch.endTime.trim() === "");
+    const hasEmptyDate = showTimes.some((t) => t.showStartDate.trim() === "");
+    const hasEmptyStart = showTimes.some((t) => t.showStartTime.trim() === "");
+    const hasEmptyEnd = showTimes.some((t) => t.showEndTime.trim() === "");
 
     if (hasEmptyDate) {
       setShowDateError(true);
@@ -139,21 +132,31 @@ const RegisterShowStep1 = () => {
       isValid = false;
     }
 
-    // 예매 시작 날짜, 시간
-    if (reserveStartDate.trim() === "") {
-      setReserveDateError(true);
+    if (bookStartDate.trim() === "") {
+      setBookStartDateError(true);
       isValid = false;
     }
-
-    if (reserveStartTime.trim() === "") {
-      setReserveTimeError(true);
+    if (bookStartTime.trim() === "") {
+      setBookStartTimeError(true);
       isValid = false;
     }
 
     return isValid;
   };
 
-  // 다음 단계로
+  // 임시 저장
+  const handleTempSave = () => {
+    if (!validateFields()) {
+      addToast("필수 항목을 입력해주세요!", "error");
+      return;
+    }
+
+    const formData = { poster };
+    localStorage.setItem("registerShowStep1", JSON.stringify(formData));
+    addToast("임시 저장되었습니다!", "success");
+  };
+
+  // 다음
   const handleNext = () => {
     if (!validateFields()) {
       addToast("필수 항목을 입력해주세요!", "error");
@@ -163,25 +166,18 @@ const RegisterShowStep1 = () => {
     navigate("/register-show/step2");
   };
 
-  // 기존 임시 저장 데이터 불러오기
+  // 로컬 저장 로드
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("registerShowStep1"));
     if (saved?.poster) {
-      setPreview(saved.poster);
+      setPoster(saved.poster);
     }
   }, []);
 
-  // console.log("제목", showName);
-  // console.log("공연날짜", showDate);
-  // console.log("공연시작시간", showStartTime);
-  // console.log("공연마감시간", showEndTime);
-  // console.log("예매날짜", reserveStartDate);
-  // console.log("예매시간", reserveStartTime);
-  // console.log("티켓옵션", ticketName);
-  // console.log("티켓설명", ticketDetail);
-  // console.log("가격", ticketPrice);
-  // console.log("예금주", accountHolder);
-  // console.log("계좌번호", account);
+  // --------------------------
+  //  렌더링 (변수명 변경 완료!)
+  // --------------------------
+
   return (
     <>
       <NavbarManager />
@@ -195,10 +191,9 @@ const RegisterShowStep1 = () => {
               <Poster
                 onClick={() => document.getElementById("posterUpload").click()}
               >
-                {preview ? (
+                {poster ? (
                   <>
-                    <img src={preview} alt="포스터 미리보기" />
-
+                    <img src={poster} alt="포스터 미리보기" />
                     <HoverOverlay>포스터 변경하기</HoverOverlay>
                   </>
                 ) : (
@@ -218,46 +213,41 @@ const RegisterShowStep1 = () => {
             </LeftContent>
 
             <RightContent>
+              {/* 공연명 */}
               <Q>
-                {/* 공연명 */}
                 <Name>공연명</Name>
                 <Input
-                  value={showName}
+                  value={title}
                   onChange={(e) => {
-                    setShowName(e.target.value);
-                    if (e.target.value.trim() !== "") {
-                      setShowNameError(false);
-                    }
+                    setTitle(e.target.value);
+                    if (e.target.value.trim() !== "") setTitleError(false);
                   }}
-                  className={showName === "" ? "placeholder" : ""}
                   placeholder="제4회 정기공연"
                 />
-                {showNameError && (
-                  <ErrorMessage>*필수 항목입니다.</ErrorMessage>
-                )}
+                {titleError && <ErrorMessage>*필수 항목입니다.</ErrorMessage>}
               </Q>
 
+              {/* 공연 회차 showTimes */}
               <Q>
-                {/* 공연 날짜/회차 */}
                 <Name>
                   공연 날짜/회차
-                  <AddButton onClick={addSchedule}>추가하기</AddButton>
+                  <AddButton onClick={addShowTime}>추가하기</AddButton>
                 </Name>
-                {showSchedules.map((sch, idx) => (
+
+                {showTimes.map((t, idx) => (
                   <DateRow key={idx}>
+                    {/* 날짜 */}
                     <Column>
                       <DateWrapper>
                         <DateInput
                           type="date"
-                          value={sch.date}
+                          value={t.showStartDate}
                           onChange={(e) => {
-                            updateSchedule(idx, "date", e.target.value);
+                            updateShowTime(idx, "showStartDate", e.target.value);
                             if (e.target.value.trim() !== "")
                               setShowDateError(false);
                           }}
-                          className={sch.date === "" ? "placeholder" : ""}
                         />
-
                         <CalendarIcon />
                       </DateWrapper>
                       {showDateError && (
@@ -265,21 +255,21 @@ const RegisterShowStep1 = () => {
                       )}
                     </Column>
 
+                    {/* 시작 시간 */}
                     <Column>
                       <TimeSelect
-                        value={sch.startTime}
+                        value={t.showStartTime}
                         onChange={(e) => {
-                          updateSchedule(idx, "startTime", e.target.value);
+                          updateShowTime(idx, "showStartTime", e.target.value);
                           if (e.target.value.trim() !== "")
                             setShowTimeError(false);
                         }}
-                        className={sch.startTime === "" ? "placeholder" : ""}
                       >
-                        <option value="" disabled className="placeholder">
+                        <option value="" disabled>
                           00:00
                         </option>
-                        {timeOptions.map((time, idx) => (
-                          <option key={idx} value={time}>
+                        {timeOptions.map((time, i) => (
+                          <option key={i} value={time}>
                             {time}
                           </option>
                         ))}
@@ -291,21 +281,21 @@ const RegisterShowStep1 = () => {
 
                     <span>~</span>
 
+                    {/* 종료 시간 */}
                     <Column>
                       <TimeSelect
-                        value={sch.endTime}
+                        value={t.showEndTime}
                         onChange={(e) => {
-                          updateSchedule(idx, "endTime", e.target.value);
+                          updateShowTime(idx, "showEndTime", e.target.value);
                           if (e.target.value.trim() !== "")
                             setShowTimeError(false);
                         }}
-                        className={sch.endTime === "" ? "placeholder" : ""}
                       >
-                        <option value="" disabled className="placeholder">
+                        <option value="" disabled>
                           00:00
                         </option>
-                        {timeOptions.map((time, idx) => (
-                          <option key={idx} value={time}>
+                        {timeOptions.map((time, i) => (
+                          <option key={i} value={time}>
                             {time}
                           </option>
                         ))}
@@ -314,57 +304,58 @@ const RegisterShowStep1 = () => {
                         <ErrorMessage>*필수 항목입니다.</ErrorMessage>
                       )}
                     </Column>
-                    {/* ★ 삭제 버튼 (스케줄이 2개 이상일 때만 표시) */}
-                    {showSchedules.length > 1 && (
-                      <DeleteIcon onClick={() => removeSchedule(idx)} />
+
+                    {showTimes.length > 1 && (
+                      <DeleteIcon onClick={() => removeShowTime(idx)} />
                     )}
                   </DateRow>
                 ))}
               </Q>
 
+              {/* 예매 시작 bookStart */}
               <Q>
-                {/* 예매 기간 */}
                 <Name>예매 기간</Name>
+
                 <DateRow>
+                  {/* bookStartDate */}
                   <Column>
                     <DateWrapper>
                       <DateInput
                         type="date"
-                        value={reserveStartDate}
+                        value={bookStartDate}
                         onChange={(e) => {
-                          setReserveStartDate(e.target.value);
+                          setBookStartDate(e.target.value);
                           if (e.target.value.trim() !== "")
-                            setReserveDateError(false);
+                            setBookStartDateError(false);
                         }}
-                        className={reserveStartDate === "" ? "placeholder" : ""}
                       />
                       <CalendarIcon />
                     </DateWrapper>
-                    {reserveDateError && (
+                    {bookStartDateError && (
                       <ErrorMessage>*필수 항목입니다.</ErrorMessage>
                     )}
                   </Column>
 
+                  {/* bookStartTime */}
                   <Column>
                     <TimeSelect
-                      value={reserveStartTime}
+                      value={bookStartTime}
                       onChange={(e) => {
-                        setReserveStartTime(e.target.value);
+                        setBookStartTime(e.target.value);
                         if (e.target.value.trim() !== "")
-                          setReserveTimeError(false);
+                          setBookStartTimeError(false);
                       }}
-                      className={reserveStartTime === "" ? "placeholder" : ""}
                     >
-                      <option value="" disabled className="placeholder">
+                      <option value="" disabled>
                         00:00
                       </option>
-                      {timeOptions.map((time, idx) => (
-                        <option key={idx} value={time}>
+                      {timeOptions.map((time, i) => (
+                        <option key={i} value={time}>
                           {time}
                         </option>
                       ))}
                     </TimeSelect>
-                    {reserveTimeError && (
+                    {bookStartTimeError && (
                       <ErrorMessage>*필수 항목입니다.</ErrorMessage>
                     )}
                   </Column>
@@ -375,6 +366,7 @@ const RegisterShowStep1 = () => {
                 </DateRow>
               </Q>
 
+              {/* 티켓 옵션 */}
               <Q>
                 <Name>
                   티켓 옵션
@@ -389,16 +381,14 @@ const RegisterShowStep1 = () => {
                       onChange={(e) =>
                         updateTicketOption(idx, "name", e.target.value)
                       }
-                      className={opt.name === "" ? "placeholder" : ""}
                     />
 
                     <Input
                       placeholder="티켓 옵션 설명"
-                      value={opt.detail}
+                      value={opt.description}
                       onChange={(e) =>
-                        updateTicketOption(idx, "detail", e.target.value)
+                        updateTicketOption(idx, "description", e.target.value)
                       }
-                      className={opt.detail === "" ? "placeholder" : ""}
                     />
 
                     <PriceRow>
@@ -409,11 +399,9 @@ const RegisterShowStep1 = () => {
                         onChange={(e) =>
                           updateTicketOption(idx, "price", e.target.value)
                         }
-                        className={opt.price === "" ? "placeholder" : ""}
                       />
                       <span>원</span>
 
-                      {/* 옵션이 2개 이상일 때만 X 버튼 표시 */}
                       {ticketOptions.length > 1 && (
                         <DeleteIcon onClick={() => removeTicketOption(idx)} />
                       )}
@@ -422,24 +410,22 @@ const RegisterShowStep1 = () => {
                 ))}
               </Q>
 
+              {/* 입금 정보 */}
               <Q>
-                {/* 입금주 */}
                 <Name>입금주</Name>
                 <Input
                   placeholder="홍길동"
-                  value={accountHolder}
-                  onChange={(e) => setAccountHolder(e.target.value)}
+                  value={bankMaster}
+                  onChange={(e) => setBankMaster(e.target.value)}
                 />
 
-                {/* 입금 계좌 */}
                 <Name>입금 계좌</Name>
                 <AccountRow>
                   <BankSelect
-                    value={selectBank}
-                    onChange={(e) => setSelectBank(e.target.value)}
-                    className={selectBank === "" ? "placeholder" : ""}
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
                   >
-                    <option value="" disabled className="placeholder">
+                    <option value="" disabled>
                       은행명
                     </option>
                     <option>우리</option>
@@ -449,10 +435,11 @@ const RegisterShowStep1 = () => {
                     <option>카카오뱅크</option>
                     <option>토스뱅크</option>
                   </BankSelect>
+
                   <Input
                     placeholder="0000000000000"
-                    value={account}
-                    onChange={(e) => setAccount(e.target.value)}
+                    value={bankAccount}
+                    onChange={(e) => setBankAccount(e.target.value)}
                   />
                 </AccountRow>
               </Q>
@@ -460,11 +447,13 @@ const RegisterShowStep1 = () => {
           </FormContent>
         </MainContent>
 
-        {/* 하단 버튼 */}
         <Footer>
           <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+
           <RightButtonGroup>
-            <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
+            <TempSaveButton onClick={handleTempSave}>
+              임시저장
+            </TempSaveButton>
             <NextButton onClick={handleNext}>다음→</NextButton>
           </RightButtonGroup>
         </Footer>
@@ -474,6 +463,7 @@ const RegisterShowStep1 = () => {
 };
 
 export default RegisterShowStep1;
+
 
 const Container = styled.div`
   width: 1440px;
