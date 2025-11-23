@@ -8,11 +8,11 @@ import NavbarLanding from "../../components/Navbar/NavbarLanding";
 
 const WriteTeamInfo = () => {
   const [formData, setFormData] = useState({
-    logo: "",
-    name: "",
-    oneLiner: "",
-    description: "",
-    socialLinks: {
+    managerPicture: "",
+    managerName: "",
+    managerIntro: "",
+    managerText: "",
+    managerUrl: {
       instagram: "",
       youtube: "",
       facebook: "",
@@ -29,8 +29,8 @@ const WriteTeamInfo = () => {
   const handleSocialLinkChange = (platform, value) => {
     setFormData((prev) => ({
       ...prev,
-      socialLinks: {
-        ...prev.socialLinks,
+      managerUrl: {
+        ...prev.managerUrl,
         [platform]: value,
       },
     }));
@@ -43,16 +43,51 @@ const WriteTeamInfo = () => {
       reader.onloadend = () => {
         setFormData((prev) => ({
           ...prev,
-          logo: reader.result,
+          managerPicture: reader.result,
         }));
       };
       reader.readAsDataURL(file);
     }
   };
-
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("저장된 데이터:", formData);
-    // TODO: API 호출하여 데이터 저장
+    const urlArray = [
+      formData.managerUrl.instagram,
+      formData.managerUrl.youtube,
+      formData.managerUrl.facebook,
+    ];
+    const payload = {
+      managerPicture: formData.managerPicture,
+      managerName: formData.managerName,
+      managerIntro: formData.managerIntro,
+      managerText: formData.managerText,
+      managerUrl: urlArray, // 배열로 넣음
+    };
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/kakao/manager`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          credentials: "include", // 쿠키 기반 세션 유지
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("저장 성공:", data);
+
+      // 저장 후 필요한 후속 처리 (예: 페이지 이동, 상태 업데이트 등)
+    } catch (error) {
+      console.error("저장 실패:", error);
+    }
   };
 
   return (
@@ -66,8 +101,11 @@ const WriteTeamInfo = () => {
           <Logo>
             <LogoUploadContainer>
               <LogoUploadLabel htmlFor="logo-upload">
-                {formData.logo ? (
-                  <UploadedLogo src={formData.logo} alt="업로드된 로고" />
+                {formData.managerPicture ? (
+                  <UploadedLogo
+                    src={formData.managerPicture}
+                    alt="업로드된 로고"
+                  />
                 ) : (
                   <UploadIconWrapper>
                     <BsUpload size={32} color="#333" />
@@ -92,8 +130,10 @@ const WriteTeamInfo = () => {
                 <InputField
                   type="text"
                   placeholder="단체명을 입력해주세요"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  value={formData.managerName}
+                  onChange={(e) =>
+                    handleInputChange("managerName", e.target.value)
+                  }
                   style={{ width: "700px" }}
                 />
                 <Desc>
@@ -115,7 +155,7 @@ const WriteTeamInfo = () => {
                   <URLInput
                     type="url"
                     placeholder="인스타 링크"
-                    value={formData.socialLinks.instagram}
+                    value={formData.managerUrl.instagram}
                     onChange={(e) =>
                       handleSocialLinkChange("instagram", e.target.value)
                     }
@@ -130,7 +170,7 @@ const WriteTeamInfo = () => {
                   <URLInput
                     type="url"
                     placeholder="유튜브 링크"
-                    value={formData.socialLinks.youtube}
+                    value={formData.managerUrl.youtube}
                     onChange={(e) =>
                       handleSocialLinkChange("youtube", e.target.value)
                     }
@@ -145,7 +185,7 @@ const WriteTeamInfo = () => {
                   <URLInput
                     type="url"
                     placeholder="페이스북 링크"
-                    value={formData.socialLinks.facebook}
+                    value={formData.managerUrl.facebook}
                     onChange={(e) =>
                       handleSocialLinkChange("facebook", e.target.value)
                     }
@@ -160,9 +200,9 @@ const WriteTeamInfo = () => {
                 <FieldLabel>한줄 소개</FieldLabel>
                 <TextAreaField
                   placeholder="한줄 소개를 입력해주세요"
-                  value={formData.oneLiner}
+                  value={formData.managerIntro}
                   onChange={(e) =>
-                    handleInputChange("oneLiner", e.target.value)
+                    handleInputChange("managerIntro", e.target.value)
                   }
                   rows={1}
                 />
@@ -176,9 +216,9 @@ const WriteTeamInfo = () => {
                 <FieldLabel>소개글</FieldLabel>
                 <TextAreaField
                   placeholder="소개글을 입력해주세요"
-                  value={formData.description}
+                  value={formData.managerText}
                   onChange={(e) =>
-                    handleInputChange("description", e.target.value)
+                    handleInputChange("managerText", e.target.value)
                   }
                   rows={3}
                   style={{ height: "80px" }}

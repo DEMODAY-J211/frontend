@@ -70,28 +70,28 @@ export default function MobileTicket() {
   };
   const fetchticket = async () => {
     try {
-      // const response = await fetch(
-      //   `${
-      //     import.meta.env.VITE_API_URL
-      //   }/user/${managerId}/ticket/${reservationId}`,
-      //   {
-      //     method: "GET",
-      //     credentials: "include",
-      //     headers: {
-      //       Accept: "application/json",
-      //       "Content-Type": "application/json",
-      //       "Access-Control-Allow-Credentials": "true",
-      //     },
-      //   }
-      // );
-      // if (!response.ok) {
-      //   throw new Error(`HTTP error: ${response.status}`);
-      // }
-      // const data = await response.json();
-      // if (data.success) {
-      //   setShowInfo(data.data);
-      //   console.log("response의 data", data);
-      // }
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/user/${managerId}/ticket/${reservationId}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Credentials": "true",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success) {
+        setShowInfo(data.data);
+        console.log("response의 data", data);
+      }
     } catch (error) {
       console.error("예매한 공연 조회 실패:", error);
       alert("예매한 공연을 찾을 수 없습니다.");
