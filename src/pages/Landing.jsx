@@ -16,19 +16,31 @@ export default function Landing() {
   const handleSelectRole = async (selectedRole) => {
     try {
       setLoading(true);
-      const payload = {
-        role: selectedRole,
-      };
-      console.log(payload);
+      // const token = localStorage.getItem("accessToken");
+
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/kakao/update-role`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/auth/kakao/select-role?role=${selectedRole}`,
         {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           credentials: "include", // 쿠키 기반 세션 유지용
         }
       );
+      // const response = await fetch(
+      //   `${import.meta.env.VITE_API_URL}/auth/kakao/select-role
+      // ?role=${selectedRole}`,
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     credentials: "include", // 쿠키 기반 세션 유지용
+      //   }
+      // );
 
       // 응답 상태 코드가 실패일 경우
       if (!response.ok) {
@@ -41,26 +53,26 @@ export default function Landing() {
       const contentType = response.headers.get("Content-Type");
       console.log("응답 Content-Type:", contentType); // 응답 헤더 로그 추가
 
-      if (contentType && contentType.includes("application/json")) {
-        // JSON 형식이라면 파싱
-        const data = await response.json();
-        console.log("✅ 역할 선택 성공:", data);
+      // if (contentType && contentType.includes("application/json")) {
+      //   // JSON 형식이라면 파싱
+      //   const data = await response.json();
+      //   console.log("✅ 역할 선택 성공:", data);
 
-        // 역할에 따른 네비게이션
-        if (selectedRole === "USER") {
-          navigate("/homeuser");
-        } else if (selectedRole === "MANAGER") {
-          navigate("/write-teaminfo");
-        }
-      } else if (contentType && contentType.includes("text/plain")) {
+      //   // 역할에 따른 네비게이션
+      // } else
+      if (contentType && contentType.includes("text/plain")) {
         // 응답이 텍스트 형식일 경우 처리
         const textResponse = await response.text();
         console.log("응답이 텍스트입니다:", textResponse);
-        alert(`응답 내용: ${textResponse}`);
+        // alert(`응답 내용: ${textResponse}`);
 
         // 텍스트 응답에 따라 추가 처리
         if (textResponse.includes("role updated")) {
-          navigate(`/home${selectedRole.toLowerCase()}`);
+          if (selectedRole === "USER") {
+            navigate(`/home${selectedRole.toLowerCase()}`); //d여기 수정하기
+          } else if (selectedRole === "MANAGER") {
+            navigate("/write-teaminfo");
+          }
         }
       } else {
         console.error("예상하지 못한 응답 형식:", contentType);
