@@ -75,7 +75,7 @@ const RegisterShowStep5 = () => {
     <>
       {/* <NavbarManager /> */}
       <Container>
-        <MainContent>
+       
           {/* <RegisterShowNavbar currentStep={5} /> */}
           <RegisterShowStep1 viewer={true} />
           <RegisterShowStep2 viewer={true} />
@@ -88,159 +88,8 @@ const RegisterShowStep5 = () => {
               <NextButton onClick={handleSubmit}>등록하기</NextButton>
             </RightButtonGroup>
           </Footer>
-          <FormContent>
-            <LeftContent>
-              <Name>대표 포스터</Name>
-              <Poster>
-                {preview ? (
-                  <>
-                    <img src={preview} alt="포스터 미리보기" />
+       
 
-                    <HoverOverlay>포스터 변경하기</HoverOverlay>
-                  </>
-                ) : (
-                  <EmptyBox>
-                    <BsUpload size={45} color="#ccc" />
-                    <UploadText>포스터 업로드하기</UploadText>
-                  </EmptyBox>
-                )}
-              </Poster>
-            </LeftContent>
-
-            <RightContent>
-              <Q>
-                {/* 공연명 */}
-                <Name>공연명</Name>
-                <Input
-                  value={showName}
-                  className={showName === "" ? "placeholder" : ""}
-                  placeholder="제4회 정기공연"
-                />
-              </Q>
-
-              <Q>
-                {/* 공연 날짜/회차 */}
-                <Name>
-                  공연 날짜/회차
-                  <AddButton onClick={addSchedule}>추가하기</AddButton>
-                </Name>
-                {showSchedules.map((sch, idx) => (
-                  <DateRow key={idx}>
-                    <Column>
-                      <DateWrapper>
-                        <DateInput
-                          type="date"
-                          value={sch.date}
-                          className={sch.date === "" ? "placeholder" : ""}
-                        />
-
-                        <CalendarIcon />
-                      </DateWrapper>
-                    </Column>
-
-                    <Column>
-                      <TimeSelect
-                        value={sch.startTime}
-                        className={sch.startTime === "" ? "placeholder" : ""}
-                      ></TimeSelect>
-                    </Column>
-
-                    <span>~</span>
-
-                    <Column>
-                      <TimeSelect
-                        value={sch.endTime}
-                        className={sch.endTime === "" ? "placeholder" : ""}
-                      ></TimeSelect>
-                    </Column>
-                  </DateRow>
-                ))}
-              </Q>
-
-              <Q>
-                {/* 예매 기간 */}
-                <Name>예매 기간</Name>
-                <DateRow>
-                  <Column>
-                    <DateWrapper>
-                      <DateInput
-                        type="date"
-                        value={reserveStartDate}
-                        className={reserveStartDate === "" ? "placeholder" : ""}
-                      />
-                      <CalendarIcon />
-                    </DateWrapper>
-                  </Column>
-
-                  <Column>
-                    <TimeSelect
-                      value={reserveStartTime}
-                      className={reserveStartTime === "" ? "placeholder" : ""}
-                    ></TimeSelect>
-                  </Column>
-
-                  <span>~</span>
-
-                  <PeriodText>공연 시작 1시간 전</PeriodText>
-                </DateRow>
-              </Q>
-
-              <Q>
-                <Name>티켓 옵션</Name>
-
-                {ticketOptions.map((opt, idx) => (
-                  <TicketContent key={idx}>
-                    <Input
-                      placeholder="티켓 옵션 이름 (일반예매 / 학생예매)"
-                      value={opt.name}
-                      className={opt.name === "" ? "placeholder" : ""}
-                    />
-
-                    <Input
-                      placeholder="티켓 옵션 설명"
-                      value={opt.detail}
-                      className={opt.detail === "" ? "placeholder" : ""}
-                    />
-
-                    <PriceRow>
-                      <span>판매가</span>
-                      <PriceInput
-                        placeholder="0"
-                        value={opt.price}
-                        className={opt.price === "" ? "placeholder" : ""}
-                      />
-                      <span>원</span>
-                    </PriceRow>
-                  </TicketContent>
-                ))}
-              </Q>
-
-              <Q>
-                {/* 입금주 */}
-                <Name>입금주</Name>
-                <Input placeholder="홍길동" value={accountOwner} />
-
-                {/* 입금 계좌 */}
-                <Name>입금 계좌</Name>
-                <AccountRow>
-                  <BankSelect
-                    value={selectBank}
-                    className={selectBank === "" ? "placeholder" : ""}
-                  ></BankSelect>
-                  <Input placeholder="0000-000-000000" value={account} />
-                </AccountRow>
-              </Q>
-            </RightContent>
-          </FormContent>
-        </MainContent>
-
-        {/* 하단 버튼 */}
-        <Footer>
-          <PrevButton onClick={handlePrevious}>←이전</PrevButton>
-          <RightButtonGroup>
-            <NextButton onClick={handleSubmit}>다음→</NextButton>
-          </RightButtonGroup>
-        </Footer>
       </Container>
     </>
   );
@@ -249,7 +98,7 @@ const RegisterShowStep5 = () => {
 export default RegisterShowStep5;
 
 const Container = styled.div`
-  width: 1440px;
+  width: 100%;
   margin: 0 auto;
   background: #ffffff;
   display: flex;
