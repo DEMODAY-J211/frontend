@@ -64,7 +64,7 @@ export default function ReservationComplete({ onClose }) {
     const reservationId = data.data;
     console.log("예매 완료 응답:", data);
 
-    navigate(`/${managerId}/checkticket/${reservationId}`);
+    navigate(`/${managerId}/checkticket/${reservationId}`, { replace: true });
   };
 
   useEffect(() => {
