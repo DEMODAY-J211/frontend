@@ -29,9 +29,6 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   console.log(showId);
   const { addToast } = useToast();
 
-  const {showId} = useParams();
-
-  // 대표 포스터
   // 공연 회차
   const today = () => {
     const now = new Date(); // 로컬 시간 기준
@@ -351,47 +348,44 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   useEffect(() => {
     console.log(posterFile);
   }, [posterFile]);
-// const handleFileChange = async (e) => {
-//   const file = e.target.files[0];
-//   setPosterFile(file);  // 선택된 파일 상태 업데이트
+  // const handleFileChange = async (e) => {
+  //   const file = e.target.files[0];
+  //   setPosterFile(file);  // 선택된 파일 상태 업데이트
 
+  //   if (file) {
+  //     // 미리보기 URL 생성
+  //     const previewUrl = URL.createObjectURL(file);
+  //     setPoster(previewUrl);  // 미리보기 화면에 표시
 
-//   if (file) {
-//     // 미리보기 URL 생성
-//     const previewUrl = URL.createObjectURL(file);
-//     setPoster(previewUrl);  // 미리보기 화면에 표시
+  //     try {
+  //       // FormData 객체 생성하여 파일 추가
+  //       const formData = new FormData();
+  //       formData.append('image', file);
 
-//     try {
-//       // FormData 객체 생성하여 파일 추가
-//       const formData = new FormData();
-//       formData.append('image', file);
+  //       // 포스터 업로드 API 호출 (showId는 실제 값으로 대체)
+  //       const response = await fetch(`${import.meta.env.VITE_API_URL}/shows/${showId}/poster`, {
+  //         method: 'POST',
+  //         body: formData,
+  //       });
 
-//       // 포스터 업로드 API 호출 (showId는 실제 값으로 대체)
-//       const response = await fetch(`${import.meta.env.VITE_API_URL}/shows/${showId}/poster`, {
-//         method: 'POST',
-//         body: formData,
-//       });
+  //       const result = await response.json();
+  //       if (result.success) {
+  //         // 성공적으로 업로드된 포스터의 URL을 반환받음
+  //         const uploadedUrl = result.data[0];  // URL을 반환 받은 후
+  //         addToast("포스터 업로드 성공", "success");
+  //         setPoster(uploadedUrl);  // URL을 상태에 저장
+  //       } else {
+  //         // 업로드 실패 시 에러 처리
+  //         addToast("포스터 업로드 실패", "error");
+  //         throw new Error(`HTTP error! Status: ${response.status}`);
+  //       }
+  //     } catch (error) {
+  //       // 네트워크 오류 등 다른 에러 처리
+  //       addToast("포스터 업로드 중 오류 발생", "error");
+  //       console.error("포스터 업로드 중 오류 발생:", error);
 
-//       const result = await response.json();
-//       if (result.success) {
-//         // 성공적으로 업로드된 포스터의 URL을 반환받음
-//         const uploadedUrl = result.data[0];  // URL을 반환 받은 후
-//         addToast("포스터 업로드 성공", "success");
-//         setPoster(uploadedUrl);  // URL을 상태에 저장
-//       } else {
-//         // 업로드 실패 시 에러 처리
-//         addToast("포스터 업로드 실패", "error");
-//         throw new Error(`HTTP error! Status: ${response.status}`);
-//       }
-//     } catch (error) {
-//       // 네트워크 오류 등 다른 에러 처리
-//       addToast("포스터 업로드 중 오류 발생", "error");
-//       console.error("포스터 업로드 중 오류 발생:", error);
-      
-//     }
-//   }
-};
-
+  //     }
+  //   }
 
   // 이전 단계
   const handlePrevious = () => {
