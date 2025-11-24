@@ -68,10 +68,14 @@ export default function Landing() {
 
         // 텍스트 응답에 따라 추가 처리
         if (textResponse.includes("role updated")) {
+          console.log("gg");
+          if (selectedRole === "MANAGER") {
+            navigate("/write-teaminfo");
+          }
+        } else if (textResponse.includes("role selected")) {
+          console.log("gg");
           if (selectedRole === "USER") {
             navigate(`/home${selectedRole.toLowerCase()}`); //d여기 수정하기
-          } else if (selectedRole === "MANAGER") {
-            navigate("/write-teaminfo");
           }
         }
       } else {

@@ -5,6 +5,13 @@ import { useNavigate } from "react-router-dom";
 export default function LoginRequiredModal({ onClose }) {
   const navigate = useNavigate();
 
+  const handleLoginClick = () => {
+    // 1) 현재 경로 저장
+    localStorage.setItem("redirectUrl", location.pathname);
+    console.log("re", location.pathname);
+    // 2) 로그인 페이지로 이동
+    navigate(`/login`);
+  };
   return (
     <Overlay>
       <ModalBox>
@@ -15,12 +22,7 @@ export default function LoginRequiredModal({ onClose }) {
           <p>예매는 로그인 후 가능합니다.</p>
           <p>지금 가입하고 원하는 공연을 예매해 보세요.</p>
         </div>
-        <div
-          className="btn btn-red"
-          onClick={() =>
-            navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`)
-          }
-        >
+        <div className="btn btn-red" onClick={handleLoginClick}>
           로그인하기{" "}
         </div>
       </ModalBox>

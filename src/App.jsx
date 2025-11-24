@@ -15,6 +15,7 @@ import { ToastProvider } from "./components/Toast/ToastProvider";
 import { AuthProvider, useAuth } from "./pages/Auth/AuthContext";
 import Login from "./pages/Login";
 import HomeUser from "./pages/User/HomeUser";
+import HomeUserLanding from "./pages/User/HomeUserLanding";
 import ViewShowDetail from "./pages/User/ViewShowDetail";
 import ViewTeamInfo from "./pages/User/ViewTeamInfo";
 import MyTicketList from "./pages/User/MyTicketList";
@@ -133,11 +134,12 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
             <Route path="/landing" element={<Landing />} />
+            <Route path=":managerId/homeuser" element={<HomeUser />} />
 
             {/* 보호된 라우트: User */}
             <Route
-              path=":managerId/homeuser"
-              element={<ProtectedRoute element={HomeUser} />}
+              path="/homeuser"
+              element={<ProtectedRoute element={HomeUserLanding} />}
             />
             <Route
               path=":managerId/viewshowdetail/:showId"
