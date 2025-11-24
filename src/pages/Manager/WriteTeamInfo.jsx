@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { AiOutlineClose } from "react-icons/ai";
 import { BsUpload, BsInstagram, BsFacebook } from "react-icons/bs";
 import { BiLogoYoutube } from "react-icons/bi";
 import { IoTicket } from "react-icons/io5";
 import NavbarLanding from "../../components/Navbar/NavbarLanding";
+import { useNavigate } from "react-router-dom";
 
 const WriteTeamInfo = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     managerPicture: "",
     managerName: "",
@@ -18,6 +20,7 @@ const WriteTeamInfo = () => {
       facebook: "",
     },
   });
+  const [url, setUrl] = useState(null);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -36,19 +39,55 @@ const WriteTeamInfo = () => {
     }));
   };
 
-  const handleLogoUpload = (e) => {
+  const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
+    console.log("선택된 파일:", file);
+    if (!file) return;
+
+    try {
+      // 🔥 파일을 FormData에 담기
+      const imgData = new FormData();
+      imgData.append("image", file);
+
+      // ✔ 이미지 미리보기용 Base64
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData((prev) => ({
-          ...prev,
-          managerPicture: reader.result,
-        }));
+        setUrl(reader.result); // UI 미리보기
       };
       reader.readAsDataURL(file);
+      console.log("formData", imgData);
+      // 🔥 S3 업로드 API 호출
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/kakao/manager/image`,
+        {
+          method: "POST",
+          credentials: "include",
+          body: imgData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("파일 업로드 실패");
+      }
+
+      const data = await response.json();
+      console.log("data", data); // 여기서 null 나왔었다면 이제 정상 출력됨.
+
+      // 백엔드가 반환한 S3 URL을 formData에 저장
+      setFormData((prev) => ({
+        ...prev,
+        managerPicture: data.data[0],
+      }));
+    } catch (err) {
+      console.error(err);
+      alert("이미지 업로드 중 오류가 발생했습니다.");
     }
   };
+
+  useEffect(() => {
+    console.log(formData);
+  }, [formData]);
+
   const handleSave = async () => {
     console.log("저장된 데이터:", formData);
     const urlArray = [
@@ -63,7 +102,7 @@ const WriteTeamInfo = () => {
       managerText: formData.managerText,
       managerUrl: urlArray, // 배열로 넣음
     };
-
+    console.log(payload);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/auth/kakao/manager`,
@@ -81,9 +120,9 @@ const WriteTeamInfo = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log("저장 성공:", data);
-
+      // const data = await response.json();
+      console.log("저장 성공:", response);
+      navigate("/homemanager", { replace: true });
       // 저장 후 필요한 후속 처리 (예: 페이지 이동, 상태 업데이트 등)
     } catch (error) {
       console.error("저장 실패:", error);
