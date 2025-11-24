@@ -1,40 +1,203 @@
-import React from "react";
-import NavbarManager from "../../../components/Navbar/NavbarManager";
-import RegisterShowNavbar from "./RegisterShowNavbar";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../../../components/Toast/useToast";
 import { useState, useEffect } from "react";
 import { BsUpload } from "react-icons/bs";
 import { AiOutlineCalendar } from "react-icons/ai";
 import { AiOutlineClose } from "react-icons/ai";
+import { useOutletContext } from "react-router-dom";
+
+const bankOptions = [
+  { id: 1, name: "국민은행", code: "KB" },
+  { id: 2, name: "기업은행", code: "IBK" },
+  { id: 3, name: "농협은행", code: "NH" },
+  { id: 4, name: "신한은행", code: "SHINHAN" },
+  { id: 5, name: "하나은행", code: "HANA" },
+  { id: 6, name: "우리은행", code: "WOORI" },
+  { id: 7, name: "우체국", code: "EPOST" },
+  { id: 8, name: "카카오뱅크", code: "KAKAO" },
+  { id: 9, name: "토스뱅크", code: "TOSS" },
+];
 
 const RegisterShowStep1 = ({ viewer = false }) => {
+  const { setIsDirty } = useOutletContext();
+  const handleAnyInput = () => {
+    setIsDirty(true);
+  };
   const navigate = useNavigate();
+  const { showId } = useParams();
+  console.log(showId);
   const { addToast } = useToast();
 
   // 대표 포스터
+  // 공연 회차
+  const today = () => {
+    const now = new Date(); // 로컬 시간 기준
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // 월은 0~11
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`; // yyyy-mm-dd
+  };
+  // (A) 기본 Payload 초기 구조
+  const getBasePayload = () => ({
+    title: "",
+    poster: "",
+    showTimes: [
+      {
+        showStart: "",
+        showEnd: "",
+      },
+    ],
+    bookStart: "",
+    bookEnd: "",
+    ticketOptions: [{ name: "", description: "", price: "", amount: 100 }],
+    bankMaster: "",
+    bankName: "",
+    bankAccount: "",
+    detailImages: [],
+    detailText: "",
+    locationId: 3,
+    locationName: "메리홀",
+    SaleMethod: "SCHEDULING",
+    seatCount: 450,
+    // locationId: null,
+    // locationName: "",
+    // SaleMethod: "SELECT_BY_USER",
+    // seatCount: 0,
+    showMessage: {
+      payGuide: "",
+      showGuide: "",
+      reviewRequest: "",
+      reviewUrl: "",
+    },
+    status: "DRAFT",
+  });
+
+  // (B) 공용 createPayload 함수 (Step1~5 공통 사용)
+  const createPayload = (currentPayload) => {
+    const base = getBasePayload();
+    const saved = JSON.parse(localStorage.getItem("createShowPayload") || "{}");
+    let merged = deepMergeWithSkipEmpty(base, saved);
+    merged = deepMergeWithSkipEmpty(merged, currentPayload); // current가 최종 우선
+    return merged;
+  };
+
+  // const createPayload = (currentPayload) => {
+  //   // 1) 기본값
+  //   const base = getBasePayload();
+
+  //   // 2) 기존 저장된 값
+  //   const saved = JSON.parse(localStorage.getItem("createShowPayload") || "{}");
+  //   let merged = deepMergeWithSkipEmpty(base, saved);
+  //   merged = deepMergeWithSkipEmpty(merged, currentPayload); // current가 최종 우선
+
+  //   // 3) 중첩 병합(showMessage 안전하게 처리)
+  //   // const merged = {
+  //   //   ...base,
+  //   //   ...saved,
+  //   //   ...currentPayload, // 이번 스텝 값이 최종 우선
+  //   //   showMessage: {
+  //   //     ...base.showMessage,
+  //   //     ...(saved.showMessage || {}),
+  //   //     ...(currentPayload.showMessage || {}),
+  //   //   },
+  //   return merged;
+  // };
+
+  // const createPayload = (current) => {
+  //   const base = getBasePayload();
+  //   const saved = JSON.parse(localStorage.getItem("createShowPayload") || "{}");
+
+  //   let merged = deepMergeWithSkipEmpty(base, saved);
+  //   merged = deepMergeWithSkipEmpty(merged, current); // current가 최종 우선
+
+  //   return merged;
+  // };
+
+  const [formData, setFormData] = useState(getBasePayload());
+  useEffect(() => {
+    const saved = localStorage.getItem("createShowPayload");
+    if (!saved) return;
+    console.log("save", saved);
+    try {
+      const parsed = JSON.parse(saved);
+
+      setFormData((prev) => ({
+        ...prev,
+        ...parsed,
+      }));
+
+      // UI 전용 state도 필요하면 여기에 채우기
+      // 단, formData와 UI 필드 이름이 다르니까 직접 매핑
+      if (parsed.bookStart) {
+        const [date, time] = parsed.bookStart.split("T");
+        setBookStartDate(date);
+        setBookStartTime(time?.slice(0, 5) || "00:00");
+      }
+
+      if (parsed.showTimes?.length > 0) {
+        const converted = parsed.showTimes.map((t) => {
+          const [startDate, startTime] = t.showStart.split("T");
+          const [endDate, endTime] = t.showEnd.split("T");
+          return {
+            showStartDate: startDate,
+            showStartTime: startTime?.slice(0, 5),
+            showEndTime: endTime?.slice(0, 5),
+          };
+        });
+
+        setShowTimes(converted);
+      }
+    } catch (e) {
+      console.error("JSON parse error:", e);
+    }
+  }, []);
+
   const [posterFile, setPosterFile] = useState(null); // 파일
   const [poster, setPoster] = useState(null); // 미리보기 URL
 
   // 공연명
   const [title, setTitle] = useState("");
 
-  // 공연 회차
+  // 공연 날짜/회차
   const [showTimes, setShowTimes] = useState([
     {
-      showStartDate: "",
-      showStartTime: "",
-      showEndTime: "",
+      showStartDate: today(), // 기본 오늘 날짜
+      showStartTime: "00:00",
+      showEndTime: "00:00",
     },
   ]);
+  // 예매 시작(bookStart)
+  const [bookStartDate, setBookStartDate] = useState(today());
+  const [bookStartTime, setBookStartTime] = useState(today());
 
+  // const addShowTime = () => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     showTimes: [
+  //       ...prev.showTimes,
+  //       {
+  //         showStartDate: today(), // 오늘 날짜
+  //         showStartTime: "00:00",
+  //         showEndTime: "00:00",
+  //       },
+  //     ],
+  //   }));
+  // };
   const addShowTime = () => {
     setShowTimes([
       ...showTimes,
-      { showStartDate: "", showStartTime: "", showEndTime: "" },
+      {
+        showStartDate: today(),
+        showStartTime: "00:00",
+        showEndTime: "00:00",
+      },
     ]);
   };
+
+  useEffect(() => {
+    console.log(showTimes);
+  }, [showTimes]);
 
   const updateShowTime = (index, field, value) => {
     const updated = [...showTimes];
@@ -42,13 +205,48 @@ const RegisterShowStep1 = ({ viewer = false }) => {
     setShowTimes(updated);
   };
 
+  // const updateShowTime = (index, field, value) => {
+  // setFormData((prev) => {
+  //   const updated = [...prev.showTimes];
+  //   updated[index] = {
+  //     ...updated[index],
+  //     [field]: value,
+  //   };
+  //   return {
+  //     ...prev,
+  //     showTimes: updated,
+  //   };
+  // });
+  // setFormData((prev) => {
+  //   const newShowTimes = [...prev.showTimes];
+  //   const target = newShowTimes[index];
+  //   // 날짜 + 시간 합쳐서 저장
+  //   if (field === "showStartDate" || field === "showStartTime") {
+  //     const date = field === "showStartDate" ? value : target.showStartDate;
+  //     const time = field === "showStartTime" ? value : target.showStartTime;
+  //     target.showStartDate = date;
+  //     target.showStartTime = time;
+  //     if (date && time) target.showStart = `${date}T${time}:00`;
+  //   }
+  //   if (field === "showEndTime") {
+  //     const time = value;
+  //     target.showEndTime = time;
+  //     if (target.showStartDate)
+  //       target.showEnd = `${target.showStartDate}T${time}:00`;
+  //   }
+  //   return { ...prev, showTimes: newShowTimes };
+  // });
+  // };
+
+  // const removeShowTime = (index) => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     showTimes: prev.showTimes.filter((_, i) => i !== index),
+  //   }));
+  // };
   const removeShowTime = (index) => {
     setShowTimes(showTimes.filter((_, i) => i !== index));
   };
-
-  // 예매 시작(bookStart)
-  const [bookStartDate, setBookStartDate] = useState("");
-  const [bookStartTime, setBookStartTime] = useState("");
 
   // 시간 리스트 (30분 간격)
   const timeOptions = [];
@@ -61,31 +259,42 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   }
 
   // 티켓 옵션
-  const [ticketOptions, setTicketOptions] = useState([
-    { name: "", description: "", price: "" },
-  ]);
-
   const addTicketOption = () => {
-    setTicketOptions([
-      ...ticketOptions,
-      { name: "", description: "", price: "" },
-    ]);
+    setFormData((prev) => ({
+      ...prev,
+      ticketOptions: [
+        ...prev.ticketOptions,
+        {
+          name: "",
+          description: "",
+          price: "",
+          amount: 10,
+        },
+      ],
+    }));
+  };
+  const updateTicketOption = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.ticketOptions];
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+      return {
+        ...prev,
+        ticketOptions: updated,
+      };
+    });
   };
 
-  const updateTicketOption = (idx, field, value) => {
-    const updated = [...ticketOptions];
-    updated[idx][field] = value;
-    setTicketOptions(updated);
-  };
-
-  const removeTicketOption = (idx) => {
-    setTicketOptions(ticketOptions.filter((_, i) => i !== idx));
+  const removeTicketOption = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      ticketOptions: prev.ticketOptions.filter((_, i) => i !== index),
+    }));
   };
 
   // 입금 정보
-  const [bankMaster, setBankMaster] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [bankAccount, setBankAccount] = useState("");
 
   // 오류
   const [titleError, setTitleError] = useState(false);
@@ -95,15 +304,51 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   const [bookStartTimeError, setBookStartTimeError] = useState(false);
 
   // 포스터 업로드
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    setPosterFile(file);
+    console.log("선택된 파일:", file);
+    if (!file) return;
 
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setPoster(previewUrl);
+    try {
+      // 🔥 파일을 FormData에 담기
+      const imgData = new FormData();
+      imgData.append("poster", file);
+
+      // ✔ 이미지 미리보기용 Base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPoster(reader.result);
+      };
+      reader.readAsDataURL(file);
+      console.log("formData", imgData);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/shows/${showId}/poster`,
+        {
+          method: "POST",
+          credentials: "include",
+          body: imgData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("파일 업로드 실패");
+      }
+
+      const data = await response.json();
+      console.log("data", data); // 여기서 null 나왔었다면 이제 정상 출력됨.
+
+      // 백엔드가 반환한 S3 URL을 formData에 저장
+      setPosterFile(data.data); // 백엔드 반환 구조에 맞게 사용
+      setFormData((prev) => ({ ...prev, poster: data.data }));
+    } catch (err) {
+      console.error(err);
+      alert("이미지 업로드 중 오류가 발생했습니다.");
     }
   };
+  useEffect(() => {
+    console.log(posterFile);
+  }, [posterFile]);
 
   // 이전 단계
   const handlePrevious = () => {
@@ -114,7 +359,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   const validateFields = () => {
     let isValid = true;
 
-    if (title.trim() === "") {
+    if (formData.title.trim() === "") {
       setTitleError(true);
       isValid = false;
     }
@@ -144,16 +389,162 @@ const RegisterShowStep1 = ({ viewer = false }) => {
     return isValid;
   };
 
-  // 임시 저장
-  const handleTempSave = () => {
+  // const createpayload = () => {
+  //   const savedPayload = JSON.parse(
+  //     localStorage.getItem("createShowPayload") || "{}"
+  //   );
+
+  //   const formattedShowTimes = showTimes.map((t) => ({
+  //     showStart: `${t.showStartDate}T${t.showStartTime}:00`,
+  //     showEnd: `${t.showStartDate}T${t.showEndTime || "23:59"}:00`,
+  //   }));
+
+  //   const formattedBookStart = `${bookStartDate}T${bookStartTime}:00`;
+  //   const lastShowDate = showTimes[showTimes.length - 1].showStartDate;
+  //   const formattedBookEnd = `${lastShowDate}T23:59:00`;
+  //   // API 호출 전에 bankName을 코드로 변환
+  // const basePayload = {
+  //   title,
+  //   poster: posterFile,
+  //   showTimes: formattedShowTimes,
+  //   bookStart: formattedBookStart,
+  //   bookEnd: formattedBookEnd,
+  //   ticketOptions: ticketOptions.map((opt) => ({
+  //     name: opt.name,
+  //     description: opt.description,
+  //     price: Number(opt.price),
+  //     amount: Number(opt.amount || 0),
+  //   })),
+  //   bankMaster,
+  //   bankName,
+  //   bankAccount,
+  //   detailImages: [],
+  //   detailText:
+  //     "덴마크 왕자 햄릿의 비극을 그린 창작 뮤지컬. 국내 최정상 배우들이 참여하며 10월 단 2주간 공연됩니다.",
+  //   locationId: 3,
+  //   locationName: "메리홀",
+  //   SaleMethod: "SCHEDULING",
+  //   seatCount: 450,
+  //   showMessage: {
+  //     payGuide: "아래 계좌로 입금 부탁드립니다...",
+  //     //         bookConfirm: `보낼 메시지: [관람일 D-1 안내]
+  //     // {username}, 관람일이 바로 내일이에요!
+
+  //     // 공연명: {show_name}
+  //     // 일시: {show_date_time}
+  //     // 예매 매수: {예매 매수}
+  //     // 관람 장소: {공연장소}
+
+  //     // 안전하고 즐거운 관람을 위해 입장시간에 맞춰 와주세요!`,
+  //     showGuide: "공연은 내일 7시에 시작됩니다...",
+  //     reviewRequest: "공연은 어떠셨나요?",
+  //     reviewUrl: "https://tikittta.com/review/hamlet-2025",
+  //   },
+  //   status: "DRAFT",
+  // };
+  //   // ⭐ savedPayload가 있는 경우 basePayload에 덮어쓰기
+  //   const finalPayload = {
+  //     ...basePayload,
+  //     ...savedPayload, // 1차: 최상위 값 덮어쓰기
+  //     showMessage: {
+  //       ...basePayload.showMessage,
+  //       ...(savedPayload.showMessage || {}), // 2차: showMessage 내부 덮어쓰기
+  //     },
+  //   };
+
+  //   console.log(finalPayload);
+  //   return finalPayload;
+  // };
+  const deepMergeWithSkipEmpty = (base, override) => {
+    const result = { ...base };
+
+    for (const key in override) {
+      const value = override[key];
+
+      // 빈 값이면 skip
+      if (value === "" || value === null || value === undefined) {
+        continue;
+      }
+
+      // object면 재귀 병합
+      if (
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        value !== null
+      ) {
+        result[key] = deepMergeWithSkipEmpty(base[key] || {}, value);
+      } else {
+        // 값이 있는 경우만 덮어쓰기
+        result[key] = value;
+      }
+    }
+
+    return result;
+  };
+
+  const handleTempSave = async () => {
     if (!validateFields()) {
       addToast("필수 항목을 입력해주세요!", "error");
       return;
     }
+    // 🔥 showTimes 변환 (저장 시에만)
+    const formattedShowTimes = showTimes.map((t) => ({
+      showStart: `${t.showStartDate}T${t.showStartTime}:00`,
+      showEnd: `${t.showStartDate}T${t.showEndTime || "23:59"}:00`,
+    }));
 
-    const formData = { poster };
-    localStorage.setItem("registerShowStep1", JSON.stringify(formData));
-    addToast("임시 저장되었습니다!", "success");
+    // 🔥 bookStart/bookEnd도 저장 시 변환
+    const bookStart = `${bookStartDate}T${bookStartTime}:00`;
+    const lastShowDate = showTimes[showTimes.length - 1].showStartDate;
+    const bookEnd = `${lastShowDate}T23:59:00`;
+
+    setFormData((prev) => ({
+      ...prev,
+      showTimes: formattedShowTimes,
+      bookStart,
+      bookEnd,
+    }));
+
+    // ③ 저장용 currentPayload는 setFormData 기다릴 필요 없이 직접 만든다
+
+    const currentPayload = {
+      ...formData, // 현재 UI에서 입력된 값 모두 포함
+      showTimes: formattedShowTimes,
+      bookStart,
+      bookEnd,
+    };
+    // // ④ createPayload에 넣어 최종 payload 생성
+    const finalPayload = createPayload(currentPayload);
+
+    // ⑤ localStorage에 먼저 저장
+    console.log("final", finalPayload);
+    localStorage.setItem("createShowPayload", JSON.stringify(finalPayload));
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(finalPayload),
+          credentials: "include",
+        }
+      );
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log("등록 성공:", result);
+        addToast("임시 저장되었습니다!", "success");
+      } else {
+        console.error("등록 실패:", result);
+        alert(result.message || "등록 중 오류가 발생했습니다.");
+      }
+    } catch (error) {
+      console.error("API 요청 실패:", error);
+      alert("서버 연결 실패");
+    }
   };
 
   // 다음
@@ -162,15 +553,51 @@ const RegisterShowStep1 = ({ viewer = false }) => {
       addToast("필수 항목을 입력해주세요!", "error");
       return;
     }
+    // 🔥 showTimes 변환 (저장 시에만)
+    const formattedShowTimes = showTimes.map((t) => ({
+      showStart: `${t.showStartDate}T${t.showStartTime}:00`,
+      showEnd: `${t.showStartDate}T${t.showEndTime || "23:59"}:00`,
+    }));
 
-    navigate("/register-show/step2");
+    // 🔥 bookStart/bookEnd도 저장 시 변환
+    const bookStart = `${bookStartDate}T${bookStartTime}:00`;
+    const lastShowDate = showTimes[showTimes.length - 1].showStartDate;
+    const bookEnd = `${lastShowDate}T23:59:00`;
+
+    setFormData((prev) => ({
+      ...prev,
+      showTimes: formattedShowTimes,
+      bookStart,
+      bookEnd,
+    }));
+
+    // ③ 저장용 currentPayload는 setFormData 기다릴 필요 없이 직접 만든다
+
+    const currentPayload = {
+      ...formData, // 현재 UI에서 입력된 값 모두 포함
+      showTimes: formattedShowTimes,
+      bookStart,
+      bookEnd,
+    };
+    // // ④ createPayload에 넣어 최종 payload 생성
+    const finalPayload = createPayload(currentPayload);
+
+    // ⑤ localStorage에 먼저 저장
+    console.log("final", finalPayload);
+    localStorage.setItem("createShowPayload", JSON.stringify(finalPayload));
+    navigate(`/register-show/${showId}/step2`);
   };
 
   // 로컬 저장 로드
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("registerShowStep1"));
+    const saved = JSON.parse(localStorage.getItem("mainposter"));
     if (saved?.poster) {
       setPoster(saved.poster);
+    }
+    const savedData = JSON.parse(localStorage.getItem("createShowPayload"));
+    if (savedData?.poster) {
+      setPoster(savedData.poster);
+      setPosterFile(savedData.poster);
     }
   }, []);
 
@@ -181,7 +608,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   return (
     <>
       {/* <NavbarManager /> */}
-      <Container>
+      <Container onChange={handleAnyInput} onInput={handleAnyInput}>
         <MainContent>
           {/* <RegisterShowNavbar currentStep={1} /> */}
 
@@ -193,7 +620,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
               >
                 {poster ? (
                   <>
-                    <img src={poster} alt="포스터 미리보기" />
+                    <img src={formData.poster} alt="포스터 미리보기" />
                     <HoverOverlay>포스터 변경하기</HoverOverlay>
                   </>
                 ) : (
@@ -217,12 +644,14 @@ const RegisterShowStep1 = ({ viewer = false }) => {
               <Q>
                 <Name>공연명</Name>
                 <Input
-                  value={title}
+                  value={formData.title}
                   onChange={(e) => {
-                    setTitle(e.target.value);
+                    setFormData((prev) => ({ ...prev, title: e.target.value }));
                     if (e.target.value.trim() !== "") setTitleError(false);
                   }}
-                  placeholder="제4회 정기공연"
+                  placeholder={
+                    formData.title ? formData.title : "제4회 정기공연"
+                  }
                 />
                 {titleError && <ErrorMessage>*필수 항목입니다.</ErrorMessage>}
               </Q>
@@ -243,7 +672,11 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                           type="date"
                           value={t.showStartDate}
                           onChange={(e) => {
-                            updateShowTime(idx, "showStartDate", e.target.value);
+                            updateShowTime(
+                              idx,
+                              "showStartDate",
+                              e.target.value
+                            );
                             if (e.target.value.trim() !== "")
                               setShowDateError(false);
                           }}
@@ -254,7 +687,6 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                         <ErrorMessage>*필수 항목입니다.</ErrorMessage>
                       )}
                     </Column>
-
                     {/* 시작 시간 */}
                     <Column>
                       <TimeSelect
@@ -305,7 +737,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                       )}
                     </Column>
 
-                    {showTimes.length > 1 && (
+                    {formData.showTimes.length > 1 && (
                       <DeleteIcon onClick={() => removeShowTime(idx)} />
                     )}
                   </DateRow>
@@ -373,7 +805,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                   <AddButton onClick={addTicketOption}>추가하기</AddButton>
                 </Name>
 
-                {ticketOptions.map((opt, idx) => (
+                {formData.ticketOptions.map((opt, idx) => (
                   <TicketContent key={idx}>
                     <Input
                       placeholder="티켓 옵션 이름 (일반예매 / 학생예매)"
@@ -402,7 +834,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                       />
                       <span>원</span>
 
-                      {ticketOptions.length > 1 && (
+                      {formData.ticketOptions.length > 1 && (
                         <DeleteIcon onClick={() => removeTicketOption(idx)} />
                       )}
                     </PriceRow>
@@ -415,31 +847,45 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                 <Name>입금주</Name>
                 <Input
                   placeholder="홍길동"
-                  value={bankMaster}
-                  onChange={(e) => setBankMaster(e.target.value)}
+                  value={formData.bankMaster}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      bankMaster: e.target.value,
+                    }))
+                  }
                 />
 
                 <Name>입금 계좌</Name>
                 <AccountRow>
                   <BankSelect
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
+                    value={formData.bankName}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        bankName: e.target.value,
+                      }))
+                    }
                   >
                     <option value="" disabled>
                       은행명
                     </option>
-                    <option>우리</option>
-                    <option>신한</option>
-                    <option>국민</option>
-                    <option>하나</option>
-                    <option>카카오뱅크</option>
-                    <option>토스뱅크</option>
+                    {bankOptions.map((bank) => (
+                      <option key={bank.id} value={bank.code}>
+                        {bank.name}
+                      </option>
+                    ))}
                   </BankSelect>
 
                   <Input
                     placeholder="0000000000000"
-                    value={bankAccount}
-                    onChange={(e) => setBankAccount(e.target.value)}
+                    value={formData.bankAccount}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        bankAccount: e.target.value,
+                      }))
+                    }
                   />
                 </AccountRow>
               </Q>
@@ -457,23 +903,12 @@ const RegisterShowStep1 = ({ viewer = false }) => {
             </RightButtonGroup>
           </Footer>
         )}
-//         <Footer>
-//           <PrevButton onClick={handlePrevious}>←이전</PrevButton>
-
-//           <RightButtonGroup>
-//             <TempSaveButton onClick={handleTempSave}>
-//               임시저장
-//             </TempSaveButton>
-//             <NextButton onClick={handleNext}>다음→</NextButton>
-//           </RightButtonGroup>
-//         </Footer>
       </Container>
     </>
   );
 };
 
 export default RegisterShowStep1;
-
 
 const Container = styled.div`
   width: 1440px;

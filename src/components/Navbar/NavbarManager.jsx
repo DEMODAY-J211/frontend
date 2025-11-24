@@ -6,29 +6,40 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/tikitta_logo.png";
 import { AuthContext } from "../../pages/Auth/AuthContext";
 
-const NavbarManager = () => {
+const NavbarManager = ({ onProtectedNavigate }) => {
   const navigate = useNavigate();
   const [login, setLogin] = useState(true); //true: 로그인 상태 , false: 로그아웃 상태
 
   const { logout } = useContext(AuthContext);
 
+  const handleClick = (path) => {
+    if (onProtectedNavigate) {
+      onProtectedNavigate(path); // RegisterShow 모달 로직 실행
+    } else {
+      navigate(path); // 일반 페이지
+    }
+  };
   return (
     <Navbar>
       <NavbarLeft>
         <Logo
-          onClick={() => navigate("/homemanager")}
+          onClick={() => handleClick("/homemanager")}
           src={logo}
           alt="로고"
         ></Logo>
-        <NavItem onClick={() => navigate("/homemanager")}>메인 홈</NavItem>
-        <NavItem onClick={() => navigate("/manageshow")}>내 공연 관리</NavItem>
-        <NavItem onClick={() => navigate("/qrmanager")}>QR 입장 확인</NavItem>
+        <NavItem onClick={() => handleClick("/homemanager")}>메인 홈</NavItem>
+        <NavItem onClick={() => handleClick("/manageshow")}>
+          내 공연 관리
+        </NavItem>
+        <NavItem onClick={() => handleClick("/qrmanager")}>
+          QR 입장 확인
+        </NavItem>
       </NavbarLeft>
       <NavbarRight>
         {login === true ? (
           <Button onClick={logout}>로그아웃</Button>
         ) : (
-          <Button onClick={() => navigate("/login")}>로그인</Button>
+          <Button onClick={() => handleClick("/login")}>로그인</Button>
         )}
       </NavbarRight>
     </Navbar>

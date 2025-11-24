@@ -9,6 +9,7 @@ import landing_manager from "../assets/landing_manager.png";
 import NavbarLanding from "../components/Navbar/NavbarLanding";
 
 export default function Landing() {
+  const { setUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -30,17 +31,6 @@ export default function Landing() {
           credentials: "include", // 쿠키 기반 세션 유지용
         }
       );
-      // const response = await fetch(
-      //   `${import.meta.env.VITE_API_URL}/auth/kakao/select-role
-      // ?role=${selectedRole}`,
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     credentials: "include", // 쿠키 기반 세션 유지용
-      //   }
-      // );
 
       // 응답 상태 코드가 실패일 경우
       if (!response.ok) {
@@ -53,13 +43,6 @@ export default function Landing() {
       const contentType = response.headers.get("Content-Type");
       console.log("응답 Content-Type:", contentType); // 응답 헤더 로그 추가
 
-      // if (contentType && contentType.includes("application/json")) {
-      //   // JSON 형식이라면 파싱
-      //   const data = await response.json();
-      //   console.log("✅ 역할 선택 성공:", data);
-
-      //   // 역할에 따른 네비게이션
-      // } else
       if (contentType && contentType.includes("text/plain")) {
         // 응답이 텍스트 형식일 경우 처리
         const textResponse = await response.text();
@@ -70,12 +53,14 @@ export default function Landing() {
         if (textResponse.includes("role updated")) {
           console.log("gg");
           if (selectedRole === "MANAGER") {
-            navigate("/write-teaminfo");
+            setUser({ type: "manager" });
+            navigate("/write-teaminfo", { replace: true });
           }
         } else if (textResponse.includes("role selected")) {
           console.log("gg");
           if (selectedRole === "USER") {
-            navigate(`/home${selectedRole.toLowerCase()}`); //d여기 수정하기
+            setUser({ type: "user" });
+            navigate("/homeuser", { replace: true });
           }
         }
       } else {

@@ -199,7 +199,7 @@ const App = () => {
               path="/register-show"
               element={<ProtectedRoute element={RegisterShow} />}
             /> */}
-            <Route path="/register-show" element={<RegisterShow />}>
+            <Route path="/register-show/:showId" element={<RegisterShow />}>
               <Route path="step1" element={<RegisterShowStep1 />} />
               <Route path="step2" element={<RegisterShowStep2 />} />
               <Route path="step3" element={<RegisterShowStep3 />} />

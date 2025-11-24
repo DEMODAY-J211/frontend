@@ -1,12 +1,16 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Auth/AuthContext";
 
 const HomeUserLanding = () => {
   const navigate = useNavigate();
+  const { user, setUser } = useAuth();
 
   useEffect(() => {
     const redirectUrl = localStorage.getItem("redirectUrl");
-
+    if (!user || user.type !== "user") {
+      setUser({ type: "user" }); // 안전하게 user 상태 재설정
+    }
     if (redirectUrl) {
       navigate(redirectUrl);
     } else {

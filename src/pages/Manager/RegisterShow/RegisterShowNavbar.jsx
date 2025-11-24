@@ -1,13 +1,14 @@
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { RiArrowRightSLine } from "react-icons/ri";
 
 const RegisterShowNavbar = ({ currentStep, setCurrentStep }) => {
   const navigate = useNavigate();
+  const { showId } = useParams();
   const handleStepClick = (step) => {
     setCurrentStep(step); // ① 상태 업데이트
-    // navigate(`/register-show/step${step}`); // ② URL 이동
+    navigate(`/register-show/${showId}/step${step}`); // ② URL 이동
   };
   return (
     <>

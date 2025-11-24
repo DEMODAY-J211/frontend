@@ -3,6 +3,7 @@ import NavbarManager from "../../components/Navbar/NavbarManager";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuth } from "../Auth/AuthContext";
 
 import showimg from "../../assets/homemanager/show_icon.png";
 import linkimg from "../../assets/homemanager/link.png";
@@ -16,7 +17,13 @@ import EditTeamInfo from "./EditTeamInfo";
 
 const HomeManager = () => {
   const navigate = useNavigate();
-
+  const { user, setUser } = useAuth();
+  useEffect(() => {
+    if (!user || user.type !== "manager") {
+      setUser({ type: "manager" }); // 안전하게 manager 상태 재설정
+    }
+  }, []);
+  const [showId, setShowId] = useState(null);
   const { addToast } = useToast(); // 훅으로 토스트 가져오기
   const [isEditTeamModalOpen, setIsEditTeamModalOpen] = useState(false);
   const [registerShowModal, setRegisterShowModal] = useState(null); // null, 'first', 'continue', 'duplicate', 'temp', 'tempDone'
@@ -83,7 +90,13 @@ const HomeManager = () => {
   };
 
   const handleRegisterShowClick = () => {
-    // 즐겨찾기 공연장이 없으면 'first' 모달, 있으면 'duplicate' 모달
+    const draftId = localStorage.getItem("draft_showId");
+
+    if (draftId) {
+      setRegisterShowModal("temp");
+      setShowId(draftId);
+      return;
+    } // 즐겨찾기 공연장이 없으면 'first' 모달, 있으면 'duplicate' 모달
     if (!hasVenues) {
       setRegisterShowModal("first"); // "등록된 공연장이 없습니다"
     } else {
@@ -92,40 +105,90 @@ const HomeManager = () => {
   };
 
   const handleCloseRegisterModal = () => {
+    const draftId = localStorage.getItem("draft_showId");
+    if (draftId) {
+      setShowId(draftId);
+      // setRegisterShowModal("temp");
+    } else {
+      // 값이 없으면 그냥 닫기
+      setRegisterShowModal(false);
+    }
     setRegisterShowModal(null);
   };
-
-  const onClickRegisterShow = () => {
-    const fetchRegisterShow = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/manager/shows`,
-          {
-            method: "POST",
-            credentials: "include",
-          }
-        );
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log("Register Show :", result);
-
-          // data가 배열이고 길이가 0보다 크면 공연장이 있는 것
-          if (result.success) {
-            console.log(result.message);
-            console.log(result.data);
-            const showId = result.data.showId;
-            navigate(`/register-show/${showId}/step1`);
-          }
-        } else {
-          console.error("Failed to fetch shows:", response.status);
+  const fetchRegisterShow = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows`,
+        {
+          method: "POST",
+          credentials: "include",
         }
-      } catch (error) {
-        console.error("Error fetching shows:", error);
-      }
-    };
+      );
 
-    fetchRegisterShow();
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Register Show :", result);
+
+        // data가 배열이고 길이가 0보다 크면 공연장이 있는 것
+        if (result.success) {
+          console.log(result.message);
+          console.log(result.data);
+          setShowId(result.data.showId);
+          localStorage.setItem("draft_showId", result.data.showId);
+          navigate(`/register-show/${result.data.showId}/step1`, {
+            replace: true,
+          }); // 뒤로 가기 방지
+        }
+      } else {
+        console.error("Failed to fetch shows:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching shows:", error);
+    }
+  };
+
+  const fetchDeleteShow = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows/draft`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Register Show :", result);
+
+        // data가 배열이고 길이가 0보다 크면 공연장이 있는 것
+        if (result.success) {
+          console.log(result.message);
+          console.log(result.data);
+        }
+      } else {
+        console.error("Failed to Delete draft shows:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching  Delete draft shows:", error);
+    }
+  };
+
+  const handleRegisterNewShow = async () => {
+    const draftId = localStorage.getItem("draft_showId");
+
+    try {
+      // 임시저장된 공연이 있는 경우 → 삭제 먼저 실행
+      if (draftId) {
+        await fetchDeleteShow();
+        localStorage.removeItem("draft_showId");
+      }
+
+      // 항상 새 공연 생성
+      await fetchRegisterShow();
+    } catch (error) {
+      console.error("Error in handleRegisterNewShow:", error);
+    }
   };
 
   return (
@@ -168,7 +231,7 @@ const HomeManager = () => {
               이어서 공연도 등록하시겠습니까?
             </ModalTitle>
             <ModalButtonGroup>
-              <ModalButton $primary onClick={onClickRegisterShow}>
+              <ModalButton $primary onClick={handleRegisterNewShow}>
                 네, 등록할래요
               </ModalButton>
               <ModalButton onClick={handleCloseRegisterModal}>
@@ -194,7 +257,7 @@ const HomeManager = () => {
               <ModalButton onClick={() => navigate("/registeredvenues")}>
                 공연장 등록하기
               </ModalButton>
-              <ModalButton $primary onClick={onClickRegisterShow}>
+              <ModalButton $primary onClick={handleRegisterNewShow}>
                 이미 등록했어요
               </ModalButton>
             </ModalButtonGroup>
@@ -218,11 +281,11 @@ const HomeManager = () => {
             <ModalButtonGroup>
               <ModalButton
                 $primary
-                onClick={() => navigate("/register-show/step1?mode=continue")}
+                onClick={() => navigate(`/register-show/${showId}/step1`)}
               >
                 이어서 등록하기
               </ModalButton>
-              <ModalButton onClick={onClickRegisterShow}>
+              <ModalButton onClick={handleRegisterNewShow}>
                 새로운 공연 등록하기
               </ModalButton>
             </ModalButtonGroup>
@@ -230,7 +293,7 @@ const HomeManager = () => {
         </ModalOverlay>
       )}
 
-      {registerShowModal === "tempDone" && (
+      {/* {registerShowModal === "tempDone" && (
         <ModalOverlay onClick={handleCloseRegisterModal}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <CloseButton onClick={handleCloseRegisterModal}>×</CloseButton>
@@ -247,7 +310,7 @@ const HomeManager = () => {
               <ModalButton
                 $primary
                 onClick={() => {
-                  /* 임시저장 로직 */
+                  //  임시저장 로직
                 }}
               >
                 임시 저장하기
@@ -258,7 +321,7 @@ const HomeManager = () => {
             </ModalButtonGroup>
           </ModalContent>
         </ModalOverlay>
-      )}
+      )} */}
 
       <ButtonGridTop>
         <FarLeft>
