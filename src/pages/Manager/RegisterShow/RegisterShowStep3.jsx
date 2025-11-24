@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { RiArrowRightSLine, RiInformationLine } from "react-icons/ri";
 import { GrCheckbox, GrCheckboxSelected } from "react-icons/gr";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
@@ -11,6 +11,7 @@ import RegisterShowNavbar from "./RegisterShowNavbar";
 
 const RegisterShowStep3 = ({ viewer = false }) => {
   const navigate = useNavigate();
+  const { showId } = useParams();
   const { addToast } = useToast();
 
   // 상태 관리
@@ -21,6 +22,7 @@ const RegisterShowStep3 = ({ viewer = false }) => {
   const [excludedSeats, setExcludedSeats] = useState([]); // 제외된 좌석
   const [totalAvailableSeats, setTotalAvailableSeats] = useState(null); // 총 판매 가능 좌석
   const [updatedSeatCount, setUpdatedSeatCount] = useState(0); // 제외/VIP 좌석 수
+  const [seatMapData, setSeatMapData] = useState(null); // 좌석표 데이터 (API 전송용)
 
   // 공연 장소 목록 (API에서 가져옴)
   const [venues, setVenues] = useState([]);
@@ -83,10 +85,35 @@ const RegisterShowStep3 = ({ viewer = false }) => {
   // 공연 장소 선택 핸들러 (단일 선택)
   const handleVenueSelect = (venue) => {
     setSelectedVenue(venue);
+
+    // 공연장이 STANDING 타입이면 자동으로 스탠딩석 선택하고 변경 불가
+    if (venue.type === "STANDING") {
+      setSelectedMethod("스탠딩석");
+      // 좌석 데이터 초기화
+      setSeatMapData(null);
+      setExcludedSeats([]);
+      setTotalAvailableSeats(null);
+      setUpdatedSeatCount(0);
+    } else {
+      // STANDING이 아닌 경우 선택 초기화
+      setSelectedMethod(null);
+    }
   };
 
   // 좌석 판매 방법 선택 핸들러 (단일 선택)
   const handleMethodSelect = (method) => {
+    // STANDING 타입 공연장은 스탠딩석만 선택 가능 (변경 불가)
+    if (selectedVenue?.type === "STANDING") {
+      addToast("이 공연장은 스탠딩석만 선택 가능합니다.", "error");
+      return;
+    }
+
+    // 이전 좌석 데이터 초기화
+    setSeatMapData(null);
+    setExcludedSeats([]);
+    setTotalAvailableSeats(null);
+    setUpdatedSeatCount(0);
+
     setSelectedMethod(method);
 
     // 예매자 선택 또는 자동 배정인 경우 모달 열기
@@ -101,8 +128,11 @@ const RegisterShowStep3 = ({ viewer = false }) => {
     }
   };
 
-  // 모달에서 좌석 저장
+  // 모달에서 좌석 저장 (로컬에만 저장)
   const handleSaveSeats = (seatData) => {
+    // 좌석표 데이터 저장
+    setSeatMapData(seatData.seatMap);
+
     // totalAvailableSeats 저장
     if (seatData.totalAvailableSeats !== undefined) {
       setTotalAvailableSeats(seatData.totalAvailableSeats);
@@ -114,7 +144,7 @@ const RegisterShowStep3 = ({ viewer = false }) => {
       setExcludedSeats(seatData.excludedSeats || []);
       setUpdatedSeatCount(seatData.excludedSeats?.length || 0);
       addToast(
-        `${seatData.excludedSeats?.length || 0}개의 좌석이 제외되었습니다.`,
+        `제외된 좌석: ${seatData.excludedSeats?.length || 0}개 / 판매 가능 좌석: ${seatData.totalAvailableSeats || 0}개`,
         "success"
       );
     }
@@ -123,7 +153,7 @@ const RegisterShowStep3 = ({ viewer = false }) => {
       setExcludedSeats(seatData.vipSeats || []);
       setUpdatedSeatCount(seatData.vipSeats?.length || 0);
       addToast(
-        `${seatData.vipSeats?.length || 0}개의 VIP석이 지정되었습니다.`,
+        `VIP석: ${seatData.vipSeats?.length || 0}개 / 판매 가능 좌석: ${seatData.totalAvailableSeats || 0}개`,
         "success"
       );
     }
@@ -142,12 +172,11 @@ const RegisterShowStep3 = ({ viewer = false }) => {
 
   // 이전 단계로
   const handlePrevious = () => {
-    // TODO: 2단계 페이지로 이동
-    navigate("/register-show/step2");
+    navigate(`/register-show/${showId}/step2`);
   };
 
   // 다음 단계로
-  const handleNext = () => {
+  const handleNext = async () => {
     // 유효성 검사
     if (!selectedVenue) {
       addToast("공연 장소를 선택해주세요!", "error");
@@ -164,8 +193,91 @@ const RegisterShowStep3 = ({ viewer = false }) => {
       return;
     }
 
-    // TODO: 4단계 페이지로 이동
-    navigate("/register-show/step4");
+    // 예매자 선택 또는 자동 배정인 경우 API 호출
+    if (
+      (selectedMethod === "예매자 선택" || selectedMethod === "자동 배정") &&
+      seatMapData
+    ) {
+      try {
+        setIsLoading(true);
+
+        const endpoint =
+          selectedMethod === "자동 배정"
+            ? `/manager/shows/${selectedVenue.id}/seatmap/vip`
+            : `/manager/shows/${selectedVenue.id}/seatmap/delete`;
+
+        const requestBody = {
+          seat_map: seatMapData,
+        };
+
+        console.log("=== POST Request Data ===");
+        console.log("Endpoint:", `${import.meta.env.VITE_API_URL}${endpoint}`);
+        console.log("Sales Method:", selectedMethod);
+        console.log("Venue ID:", selectedVenue.id);
+        console.log("Request Body:", requestBody);
+        console.log("Seat Map Data:", JSON.stringify(seatMapData, null, 2));
+        console.log("========================");
+
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}${endpoint}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(requestBody),
+          }
+        );
+        console.log("Response:", response);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log("Seat update result:", result);
+
+          if (result.success) {
+            console.log("✅ Success! Navigating to step 4...");
+            addToast(
+              selectedMethod === "자동 배정"
+                ? "VIP석 선택이 완료되었습니다!"
+                : "좌석 변경이 완료되었습니다!",
+              "success"
+            );
+
+            // step4로 이동
+            console.log(`Calling navigate('/register-show/${showId}/step4')`);
+            navigate(`/register-show/${showId}/step4`);
+            console.log("Navigate called");
+          } else {
+            console.log("❌ result.success is false");
+            addToast(
+              selectedMethod === "자동 배정"
+                ? "VIP석 선택에 실패했습니다."
+                : "좌석 변경에 실패했습니다.",
+              "error"
+            );
+          }
+        } else {
+          console.log("❌ response.ok is false, status:", response.status);
+          const errorData = await response.json();
+          addToast(
+            errorData.message ||
+              (selectedMethod === "자동 배정"
+                ? "VIP석 선택에 실패했습니다."
+                : "좌석 변경에 실패했습니다."),
+            "error"
+          );
+        }
+      } catch (error) {
+        console.error("Error saving seat changes:", error);
+        addToast("서버와의 통신 중 오류가 발생했습니다.", "error");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // 스탠딩석 또는 주최 측 배정인 경우 바로 다음 단계로
+      navigate(`/register-show/${showId}/step4`);
+    }
   };
 
   return (
@@ -201,20 +313,39 @@ const RegisterShowStep3 = ({ viewer = false }) => {
             <Section>
               <SectionTitle>좌석 판매 방법</SectionTitle>
               <ButtonGroup>
-                {salesMethods.map((method) => (
-                  <SelectButton
-                    key={method}
-                    active={selectedMethod === method}
-                    onClick={() => handleMethodSelect(method)}
-                  >
-                    {selectedMethod === method ? (
-                      <CheckboxIconSelected />
-                    ) : (
-                      <CheckboxIcon />
-                    )}
-                    {method}
-                  </SelectButton>
-                ))}
+                {salesMethods
+                  .filter((method) => {
+                    // STANDING 타입 공연장은 스탠딩석만 표시
+                    if (selectedVenue?.type === "STANDING") {
+                      return method === "스탠딩석";
+                    }
+                    return true; // 다른 타입은 모든 옵션 표시
+                  })
+                  .map((method) => {
+                    const isStandingType = selectedVenue?.type === "STANDING";
+                    const isStandingMethod = method === "스탠딩석";
+
+                    return (
+                      <SelectButton
+                        key={method}
+                        active={selectedMethod === method}
+                        $locked={isStandingType && isStandingMethod}
+                        onClick={() => {
+                          // STANDING 타입에서 스탠딩석 버튼은 클릭해도 아무 동작 안함
+                          if (!(isStandingType && isStandingMethod)) {
+                            handleMethodSelect(method);
+                          }
+                        }}
+                      >
+                        {selectedMethod === method ? (
+                          <CheckboxIconSelected />
+                        ) : (
+                          <CheckboxIcon />
+                        )}
+                        {method}
+                      </SelectButton>
+                    );
+                  })}
               </ButtonGroup>
               <InfoMessage>
                 <InfoIcon />
@@ -289,7 +420,7 @@ export default RegisterShowStep3;
 
 // Styled Components
 const Container = styled.div`
-  width: 1440px;
+  width: 100%;
   margin: 0 auto;
   background: #ffffff;
   display: flex;
@@ -372,17 +503,33 @@ const SelectButton = styled.button`
   padding: 5px 10px;
   border-radius: 10px;
   border: ${(props) => (props.active ? "none" : "1px solid #C5C5C5")};
-  background: ${(props) => (props.active ? "#FC2847" : "#FFFFFE")};
-  color: ${(props) => (props.active ? "#FFFFFE" : "#333333")};
+  background: ${(props) => {
+    if (props.disabled) return "#F5F5F5";
+    if (props.$locked) return "#FC2847"; // locked 상태는 항상 활성화 색상
+    return props.active ? "#FC2847" : "#FFFFFE";
+  }};
+  color: ${(props) => {
+    if (props.disabled) return "#A0A0A0";
+    if (props.$locked) return "#FFFFFE"; // locked 상태는 항상 활성화 텍스트 색상
+    return props.active ? "#FFFFFE" : "#333333";
+  }};
 
-  font-weight: ${(props) => (props.active ? "bold" : "300")};
+  font-weight: ${(props) =>
+    props.active || props.$locked ? "bold" : "300"};
   font-size: 16px;
-  cursor: pointer;
+  cursor: ${(props) => {
+    if (props.disabled) return "not-allowed";
+    if (props.$locked) return "default"; // locked 상태는 기본 커서
+    return "pointer";
+  }};
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: ${(props) =>
+      props.disabled || props.$locked ? "none" : "translateY(-2px)"};
+    box-shadow: ${(props) =>
+      props.disabled || props.$locked ? "none" : "0 2px 8px rgba(0, 0, 0, 0.1)"};
   }
 `;
 

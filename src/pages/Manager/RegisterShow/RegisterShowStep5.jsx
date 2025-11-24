@@ -73,21 +73,24 @@ const RegisterShowStep5 = () => {
 
   return (
     <>
-      {/* <NavbarManager /> */}
-      <MainContent>
-        {/* <RegisterShowNavbar currentStep={5} /> */}
-        <RegisterShowStep1 viewer={true} />
-        <RegisterShowStep2 viewer={true} />
-        <RegisterShowStep3 viewer={true} />
-        <RegisterShowStep4 viewer={true} />
-        <Footer>
-          <PrevButton onClick={handlePrevious}>←이전</PrevButton>
-          <RightButtonGroup>
-            {/* <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton> */}
-            <NextButton onClick={handleSubmit}>등록하기</NextButton>
-          </RightButtonGroup>
-        </Footer>
-      </MainContent>
+     
+      <Container>
+       
+          {/* <RegisterShowNavbar currentStep={5} /> */}
+          <RegisterShowStep1 viewer={true} />
+          <RegisterShowStep2 viewer={true} />
+          <RegisterShowStep3 viewer={true} />
+          <RegisterShowStep4 viewer={true} />
+          <Footer>
+            <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+            <RightButtonGroup>
+              {/* <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton> */}
+              <NextButton onClick={handleSubmit}>등록하기</NextButton>
+            </RightButtonGroup>
+          </Footer>
+       
+
+      </Container>
     </>
   );
 };
@@ -95,7 +98,7 @@ const RegisterShowStep5 = () => {
 export default RegisterShowStep5;
 
 const Container = styled.div`
-  width: 1440px;
+  width: 100%;
   margin: 0 auto;
   background: #ffffff;
   display: flex;

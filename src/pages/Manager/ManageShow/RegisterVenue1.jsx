@@ -94,7 +94,7 @@ const RegisterVenue1 = () => {
       locationAddressDetail: detailAddress || "",
       locationStandingCount: isStanding ? Number(standingCapacity) : 0,
       locationSeatFloor: isSeat ? Number(floorCount) : 1,
-      locationSeatCount: 0,
+      locationSeatCount: isSeat ? 1 : 0, // 좌석이면 1, 스탠딩석이면 0
     };
 
     formData.append(

@@ -10,6 +10,7 @@ const RegisterShowNavbar = ({ currentStep, setCurrentStep }) => {
     setCurrentStep(step); // ① 상태 업데이트
     navigate(`/register-show/${showId}/step${step}`); // ② URL 이동
   };
+
   return (
     <>
       <Title>공연 등록하기</Title>
@@ -44,6 +45,8 @@ const RegisterShowNavbar = ({ currentStep, setCurrentStep }) => {
 
 export default RegisterShowNavbar;
 
+// Styled components
+
 const Title = styled.h1`
   font-weight: 500;
   font-size: 30px;
@@ -66,6 +69,7 @@ const StepItem = styled.div`
   color: ${(props) => (props.active ? "#FC2847" : "#737373")};
   border-bottom: ${(props) => (props.active ? "2px solid #FC2847" : "none")};
   cursor: pointer;
+  transition: all 0.3s ease;
 `;
 
 const ArrowIcon = styled(RiArrowRightSLine)`

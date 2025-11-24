@@ -34,10 +34,20 @@ const SeatSelectionModal = ({
   const [tempSelectedSeats, setTempSelectedSeats] = useState(new Set());
   const [hasMoved, setHasMoved] = useState(false);
 
-  // 모달이 열릴 때 좌석표 API 호출
+  // 모달이 열릴 때 좌석표 API 호출 및 상태 초기화
   useEffect(() => {
     const fetchSeatMap = async () => {
       if (!isOpen || !locationId) return;
+
+      // 모달이 열릴 때마다 모든 상태 초기화
+      setExcludedSeats(new Set());
+      setVipSeats(new Set());
+      setExcludeHistory([new Set()]);
+      setVipHistory([new Set()]);
+      setExcludeHistoryIndex(0);
+      setVipHistoryIndex(0);
+      setClearedSeats(new Set());
+      setActiveTab(salesMethod === "자동 배정" ? "vip" : "exclude");
 
       try {
         setIsLoading(true);
@@ -71,7 +81,7 @@ const SeatSelectionModal = ({
     };
 
     fetchSeatMap();
-  }, [isOpen, locationId, addToast]);
+  }, [isOpen, locationId, salesMethod, addToast]);
 
   // 현재 탭에 따른 좌석 상태
   const selectedSeats = activeTab === "exclude" ? excludedSeats : vipSeats;
@@ -231,152 +241,67 @@ const SeatSelectionModal = ({
     updateHistory(new Set());
   };
 
-  // VIP 좌석 선택 API 호출 (자동 배정일 때)
-  const handleSaveVipSeats = async () => {
-    if (!seatMapData || clearedSeats.size === 0) {
-      // 변경사항이 없으면 그냥 닫기
+  // 로컬 저장 핸들러 (API 호출 제거)
+  const handleSaveSeatChanges = () => {
+    if (!seatMapData) {
       onClose();
       return;
     }
 
-    try {
-      setIsLoading(true);
+    // 좌석표 데이터 생성
+    let seatMapToSave;
+    let totalSeats = 0;
+    let clearedCount = clearedSeats.size;
 
+    if (salesMethod === "자동 배정") {
       // VIP석을 1로 표시한 좌석표 생성
-      const vipSeatMap = seatMapData.seat_map.map((row) =>
+      seatMapToSave = seatMapData.seat_map.map((row) =>
         row.map((seat) => {
           if (seat === -1) return -1; // 무대는 그대로
-          if (typeof seat === "string" && clearedSeats.has(seat)) {
-            return 1; // VIP석은 1로 표시
+          if (typeof seat === "string") {
+            totalSeats++;
+            if (clearedSeats.has(seat)) {
+              return 1; // VIP석은 1로 표시
+            }
           }
-          return 0; // 나머지는 0
+          return typeof seat === "string" ? 0 : seat; // 나머지 좌석은 0
         })
       );
-
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/manager/shows/${locationId}/seatmap/vip`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            seat_map: vipSeatMap,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log("VIP seat selection result:", result);
-
-        if (result.success) {
-          addToast(
-            `VIP석 선택이 완료되었습니다. (총 판매 가능 좌석: ${result.data.totalAvailableSeats}석)`,
-            "success"
-          );
-          // onSave 콜백으로 totalAvailableSeats 전달
-          if (onSave) {
-            onSave({
-              vipSeats: Array.from(clearedSeats),
-              totalAvailableSeats: result.data.totalAvailableSeats,
-            });
-          }
-          onClose();
-        } else {
-          addToast("VIP석 선택에 실패했습니다.", "error");
-        }
-      } else {
-        const errorData = await response.json();
-        addToast(errorData.message || "VIP석 선택에 실패했습니다.", "error");
-      }
-    } catch (error) {
-      console.error("Error saving VIP seats:", error);
-      addToast("서버와의 통신 중 오류가 발생했습니다.", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 좌석 삭제 API 호출 (예매자 선택일 때)
-  const handleSaveExcludedSeats = async () => {
-    if (!seatMapData || clearedSeats.size === 0) {
-      // 변경사항이 없으면 그냥 닫기
-      onClose();
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      // 원본 좌석표를 복사하고 clearedSeats에 있는 좌석들을 0으로 변경
-      const updatedSeatMap = seatMapData.seat_map.map((row) =>
+    } else {
+      // 예매자 선택: clearedSeats에 있는 좌석들을 0으로 변경
+      seatMapToSave = seatMapData.seat_map.map((row) =>
         row.map((seat) => {
-          if (typeof seat === "string" && clearedSeats.has(seat)) {
-            return 0; // 취소된 좌석을 0으로 변경
+          if (typeof seat === "string") {
+            totalSeats++;
+            if (clearedSeats.has(seat)) {
+              return 0; // 제외된 좌석을 0으로 변경
+            }
           }
           return seat;
         })
       );
-
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/manager/shows/${locationId}/seatmap/delete`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            seat_map: updatedSeatMap,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log("Seat deletion result:", result);
-
-        if (result.success) {
-          addToast(
-            `좌석 변경이 완료되었습니다. (총 판매 가능 좌석: ${result.data.totalAvailableSeats}석)`,
-            "success"
-          );
-          // onSave 콜백으로 totalAvailableSeats 전달
-          if (onSave) {
-            onSave({
-              excludedSeats: Array.from(clearedSeats),
-              totalAvailableSeats: result.data.totalAvailableSeats,
-            });
-          }
-          onClose();
-        } else {
-          addToast("좌석 변경에 실패했습니다.", "error");
-        }
-      } else {
-        const errorData = await response.json();
-        addToast(errorData.message || "좌석 변경에 실패했습니다.", "error");
-      }
-    } catch (error) {
-      console.error("Error saving seat changes:", error);
-      addToast("서버와의 통신 중 오류가 발생했습니다.", "error");
-    } finally {
-      setIsLoading(false);
     }
-  };
 
-  // 통합 저장 핸들러
-  const handleSaveSeatChanges = () => {
-    if (salesMethod === "자동 배정") {
-      handleSaveVipSeats();
-    } else {
-      handleSaveExcludedSeats();
+    const totalAvailableSeats = totalSeats - clearedCount;
+
+    // onSave 콜백으로 데이터 전달
+    if (onSave) {
+      onSave({
+        seatMap: seatMapToSave,
+        excludedSeats: salesMethod === "예매자 선택" ? Array.from(clearedSeats) : [],
+        vipSeats: salesMethod === "자동 배정" ? Array.from(clearedSeats) : [],
+        totalAvailableSeats: totalAvailableSeats,
+      });
     }
+
+    addToast(
+      salesMethod === "자동 배정"
+        ? `${clearedCount}개의 VIP석이 선택되었습니다.`
+        : `${clearedCount}개의 좌석이 제외되었습니다.`,
+      "success"
+    );
+
+    onClose();
   };
 
   // 탭 전환 핸들러
