@@ -1,20 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import NavbarManager from "../../components/Navbar/NavbarManager";
-import { RiArrowRightSLine } from "react-icons/ri";
-import { BsUpload } from "react-icons/bs";
-import { AiOutlineCalendar, AiOutlineClose } from "react-icons/ai";
 import RegisterShowNavbar from "./RegisterShow/RegisterShowNavbar";
-import RegisterShowStep1 from "./RegisterShow/RegisterShowStep1";
-import RegisterShowStep2 from "./RegisterShow/RegisterShowStep2";
-import RegisterShowStep3 from "./RegisterShow/RegisterShowStep3";
-import RegisterShowStep4 from "./RegisterShow/RegisterShowStep4";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import RegisterShowStep5 from "./RegisterShow/RegisterShowStep5";
+import { Outlet, useLocation } from "react-router-dom";
 
 const RegisterShow = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const location = useLocation();
+
+  // URL 경로에 따라 currentStep 업데이트
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes("step1")) setCurrentStep(1);
+    else if (path.includes("step2")) setCurrentStep(2);
+    else if (path.includes("step3")) setCurrentStep(3);
+    else if (path.includes("step4")) setCurrentStep(4);
+    else if (path.includes("step5")) setCurrentStep(5);
+  }, [location.pathname]);
   // const [posterImage, setPosterImage] = useState(null);
   // const [showTimes, setShowTimes] = useState([]);
   // const [ticketOptions, setTicketOptions] = useState([]);
@@ -101,21 +103,14 @@ const RegisterShow = () => {
       <NavbarManager />
       {/* 단계 표시 */}
       <MainContent>
-      <RegisterShowNavbar
-        currentStep={currentStep}
-        setCurrentStep={setCurrentStep}
-      />
+        <RegisterShowNavbar
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
+        />
 
-      {/* 메인 컨텐츠 */}
-      {currentStep === 1 && <RegisterShowStep1 />}
-      {currentStep === 2 && <RegisterShowStep2 />}
-      {currentStep === 3 && <RegisterShowStep3 />}
-      {currentStep === 4 && <RegisterShowStep4 />}
-      {currentStep === 5 && <RegisterShowStep5 />}
-      
-        
+        {/* 중첩 라우트 렌더링 */}
+        <Outlet />
       </MainContent>
- 
     </Container>
   );
 };
