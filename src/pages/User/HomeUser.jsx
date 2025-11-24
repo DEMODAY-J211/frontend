@@ -10,8 +10,6 @@ import LoginRequiredModal from "../../components/Modal/LoginRequiredModal.jsx";
 // s00104
 
 const serverUrl = import.meta.env.VITE_API_URL;
-// const serverUrl = "http://15.164.218.55:8080";
-// const serverUrl = "https://back-tikitta.duckdns.org";
 
 export default function HomeUser() {
   const { managerId } = useParams();

@@ -27,11 +27,18 @@ export function AuthProvider({ children }) {
     const urlParams = new URLSearchParams(window.location.search);
     const loginSuccess = urlParams.get("login");
     console.log("🔍 login 파라미터:", loginSuccess);
+    const role = urlParams.get("role"); // role 파라미터 (manager / user)
 
     if (loginSuccess === "success") {
       console.log("✅ 카카오 로그인 성공 - 로그인 상태로 설정");
       localStorage.setItem("isLoggedIn", "true");
 
+      // role이 있으면 user 상태 업데이트
+      if (role) {
+        console.log(role, role.toLowerCase());
+        setUser({ type: role.toLowerCase() }); // 필요하면 다른 정보도 추가 가능
+        localStorage.setItem("userRole", role.toLowerCase()); // 선택: 로컬에도 저장
+      }
       // URL에서 파라미터 제거 (깔끔하게)
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -40,9 +47,26 @@ export function AuthProvider({ children }) {
     setIsInitialized(true);
   }, []);
 
+  const logout = () => {
+    localStorage.clear();
+    setIsLoggedIn(false);
+
+    // 쿠키가 있다면 쿠키도 만료시키기 (선택)
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+    // 로그인 페이지로 이동
+    window.location.href = "/login";
+  };
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn, setIsLoggedIn, user, setUser, isInitialized }}
+      value={{
+        isLoggedIn,
+        setIsLoggedIn,
+        user,
+        setUser,
+        isInitialized,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
@@ -50,61 +74,3 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => useContext(AuthContext);
-// import React, { createContext, useState, useEffect } from "react";
-
-// // 인증 컨텍스트 생성
-// export const AuthContext = createContext();
-
-// export function AuthProvider({ children }) {
-//     const [user, setUser] = useState(null);
-//     const [isInitializing, setIsInitializing] = useState(true);
-
-//     useEffect(() => {
-//         try {
-//             const savedUser = localStorage.getItem("loggedInUser");
-//             if (savedUser) {
-//                 setUser(JSON.parse(savedUser));
-//             }
-//         } catch (error) {
-//             console.error("저장된 사용자 정보를 불러오는 데 실패했습니다.", error);
-//             localStorage.removeItem("loggedInUser");
-//         } finally {
-//             setIsInitializing(false);
-//         }
-//     }, []);
-
-//     const login = (userData) => {
-//         setUser(userData);
-//         localStorage.setItem("loggedInUser", JSON.stringify(userData));
-//     };
-
-//     // 쿠키에서 토큰을 가져오는 헬퍼 함수
-//     const getCookie = (name) => {
-//         const value = `; ${document.cookie}`;
-//         const parts = value.split(`; ${name}=`);
-//         if (parts.length === 2) return parts.pop().split(';').shift();
-//     };
-
-//     const logout = () => {
-//         // 클라이언트 측 세션 정리
-//         const clearClientSession = () => {
-//             setUser(null);
-//             localStorage.removeItem("loggedInUser");
-//             // 쿠키 삭제
-//             document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-//             document.cookie = "refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-//         };
-
-//         // 클라이언트 세션 정리
-//         clearClientSession();
-
-//         // 로그인 페이지로 리디렉션
-//         window.location.href = "/login";
-//     };
-
-//     return (
-//         <AuthContext.Provider value={{ user, login, logout, isInitializing }}>
-//             {children}
-//         </AuthContext.Provider>
-//     );
-// }

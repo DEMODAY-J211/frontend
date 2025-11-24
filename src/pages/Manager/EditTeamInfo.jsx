@@ -63,6 +63,7 @@ const EditTeamInfo = ({ isOpen, onClose }) => {
     },
   });
 
+  const [url, setUrl] = useState(null);
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -151,6 +152,10 @@ const EditTeamInfo = ({ isOpen, onClose }) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUrl(reader.result); // UI 미리보기
+        setFormData((prev) => ({
+          ...prev,
+          managerPicture: reader.result,
+        }));
       };
       reader.readAsDataURL(file);
       console.log("formData", imgData);

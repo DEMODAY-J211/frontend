@@ -73,7 +73,7 @@ const RegisterShowStep5 = () => {
 
   return (
     <>
-      {/* <NavbarManager /> */}
+     
       <Container>
        
           {/* <RegisterShowNavbar currentStep={5} /> */}
