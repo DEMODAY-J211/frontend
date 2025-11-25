@@ -56,9 +56,9 @@ const RegisterShowStep5 = () => {
   const [account, setAccount] = useState("");
 
   // 이전 단계로
+    // 이전 단계로
   const handlePrevious = () => {
-    // TODO: 2단계 페이지로 이동
-    navigate("/register-show/step4");
+    navigate(`/register-show/${showId}/step4`);
   };
 
   // 다음 단계로

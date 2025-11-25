@@ -175,7 +175,10 @@ const RegisterShowStep4 = ({ viewer = false }) => {
     }
   };
 
-  const handlePrevious = () => navigate(`/register-show/${showId}/step3`);
+    // 이전 단계로
+  const handlePrevious = () => {
+    navigate(`/register-show/${showId}/step3`);
+  };
 
   const handleNext = () => {
     const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
