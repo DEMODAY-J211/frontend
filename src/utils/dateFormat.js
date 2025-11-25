@@ -1,6 +1,6 @@
 export function formatKoreanDate(dateString) {
-  const utc = new Date(dateString);
-  const koreaTime = new Date(utc.getTime() + 9 * 60 * 60 * 1000); // UTC+9 변환
+  const koreaTime = new Date(dateString);
+  // const koreaTime = new Date(utc.getTime() + 9 * 60 * 60 * 1000); // UTC+9 변환
 
   const year = koreaTime.getFullYear();
   const month = String(koreaTime.getMonth() + 1).padStart(2, "0");

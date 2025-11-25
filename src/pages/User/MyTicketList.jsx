@@ -87,7 +87,7 @@ export default function MyTicketList() {
                   .map((r) => (
                     <ShowListItem
                       key={r.reservationId}
-                      reservation={r}
+                      reservation={{ ...r, reservationStatus: "AFTERSHOW" }}
                       activeTab={activeTab}
                     />
                   ))}

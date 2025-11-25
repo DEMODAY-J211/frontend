@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Base from "./Base";
 import ShowtimeSelector from "./ShowtimeSelector";
 
@@ -35,16 +35,51 @@ import ShowtimeSelector from "./ShowtimeSelector";
 const serverUrl = import.meta.env.VITE_API_URL;
 // const serverUrl = "http://15.164.218.55:8080";
 
-export default function BottomSheet({
-  onClose,
-  showData = {},
-  onNeedModal,
-  managerId,
-}) {
+export default function BottomSheet({ onClose, onNeedModal, tempData }) {
   const navigate = useNavigate();
   const [selectedShowtime, setSelectedShowtime] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [quantity, setQuantity] = useState(1);
+
+  const [showData, setShowData] = useState(tempData);
+  const { managerId, showId } = useParams();
+  console.log(managerId, showId);
+  const fetchOptions = async () => {
+    try {
+      const response = await fetch(
+        `${serverUrl}/user/${managerId}/booking/${showData.showId}/reserveInfo`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+      console.log("option 조회 Data", result);
+      setShowData(result.data);
+
+      if (result.success) {
+        return result.data; // 🔥 데이터 return 추가
+      }
+    } catch (error) {
+      console.error("공연 상세정보 조회 실패:", error);
+      alert("해당 공연 상세정보를 찾을 수 없습니다.");
+    }
+    return null;
+  };
+
+  const [options, setOptions] = useState(null);
+  useEffect(() => {
+    const loadOptions = async () => {
+      const tmp = await fetchOptions();
+      setOptions(tmp);
+    };
+
+    loadOptions();
+  }, []); // 최초 1회만 실행
 
   const handleNext = async () => {
     if (!selectedShowtime || !selectedOption) {
@@ -80,9 +115,10 @@ export default function BottomSheet({
 
       const result = await response.json();
       console.log("서버 응답:", result);
-      if (showData.saleMethod === "Select_by_User") {
+      // console.log("서버응답 selec", result.data.saleMethod);
+      if (tempData.saleMethod === "SELECTBYUSER") {
         navigate(
-          `/${managerId}/selectseat/${showData.showId}/${selectedShowtime.showtimeId}`,
+          `/${managerId}/selectseat/${tempData.showId}/${selectedShowtime.showtimeId}`,
           {
             state: {
               selectedShowtime,
@@ -116,20 +152,23 @@ export default function BottomSheet({
       // });
     }
   };
-
+  console.log("showtickeoptionist", showData.ticketOptionList);
+  console.log("options", options?.ticketOptionList);
   return (
     <Base onClose={onClose}>
-      <ShowtimeSelector
-        showtimes={showData.showtimeList}
-        ticketOptionList={showData.ticketOptionList}
-        selectedShowtime={selectedShowtime}
-        setSelectedShowtime={setSelectedShowtime}
-        selectedOption={selectedOption}
-        setSelectedOption={setSelectedOption}
-        quantity={quantity}
-        setQuantity={setQuantity}
-        handlebtn={handleNext}
-      />
+      {options && (
+        <ShowtimeSelector
+          showtimes={options.showtimeList}
+          ticketOptionList={options.ticketOptionList}
+          selectedShowtime={selectedShowtime}
+          setSelectedShowtime={setSelectedShowtime}
+          selectedOption={selectedOption}
+          setSelectedOption={setSelectedOption}
+          quantity={quantity}
+          setQuantity={setQuantity}
+          handlebtn={handleNext}
+        />
+      )}
       {/* <Footerbtn onClick={handleNext} /> */}
     </Base>
   );

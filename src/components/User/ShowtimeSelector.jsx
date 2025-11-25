@@ -51,7 +51,7 @@ export default function ShowtimeSelector({
   };
 
   const totalPrice = selectedOption
-    ? selectedOption.ticketoptionPrice * quantity
+    ? selectedOption.ticketOptionPrice * quantity
     : 0;
 
   const handleDelete = () => {
@@ -112,7 +112,7 @@ export default function ShowtimeSelector({
             <Container>
               <DropdownButton onClick={() => setIsOptionOpen(!isOptionOpen)}>
                 {selectedOption
-                  ? `${selectedOption?.ticketoptionName} (${selectedOption?.ticketoptionPrice}원)`
+                  ? `${selectedOption?.ticketOptionName} (${selectedOption?.ticketOptionPrice}원)`
                   : "티켓 옵션을 선택하세요"}
                 <Arrow open={isOptionOpen}>▼</Arrow>
               </DropdownButton>
@@ -132,7 +132,7 @@ export default function ShowtimeSelector({
                         const optionWithId = {
                           ...option, // 기존 이름, 가격 등 복사
 
-                          ticketOptionId: idx + 1, // idx 기반으로 id 부여 (서버 요구에 맞춰 조정)
+                          // ticketOptionId: idx + 1, // idx 기반으로 id 부여 (서버 요구에 맞춰 조정)
                         };
 
                         return (
@@ -140,12 +140,12 @@ export default function ShowtimeSelector({
                             key={idx}
                             onClick={() => handleSelectOption(optionWithId)} // id 포함 객체 전달
                             selected={
-                              selectedOption?.ticketoptionName ===
-                              option.ticketoptionName
+                              selectedOption?.ticketOptionName ===
+                              option.ticketOptionName
                             }
                           >
-                            {option.ticketoptionName} (
-                            {option.ticketoptionPrice}
+                            {option.ticketOptionName} (
+                            {option.ticketOptionPrice}
                             원)
                           </DropdownItem>
                         );
@@ -156,11 +156,11 @@ export default function ShowtimeSelector({
                           key={idx}
                           onClick={() => handleSelectOption({ idx, option })}
                           selected={
-                            selectedOption?.ticketoptionName ===
-                            option.ticketoptionName
+                            selectedOption?.ticketOptionName ===
+                            option.ticketOptionName
                           }
                         >
-                          {option.ticketoptionName} ({option.ticketoptionPrice}
+                          {option.ticketOptionName} ({option.ticketOptionPrice}
                           원)
                         </DropdownItem>
                       ))} */}
@@ -180,8 +180,8 @@ export default function ShowtimeSelector({
                   {selectedShowtime.showtimeId}회차{" "}
                   {formatKoreanDate(selectedShowtime.showtimeStart)}
                 </strong>
-                <strong>{selectedOption.ticketoptionName}</strong>
-                <strong>{selectedOption.ticketoptionPrice}원</strong>
+                <strong>{selectedOption.ticketOptionName}</strong>
+                <strong>{selectedOption.ticketOptionPrice}원</strong>
               </TotalPrice>
               <QuantityContainer>
                 <QtyButton onClick={() => handleQuantityChange(-1)}>
