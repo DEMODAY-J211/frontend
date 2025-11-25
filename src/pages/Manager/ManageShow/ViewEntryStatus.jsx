@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import NavbarManager from "../../../components/Navbar/NavbarManager";
 import { IoMdRefresh, IoMdClose } from "react-icons/io";
 import { MdKeyboardArrowDown } from "react-icons/md";
@@ -15,6 +15,9 @@ const ViewEntryStatus = () => {
   const [viewMode, setViewMode] = useState("seat");
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [showSelected, setShowSelected] = useState(false);
+  
+  const [showTitle, setShowTitle] = useState("");
+  const [showTimeList, setShowTimeList] = useState([]);
 
   // 리스트
   const [filterTab, setFilterTab] = useState("all"); // 'all', 'entered', 'notEntered'
@@ -31,14 +34,26 @@ const ViewEntryStatus = () => {
   const [changedItems, setChangedItems] = useState([]); // 변경된 항목들
   const [loading, setLoading] = useState(false); // 로딩 상태
 
+  const [currentShowtimeId, setCurrentShowtimeId] = useState("");
+
   // TODO: URL 파라미터에서 실제 showId와 showtimeId 가져오기
-  const [showId] = useState(1); // 임시값
-  const [showtimeId] = useState(1); // 임시값
+  const showId = useParams(); // 임시값
+  // const [showtimeId] = useState(1); // 임시값
+
+  // 회차 선택 핸들러
+    const handleShowtimeChange = (showtimeId) => {
+      setCurrentShowtimeId(showtimeId);
+      // setSelectedUsers([]); // 회차 변경 시 선택 초기화
+    };
+  
 
   useEffect(() => {
+    if (showTimeList.length > 0 && currentShowtimeId === null) {
+      setCurrentShowtimeId(showTimeList[0].showTimeId);
+    }
     loadSeatData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showId, showtimeId]);
+  }, [showTimeList]);
 
   const loadSeatData = async () => {
     try {
@@ -46,7 +61,7 @@ const ViewEntryStatus = () => {
 
       // 세션 기반 로그인: 쿠키로 인증
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin?showtimeId=${showtimeId}`,
+        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin`,
         {
           credentials: 'include', // 세션 쿠키 자동 전송
           headers: {
@@ -69,6 +84,10 @@ const ViewEntryStatus = () => {
 
       const result = await response.json();
       console.log('API 응답:', result);
+
+      // showTitle, showTimeList 추출
+      setShowTitle(result.data.showTitle || "");
+      setShowTimeList(result.data.showTimeList || []);
 
       // 응답 데이터 구조 확인 및 추출
       const reservationDataFromAPI = Array.isArray(result)
@@ -537,7 +556,7 @@ const ViewEntryStatus = () => {
       });
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin?showtimeId=${showtimeId}`,
+        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin`,
         {
           method: 'PATCH',
           credentials: 'include', // 세션 쿠키 자동 전송
@@ -589,14 +608,28 @@ const ViewEntryStatus = () => {
         <Header>
 
           <Title>예매자 관리</Title>
-          <SelectTime>
-            <ShowName>제21회 정기공연</ShowName>
-            <Time>
-              <ShowTime>2025.10.14 15:00</ShowTime>
-              <MdOutlineUnfoldMore size={16} color="var(--color-primary)" />
+          {showTimeList && showTimeList.length > 0 && (
+  <ShowtimeDropdown
+ 
+    value={currentShowtimeId || showTimeList[0].showTimeId}
+    onChange={(e) => handleShowtimeChange(Number(e.target.value))}
+  >
+    {showTimeList.map((showtime) => (
+      <option key={showtime.showTimeId} value={showtime.showTimeId}>
+        <h2>{showTitle}&nbsp;&nbsp;&nbsp;&nbsp;</h2>
+        {new Date(showtime.showTime).toLocaleString("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </option>
+    ))}
+    
+  </ShowtimeDropdown>
+)}
 
-            </Time>
-          </SelectTime>
         </Header>
 
         {/* 좌석 현황 헤더 */}
