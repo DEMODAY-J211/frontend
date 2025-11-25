@@ -229,7 +229,7 @@ const RegisterShowStep2 = ({ viewer = false }) => {
           {/* <RegisterShowNavbar currentStep={2} /> */}
 
           <UpperContent>
-            <Name>공연 상세이미지(선택)</Name>
+            <Name>공연 상세이미지</Name>
             <UploadBoxWrapper>
               {Array.from({ length: uploadBoxCount }).map((_, idx) => (
                 <UploadBox
@@ -271,7 +271,9 @@ const RegisterShowStep2 = ({ viewer = false }) => {
           </UpperContent>
 
           <DownContent>
-            <Name>공연 상세 정보</Name>
+            <Name>공연 상세 정보
+              <p>*</p>
+            </Name>
             <Input
               placeholder="제 00회 정기공연입니다! ..."
               value={tempText}
@@ -365,7 +367,13 @@ const Name = styled.div`
   font-size: 25px;
   font-weight: 500;
   display: flex;
-  gap: 20px;
+  gap: 5px;
+
+    p{
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--color-primary);
+  }
 `;
 
 const UploadBoxWrapper = styled.div`
