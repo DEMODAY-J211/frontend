@@ -29,57 +29,92 @@ const HomeManager = () => {
   const [registerShowModal, setRegisterShowModal] = useState(null); // null, 'first', 'continue', 'duplicate', 'temp', 'tempDone'
   const [hasVenues, setHasVenues] = useState(false); // 공연장 등록 여부
   const [hasShows, setHasShows] = useState(false); // 공연 등록 여부
+  const [draftId, setDraftId] = useState(null);
+  const [link, setLink] = useState(null);
 
   // 페이지 로드 시 즐겨찾기 공연장 확인
   useEffect(() => {
-    const fetchFavoriteVenues = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/manager/shows/venues?favorite=true`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
+  const fetchFavoriteVenues = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows/venues?favorite=true`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
 
-        if (response.ok) {
-          const result = await response.json();
-          console.log("Favorite venues:", result);
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Favorite venues:", result);
 
-          // data가 배열이고 길이가 0보다 크면 공연장이 있는 것
-          if (
-            result.success &&
-            result.data &&
-            Array.isArray(result.data) &&
-            result.data.length > 0
-          ) {
-            setHasVenues(true);
-          } else {
-            setHasVenues(false);
-          }
+        if (
+          result.success &&
+          Array.isArray(result.data) &&
+          result.data.length > 0
+        ) {
+          setHasVenues(true);
         } else {
-          console.error("Failed to fetch venues:", response.status);
           setHasVenues(false);
         }
-      } catch (error) {
-        console.error("Error fetching favorite venues:", error);
+      } else {
+        console.error("Failed to fetch venues:", response.status);
         setHasVenues(false);
       }
-    };
-
-    fetchFavoriteVenues();
-  }, []);
-
-  const handleCopyLink = async () => {
-    const link = "https://example.com"; // 실제 복사할 링크
-    try {
-      await navigator.clipboard.writeText(link);
-      addToast("링크를 복사했어요!", "success"); // 성공 토스트
-      console.log(link);
     } catch (error) {
-      addToast("링크 복사 실패", "error"); // 실패 토스트
+      console.error("Error fetching favorite venues:", error);
+      setHasVenues(false);
     }
   };
+
+  const checkDraftId = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows/draft`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Draftedshow :", result);
+
+        if (result.success) {
+          setDraftId(result.data.showId);
+        }
+      } else {
+        console.error("Failed to fetch draft:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching draft:", error);
+    }
+  };
+
+  fetchFavoriteVenues();
+  checkDraftId();
+}, []);
+
+const handleCopyLink = async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/link`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!response.ok) throw new Error(response.status);
+
+    const result = await response.json();
+    if (!result.success) throw new Error("Failed to fetch link");
+
+    await navigator.clipboard.writeText(result.data.url); // 바로 복사
+    addToast("링크를 복사했어요!", "success");
+  } catch (error) {
+    console.error(error);
+    addToast("링크 복사 실패", "error");
+  }
+};
 
   const handleOpenTeamModal = () => {
     setIsEditTeamModalOpen(true);
@@ -89,8 +124,10 @@ const HomeManager = () => {
     setIsEditTeamModalOpen(false);
   };
 
+
+
   const handleRegisterShowClick = () => {
-    const draftId = localStorage.getItem("draft_showId");
+    // const draftId = localStorage.getItem("draft_showId");
 
     if (draftId) {
       setRegisterShowModal("temp");
@@ -105,16 +142,19 @@ const HomeManager = () => {
   };
 
   const handleCloseRegisterModal = () => {
-    const draftId = localStorage.getItem("draft_showId");
+    // const draftId = localStorage.getItem("draft_showId");
     if (draftId) {
       setShowId(draftId);
-      // setRegisterShowModal("temp");
+      setRegisterShowModal("temp");
     } else {
       // 값이 없으면 그냥 닫기
       setRegisterShowModal(false);
     }
     setRegisterShowModal(null);
   };
+
+  
+
   const fetchRegisterShow = async () => {
     try {
       const response = await fetch(
@@ -134,7 +174,7 @@ const HomeManager = () => {
           console.log(result.message);
           console.log(result.data);
           setShowId(result.data.showId);
-          localStorage.setItem("draft_showId", result.data.showId);
+          // localStorage.setItem("draft_showId", result.data.showId);
           navigate(`/register-show/${result.data.showId}/step1`, {
             replace: true,
           }); // 뒤로 가기 방지
@@ -175,13 +215,13 @@ const HomeManager = () => {
   };
 
   const handleRegisterNewShow = async () => {
-    const draftId = localStorage.getItem("draft_showId");
+    // const draftId = localStorage.getItem("draft_showId");
 
     try {
       // 임시저장된 공연이 있는 경우 → 삭제 먼저 실행
       if (draftId) {
         await fetchDeleteShow();
-        localStorage.removeItem("draft_showId");
+        // localStorage.removeItem("draft_showId");
       }
 
       // 항상 새 공연 생성
@@ -330,11 +370,12 @@ const HomeManager = () => {
             <BtnIcon src={showimg} alt="공연 등록하기" />
             <BtnWriting>
               <BtnInfo>
-                설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구..
-                어쩌구 저쩌구..{" "}
+                나의 공연을 여기서 등록해보세요! {" "}
               </BtnInfo>
               <Draft>
-                <DraftNum>임시저장(1)</DraftNum>
+                <DraftNum>
+                  {draftId ? `임시저장(1)` : ""}
+                </DraftNum>
                 {/* <DraftExplained>임시저장된 공연이 1개 있어요!</DraftExplained> */}
               </Draft>
             </BtnWriting>
@@ -345,8 +386,7 @@ const HomeManager = () => {
               <MyShowLeft>
                 <BtnName>단체 소개</BtnName>
                 <BtnInfo>
-                  설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구..
-                  어쩌구 저쩌구..
+                  나의 단체 소개글을 여기서 수정해보세요!
                 </BtnInfo>
               </MyShowLeft>
               <MyShowRight>
@@ -362,8 +402,7 @@ const HomeManager = () => {
               <MyShowLeft>
                 <BtnName>내 공연 관리</BtnName>
                 <BtnInfo>
-                  설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구..
-                  어쩌구 저쩌구..
+                  예매자 관리, 입장 현황, 공연 정보 수정까지 한 번에!
                 </BtnInfo>
               </MyShowLeft>
               <MyShowRight>
@@ -389,8 +428,7 @@ const HomeManager = () => {
               <BtnName>내 공연장 관리</BtnName>
               <BtnIcon src={locationimg} alt="내 공연장 관리" />
               <BtnInfo>
-                설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구..
-                어쩌구 저쩌구.
+                공연장 목록에 찿는 공연장이 이미 있을 경우, 즐겨찾기를 해주세요!
               </BtnInfo>
             </MyLocation>
           </TopRight>

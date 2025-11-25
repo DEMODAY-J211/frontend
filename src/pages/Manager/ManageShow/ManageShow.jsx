@@ -84,7 +84,7 @@ const handleMenuClick = (item) => {
       alert("먼저 공연을 선택해주세요.");
       return;
     }
-    navigate(`${item.path}/${selectedShow.showId}`);
+    navigate(`${item.path}`);
     return;
   }
 

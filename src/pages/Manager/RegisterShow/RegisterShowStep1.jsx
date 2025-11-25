@@ -20,10 +20,10 @@ const bankOptions = [
 ];
 
 const RegisterShowStep1 = ({ viewer = false }) => {
-  const { setIsDirty } = useOutletContext();
-  const handleAnyInput = () => {
-    setIsDirty(true);
-  };
+  // const { setIsDirty } = useOutletContext();
+  // const handleAnyInput = () => {
+  //   setIsDirty(true);
+  // };
   const navigate = useNavigate();
   const { showId } = useParams();
   console.log(showId);
@@ -390,7 +390,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   return (
     <>
       {/* <NavbarManager /> */}
-      <Container onChange={handleAnyInput} onInput={handleAnyInput}>
+      <Container>
         <MainContent>
           {/* <RegisterShowNavbar currentStep={1} /> */}
 
