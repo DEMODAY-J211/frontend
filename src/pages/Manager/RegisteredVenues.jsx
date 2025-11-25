@@ -150,7 +150,9 @@ const RegisteredVenues = () => {
       <NavbarManager />
 
       <MainContent>
-        <PageTitle>등록된 공연장</PageTitle>
+        <PageTitle>등록된 공연장
+          <p>공연장 목록에 찿는 공연장이 이미 있을 경우, 즐겨찾기를 해주세요!</p>
+        </PageTitle>
 
         <ContentLayout>
           {/* 좌측: 검색 및 리스트 */}
@@ -301,10 +303,18 @@ const MainContent = styled.div`
 `;
 
 const PageTitle = styled.h1`
+  display: flex;
+  align-items: center;
+  gap: 15px;
   font-size: 30px;
   font-weight: 500;
   color: #333;
   margin-bottom: 18px;
+  
+  p{
+    font-size: 15px;
+    font-weight: 300;
+  }
 `;
 
 const ContentLayout = styled.div`
