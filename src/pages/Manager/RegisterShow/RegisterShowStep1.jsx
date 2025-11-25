@@ -396,7 +396,9 @@ const RegisterShowStep1 = ({ viewer = false }) => {
 
           <FormContent>
             <LeftContent>
-              <Name>대표 포스터</Name>
+              <Name>대표 포스터
+                <p>( jpg, jpeg만 가능 )</p>
+              </Name>
               <Poster
                 onClick={() => document.getElementById("posterUpload").click()}
               >
@@ -790,6 +792,13 @@ const Name = styled.div`
   font-weight: 500;
   display: flex;
   gap: 20px;
+  display: flex;
+  align-items: center;
+
+  p{
+    font-size: 16px;
+    font-weight: 300;
+  }
 `;
 
 const Poster = styled.div`

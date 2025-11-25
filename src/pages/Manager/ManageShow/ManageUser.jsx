@@ -557,7 +557,7 @@ const ShowtimeDropdown = styled.select`
   border: 1px solid var(--color-primary);
     background: ${({ $active }) => ($active ? 'var(--color-primary)' : '#fff')};
   color: ${({ $active }) => ($active ? '#fff' : 'var(--color-primary)')};
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
