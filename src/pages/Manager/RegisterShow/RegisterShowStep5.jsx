@@ -90,6 +90,8 @@ const RegisterShowStep5 = () => {
       }
       console.log(result);
       addToast("저장되었습니다!", "success");
+      //제출 후 localStorage 삭제
+      localStorage.removeItem("createShowPayload");
 
       navigate("/homemanager", { replace: true });
     } catch (error) {

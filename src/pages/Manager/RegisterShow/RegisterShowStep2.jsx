@@ -162,6 +162,18 @@ const RegisterShowStep2 = ({ viewer = false }) => {
     console.log("createshowpayload ~", payload);
     navigate(`/register-show/${showId}/step3`);
   };
+  const handleSaveAndNext = async () => {
+  try {
+    // 1️⃣ 임시 저장 먼저
+    await handleTempSave(); // handleTempSave가 async라면 await 사용
+
+    // 2️⃣ 임시 저장 완료 후 다음 단계
+    handleNext();
+  } catch (error) {
+    console.error("임시 저장 중 오류:", error);
+    // 필요 시 사용자에게 알림
+  }
+};
 
   const handleText = (e) => {
     const value = e.target.value;
@@ -274,7 +286,7 @@ const RegisterShowStep2 = ({ viewer = false }) => {
             <PrevButton onClick={handlePrevious}>←이전</PrevButton>
             <RightButtonGroup>
               <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
-              <NextButton onClick={handleNext}>다음→</NextButton>
+              <NextButton onClick={handleSaveAndNext}>다음→</NextButton>
             </RightButtonGroup>
           </Footer>
         )}

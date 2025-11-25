@@ -369,6 +369,19 @@ const RegisterShowStep1 = ({ viewer = false }) => {
     localStorage.setItem("createShowPayload", JSON.stringify(finalPayload));
     navigate(`/register-show/${showId}/step2`);
   };
+  const handleSaveAndNext = async () => {
+  try {
+    // 1️⃣ 임시 저장 먼저
+    await handleTempSave(); // handleTempSave가 async라면 await 사용
+
+    // 2️⃣ 임시 저장 완료 후 다음 단계
+    handleNext();
+  } catch (error) {
+    console.error("임시 저장 중 오류:", error);
+    // 필요 시 사용자에게 알림
+  }
+};
+
 
   // 로컬 저장 로드
   useEffect(() => {
@@ -682,13 +695,32 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                   <Input
                     placeholder="0000000000000"
                     value={formData.bankAccount}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                    const value = e.target.value;
+                    // 숫자만 허용
+                    if (/^\d*$/.test(value)) {
                       setFormData((prev) => ({
                         ...prev,
-                        bankAccount: e.target.value,
-                      }))
+                        bankAccount: value,
+                      }));
+                      // 만약 idx 기반 ticketOption도 동시에 업데이트하고 싶으면 추가
+                      // updateTicketOption(idx, "price", value);
                     }
+                  }}
+                  onKeyDown={(e) => {
+                    // 허용 키: 숫자, 백스페이스, Delete, 화살표, Tab
+                    if (
+                      !(
+                        (e.key >= "0" && e.key <= "9") ||
+                        ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
+                      )
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
                   />
+                 
+
                 </AccountRow>
               </Q>
             </RightContent>
@@ -701,7 +733,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
             <PrevButton onClick={handlePrevious}>←이전</PrevButton>
             <RightButtonGroup>
               <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton>
-              <NextButton onClick={handleNext}>다음→</NextButton>
+              <NextButton onClick={handleSaveAndNext}>다음→</NextButton>
             </RightButtonGroup>
           </Footer>
         )}
