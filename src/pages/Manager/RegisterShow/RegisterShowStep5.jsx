@@ -2,7 +2,7 @@ import React from "react";
 import NavbarManager from "../../../components/Navbar/NavbarManager";
 import RegisterShowNavbar from "./RegisterShowNavbar";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../../../components/Toast/useToast";
 import { useState, useEffect } from "react";
 import { BsUpload } from "react-icons/bs";
@@ -16,7 +16,10 @@ import RegisterShowStep4 from "./RegisterShowStep4";
 const RegisterShowStep5 = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
-
+  const { showId } = useParams();
+  useEffect(() => {
+    console.log(showId);
+  }, [showId]);
   // 이미지 파일 저장
   const [poster, setPoster] = useState(null);
   // 미리보기 URL 저장
@@ -59,8 +62,40 @@ const RegisterShowStep5 = () => {
   };
 
   // 다음 단계로
-  const handleSubmit = () => {
-    // navigate("/register-show/step2");
+  const handleSubmit = async () => {
+    //  const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
+
+    try {
+      const payload = {
+        showId: showId,
+        status: "PUBLISHED",
+      };
+      console.log(payload);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/publish`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          credentials: "include",
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) {
+        addToast(result.message || "임시저장 실패", "error");
+        return;
+      }
+      console.log(result);
+      addToast("저장되었습니다!", "success");
+
+      navigate("/homemanager", { replace: true });
+    } catch (error) {
+      console.error("임시저장 오류:", error);
+      addToast("임시저장 중 오류 발생", "error");
+    }
   };
 
   // 기존 임시 저장 데이터 불러오기
@@ -73,23 +108,19 @@ const RegisterShowStep5 = () => {
 
   return (
     <>
-     
       <Container>
-       
-          {/* <RegisterShowNavbar currentStep={5} /> */}
-          <RegisterShowStep1 viewer={true} />
-          <RegisterShowStep2 viewer={true} />
-          <RegisterShowStep3 viewer={true} />
-          <RegisterShowStep4 viewer={true} />
-          <Footer>
-            <PrevButton onClick={handlePrevious}>←이전</PrevButton>
-            <RightButtonGroup>
-              {/* <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton> */}
-              <NextButton onClick={handleSubmit}>등록하기</NextButton>
-            </RightButtonGroup>
-          </Footer>
-       
-
+        {/* <RegisterShowNavbar currentStep={5} /> */}
+        <RegisterShowStep1 viewer={true} />
+        <RegisterShowStep2 viewer={true} />
+        <RegisterShowStep3 viewer={true} />
+        <RegisterShowStep4 viewer={true} />
+        <Footer>
+          <PrevButton onClick={handlePrevious}>←이전</PrevButton>
+          <RightButtonGroup>
+            {/* <TempSaveButton onClick={handleTempSave}>임시저장</TempSaveButton> */}
+            <NextButton onClick={handleSubmit}>등록하기</NextButton>
+          </RightButtonGroup>
+        </Footer>
       </Container>
     </>
   );

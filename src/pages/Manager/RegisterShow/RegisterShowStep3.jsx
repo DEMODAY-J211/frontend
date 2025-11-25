@@ -23,6 +23,7 @@ const RegisterShowStep3 = ({ viewer = false }) => {
   const [totalAvailableSeats, setTotalAvailableSeats] = useState(null); // 총 판매 가능 좌석
   const [updatedSeatCount, setUpdatedSeatCount] = useState(0); // 제외/VIP 좌석 수
   const [seatMapData, setSeatMapData] = useState(null); // 좌석표 데이터 (API 전송용)
+  const [editMode, setEditMode] = useState(false);
 
   // 공연 장소 목록 (API에서 가져옴)
   const [venues, setVenues] = useState([]);
@@ -75,9 +76,11 @@ const RegisterShowStep3 = ({ viewer = false }) => {
         setIsLoading(false);
       }
     };
-
-    fetchFavoriteVenues();
-  }, []);
+    // favoriteVenues가 비어있을 때만 호출
+    if (!venues || venues.length === 0) {
+      fetchFavoriteVenues();
+    }
+  }, [venues]); // venues 상태를 의존으로 넣으면 필요 시만 호출
 
   // 좌석 판매 방법 옵션
   const salesMethods = ["스탠딩석", "주최 측 배정", "예매자 선택", "자동 배정"];
@@ -89,6 +92,9 @@ const RegisterShowStep3 = ({ viewer = false }) => {
   };
   useEffect(() => {
     console.log(selectedVenue);
+    if (selectedVenue) {
+      setQuantity(selectedVenue.quantity ?? 50);
+    }
   }, [selectedVenue]);
 
   // 공연 장소 선택 핸들러 (단일 선택)
@@ -187,6 +193,7 @@ const RegisterShowStep3 = ({ viewer = false }) => {
       seatCount: quantity,
     };
     console.log("update", updatedPayload);
+    localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
@@ -426,11 +433,29 @@ const RegisterShowStep3 = ({ viewer = false }) => {
               ) : (
                 <QuantityControl>
                   <QuantityButtons>
-                    <QuantityInput
-                      value={quantity}
-                      onChange={(e) => setQuantity(Number(e.target.value))}
-                    />
-                    {/* <QuantityDisplay>{quantity}</QuantityDisplay> */}
+                    <QuantityDisplay>
+                      <div>
+                        {editMode ? (
+                          <input
+                            type="number"
+                            value={quantity}
+                            onChange={(e) =>
+                              setQuantity(Number(e.target.value))
+                            }
+                            onBlur={() => setEditMode(false)} // focus out 시 display 모드로
+                            autoFocus
+                            min={0}
+                          />
+                        ) : (
+                          <div
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setEditMode(true)}
+                          >
+                            {quantity}
+                          </div>
+                        )}
+                      </div>
+                    </QuantityDisplay>
                   </QuantityButtons>
                   <Unit>개</Unit>
                 </QuantityControl>
@@ -672,6 +697,18 @@ const QuantityDisplay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  /* 안에 있는 input 스타일 */
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    // width: 3ch;
+    text-align: center;
+    font-size: inherit;
+    font-family: inherit;
+    cursor: text;
+    color: #fffffe;
+  }
 `;
 
 const QuantityInput = styled.input`

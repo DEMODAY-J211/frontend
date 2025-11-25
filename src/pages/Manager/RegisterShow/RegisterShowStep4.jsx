@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../../../components/Toast/useToast";
 import NavbarManager from "../../../components/Navbar/NavbarManager";
 import RegisterShowNavbar from "./RegisterShowNavbar";
@@ -21,25 +21,26 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const checkboxItems = [
-  { id: "deposit", label: "입금 안내" },
-  { id: "reservation", label: "예매 확정" },
-  { id: "performance", label: "공연 안내" },
-  { id: "survey", label: "공연 후 설문 안내" },
+  { id: "payGuide", label: "입금 안내" },
+  { id: "bookConfirm", label: "예매 확정" },
+  { id: "showGuide", label: "공연 안내" },
+  { id: "reviewRequest", label: "공연 후 설문 안내" },
 ];
 
 const RegisterShowStep4 = ({ viewer = false }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const { showId } = useParams();
 
   const [previews, setPreviews] = useState({
-    deposit: false,
-    reservation: false,
-    performance: true,
-    survey: false,
+    payGuide: false,
+    bookConfirm: false,
+    showGuide: true,
+    reviewRequest: false,
   });
 
   const defaultMessages = {
-    deposit:
+    payGuide:
       "[입금 안내]\n" +
       "안녕하세요, {단체명}입니다!\n" +
       "예매하신 {공연명}의 티켓 금액을 아래 계좌로 입금해주시면 예매가 완료됩니다.\n\n" +
@@ -48,12 +49,12 @@ const RegisterShowStep4 = ({ viewer = false }) => {
       "계좌번호: {계좌번호}\n\n" +
       "확인되는 대로 빠르게 안내해 드리겠습니다!",
 
-    reservation:
+    bookConfirm:
       "[예매 확정 안내]\n" +
       "안녕하세요! {공연명}의 예매가 정상적으로 완료되었습니다😊\n\n" +
       "소중한 예매 감사드리며, 공연장에서 뵙겠습니다!",
 
-    performance:
+    showGuide:
       "[관람일 D-1 안내]\n" +
       "{000 님}, 관람일이 바로 내일이에요!\n\n" +
       "공연명: {공연명}\n" +
@@ -62,12 +63,13 @@ const RegisterShowStep4 = ({ viewer = false }) => {
       "관람 장소: {공연장소}\n\n" +
       "안전하고 즐거운 관람을 위해 입장시간에 맞춰 와주세요!",
 
-    survey:
+    reviewRequest:
       "[관람 후기 설문 안내]\n" +
       "공연을 관람해주셔서 진심으로 감사합니다!\n" +
       "더 좋은 공연을 만들기 위해 짧은 설문에 참여 부탁드립니다! \n\n" +
       "설문 링크: (링크를 넣어주세요)",
   };
+  const [showMessage, setShowMessage] = useState(defaultMessages);
 
   const macroMap = {
     단체명: "team_name",
@@ -93,35 +95,137 @@ const RegisterShowStep4 = ({ viewer = false }) => {
   };
 
   const handleCheckboxToggle = (id) => {
-    if (id === "performance") return; // ❗ 공연 안내는 비활성화
+    if (id === "showGuide") return; // ❗ 공연 안내는 비활성화
     setPreviews((prev) => ({ ...prev, [id]: !prev[id] }));
   };
+  // 임시 저장 핸들러
+  const handleTempSave = async () => {
+    // 1) 기존 payload 불러오기
+    const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
+    const formData = previews;
 
-  const handleTempSave = () => {
-    const formData = { previews };
     localStorage.setItem("registerShowStep4", JSON.stringify(formData));
-    addToast("임시 저장되었습니다!", "success");
-  };
+    console.log("formdata", formData);
+    console.log("payload", payload);
 
-  const handlePrevious = () => navigate("/register-show/step3");
+    const showGuideTextarea = document.getElementById("textarea-showGuide");
+    if (!showGuideTextarea) return;
+    console.log("form", formData);
 
-  const handleNext = () => {
-    const performanceTextarea = document.getElementById("textarea-performance");
-    if (!performanceTextarea) return;
-
-    const userEditedMessage = performanceTextarea.innerText.trim();
+    const userEditedMessage = showGuideTextarea.innerText.trim();
 
     if (!userEditedMessage) {
       addToast("필수 항목을 입력해주세요: 공연 안내", "error");
       return;
     }
 
-    // 백엔드용 메시지 변환
-    const backendMessage = convertMessageForBackend(userEditedMessage);
+    // true인 항목 필터링
+    const trueKeys = Object.keys(formData).filter(
+      (key) => formData[key] === true
+    );
+    console.log("turkey", trueKeys);
 
-    console.log("보낼 메시지:", backendMessage); // 여기서 실제 API 호출하면 됨
+    trueKeys.forEach((key) => {
+      // macro 변환 적용
+      const elem = document.getElementById(`textarea-${key}`);
+      if (!elem) return;
 
-    navigate("/register-show/step5");
+      const userEdited = elem.innerText.trim();
+      showMessage[key] = convertMessageForBackend(userEdited);
+    });
+    console.log(showMessage);
+
+    // userEditedMessage는 showGuide 같은 필드에 넣는다고 가정
+    showMessage.showGuide = userEditedMessage;
+
+    console.log("보낼 showMessage:", showMessage);
+
+    const updatedPayload = {
+      ...payload,
+      showMessage: showMessage, // 이미지 배열 자체가 S3 URL 배열
+    };
+    console.log("updatedapyalad", updatedPayload);
+
+    localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
+
+    // navigate("/register-show/step5");
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(showMessage),
+          credentials: "include",
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) {
+        addToast(result.message || "임시저장 실패", "error");
+        return;
+      }
+      console.log(result);
+      addToast("임시 저장되었습니다!", "success");
+    } catch (error) {
+      console.error("임시저장 오류:", error);
+      addToast("임시저장 중 오류 발생", "error");
+    }
+  };
+
+  const handlePrevious = () => navigate(`/register-show/${showId}/step3`);
+
+  const handleNext = () => {
+    const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
+    const formData = previews;
+
+    localStorage.setItem("registerShowStep4", JSON.stringify(formData));
+    console.log("formdata", formData);
+    console.log("payload", payload);
+
+    const showGuideTextarea = document.getElementById("textarea-showGuide");
+    if (!showGuideTextarea) return;
+    console.log("form", formData);
+
+    const userEditedMessage = showGuideTextarea.innerText.trim();
+
+    if (!userEditedMessage) {
+      addToast("필수 항목을 입력해주세요: 공연 안내", "error");
+      return;
+    }
+
+    // true인 항목 필터링
+    const trueKeys = Object.keys(formData).filter(
+      (key) => formData[key] === true
+    );
+    console.log("turkey", trueKeys);
+
+    trueKeys.forEach((key) => {
+      // macro 변환 적용
+      const elem = document.getElementById(`textarea-${key}`);
+      if (!elem) return;
+
+      const userEdited = elem.innerText.trim();
+      showMessage[key] = convertMessageForBackend(userEdited);
+    });
+    console.log(showMessage);
+
+    // userEditedMessage는 showGuide 같은 필드에 넣는다고 가정
+    showMessage.showGuide = userEditedMessage;
+
+    console.log("보낼 showMessage:", showMessage);
+
+    const updatedPayload = {
+      ...payload,
+      showMessage: showMessage, // 이미지 배열 자체가 S3 URL 배열
+    };
+    console.log("updatedapyalad", updatedPayload);
+
+    localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
+
+    navigate(`/register-show/${showId}/step5`);
   };
 
   // 기존 임시 저장 데이터 불러오기
@@ -153,15 +257,13 @@ const RegisterShowStep4 = ({ viewer = false }) => {
               <Flex>
                 <CheckboxButton
                   checked={previews[item.id]}
-                  isSurvey={item.id === "survey"}
+                  isSurvey={item.id === "reviewRequest"}
                   onClick={() => handleCheckboxToggle(item.id)}
                 >
                   {previews[item.id] ? <GrCheckboxSelected /> : <GrCheckbox />}
                   {item.label}
                 </CheckboxButton>
-                {item.id === "performance" && (
-                  <RequiredText>(필수)</RequiredText>
-                )}
+                {item.id === "showGuide" && <RequiredText>(필수)</RequiredText>}
               </Flex>
               {previews[item.id] && (
                 <MessageTextarea
