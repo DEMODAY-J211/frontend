@@ -29,133 +29,13 @@ const RegisterShowStep2 = ({ viewer = false }) => {
   // 로컬 스토리지 유틸 (step 방식)
   // -------------------------
 
-  const STEPS_KEY = "createShowPayload_steps";
-
-  /**
-   * stepName (string) 으로 부분 payload 저장.
-   * 예: saveStep("step_images", { detailImages: [...] })
-   */
-  const saveStep = (stepName, data) => {
-    const all = JSON.parse(localStorage.getItem(STEPS_KEY)) || {};
-    all[stepName] = {
-      ...(all[stepName] || {}),
-      ...data,
-    };
-    localStorage.setItem(STEPS_KEY, JSON.stringify(all));
-  };
-
-  /**
-   * 모든 step을 병합한 최종 payload 생성
-   * step 저장 순서에 의존하지 않게 객체들을 순서대로 병합 (Object.assign)
-   */
-  const getMergedPayloadFromSteps = () => {
-    const all = JSON.parse(localStorage.getItem(STEPS_KEY)) || {};
-    const merged = Object.assign(
-      {},
-      ...Object.keys(all).map((k) => all[k] || {})
-    );
-    return merged;
-  };
-
-  /**
-   * 특정 step을 제거하고 싶을 때 사용 (선택적)
-   */
-  const removeStep = (stepName) => {
-    const all = JSON.parse(localStorage.getItem(STEPS_KEY)) || {};
-    delete all[stepName];
-    localStorage.setItem(STEPS_KEY, JSON.stringify(all));
-  };
-
-  // -------------------------
-  // fetchImages (수정된 버전) - 업로드 결과를 step_images에 저장
-  // -------------------------
-  const fetchImages = async () => {
-    if (!images || images.length === 0) return [];
-
-    try {
-      const formData = new FormData();
-      images.forEach((file) => {
-        formData.append("images", file);
-      });
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/shows/${showId}/images`,
-        {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-        }
-      );
-
-      const result = await response.json();
-      if (!response.ok) {
-        console.error("이미지 업로드 실패:", result);
-        alert(result.message || "이미지 업로드 중 오류");
-        return [];
-      }
-
-      console.log("이미지 업로드 성공:", result);
-
-      // 업로드된 최신 S3 URL 배열
-      const uploaded = result.data ?? [];
-
-      // // 기존 step_images (있으면) 가져오기
-      // const currentSteps = JSON.parse(localStorage.getItem(STEPS_KEY)) || {};
-      // const prevImagesInStep =
-      //   (currentSteps.step_images && currentSteps.step_images.detailImages) ||
-      //   [];
-
-      // // 화면(프리뷰)에 보이는 S3 URL (이미 화면에서 유지되는 것) + 상태(uploadedUrls) + 이번 업로드
-      // const existingVisibleS3 = previews.filter((p) =>
-      //   p.startsWith("https://")
-      // );
-      // const merged = Array.from(
-      //   new Set([
-      //     ...prevImagesInStep,
-      //     ...existingVisibleS3,
-      //     ...uploaded,
-      //     ...uploadedUrls,
-      //   ])
-      // );
-
-      // // step 단위로 저장 (여기서는 "step_images")
-      // saveStep("step_images", { detailImages: merged });
-
-      // 로컬 상태 갱신
-      // setUploadedUrls((prev) => Array.from(new Set([...uploaded])));
-      // setImages([]); // 업로드 끝난 이미지 클리어
-
-      // 업로드된 URL 반환
-
-      setImages(uploaded);
-      return uploaded;
-    } catch (error) {
-      console.error("이미지 업로드 오류:", error);
-      addToast("이미지 업로드 실패", "error");
-      return [];
-    }
-  };
-
   // -------------------------
   // handleTempSave (step 기반으로 수정)
   // -------------------------
   const handleTempSave = async () => {
+    const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
+
     try {
-      // 1) 새로 업로드한 이미지 URL 받기 (fetchImages 내부에서 step_images에 저장됨)
-      const newlyUploaded = await fetchImages(); // ex: ["s3/new1.jpg"]
-      console.log("newlyuploaded", newlyUploaded);
-
-      // 2) Payload 생성
-      const payload = {
-        detailImages: newlyUploaded,
-        detailText: tempText,
-        status: "DRAFT",
-      };
-
-      // 호환을 위해 (기존 코드가 여전히 createShowPayload 사용하면) 기존 키도 업데이트
-      localStorage.setItem("register-show-step2", JSON.stringify(payload));
-
-      // 7) 서버로 PATCH 요청 (기존 로직 유지)
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
         {
@@ -169,16 +49,15 @@ const RegisterShowStep2 = ({ viewer = false }) => {
       );
 
       const result = await response.json();
-      if (response.ok) {
-        console.log("임시 저장 성공:", result);
-        addToast("임시 저장되었습니다!", "success");
-      } else {
-        console.error("임시 저장 실패:", result);
-        alert(result.message || "등록 중 오류가 발생했습니다.");
+      if (!response.ok) {
+        addToast(result.message || "임시저장 실패", "error");
+        return;
       }
+      console.log(result);
+      addToast("임시저장 완료!", "success");
     } catch (error) {
-      console.error("API 요청 실패:", error);
-      alert("서버 연결 실패");
+      console.error("임시저장 오류:", error);
+      addToast("임시저장 중 오류 발생", "error");
     }
   };
 
@@ -192,8 +71,7 @@ const RegisterShowStep2 = ({ viewer = false }) => {
 
   const [formData, setFormData] = useState(getBasePayload);
 
-  // 파일 업로드 핸들러
-  const handleFileChange = (e, index) => {
+  const handleFileChange = async (e, idx) => {
     const files = Array.from(e.target.files);
 
     if (images.length + files.length > 5) {
@@ -201,22 +79,56 @@ const RegisterShowStep2 = ({ viewer = false }) => {
       return;
     }
 
-    const newImages = [...images];
-    const newPreviews = [...previews];
+    // 백엔드 업로드 API용 FormData 준비
+    const formData = new FormData();
+    files.forEach((file) => formData.append("images", file));
+    console.log(import.meta.env.VITE_API_URL, showId);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/shows/${showId}/images`,
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        }
+      );
 
-    files.forEach((file) => {
-      newImages.push(file);
-      newPreviews.push(URL.createObjectURL(file));
-    });
+      const result = await response.json();
 
-    setImages(newImages);
-    setPreviews(newPreviews);
+      if (!response.ok) {
+        console.error("업로드 실패:", result);
+        addToast("이미지 업로드 실패", "error");
+        return;
+      }
+
+      console.log("ddd", result);
+      // S3 URL 목록
+      const uploadedUrls = result.data ?? [];
+
+      // 상태 반영
+      setImages((prev) => [...prev, ...uploadedUrls]);
+      setPreviews((prev) => [...prev, ...uploadedUrls]);
+
+      // localStorage에도 반영
+      const prevPayload =
+        JSON.parse(localStorage.getItem("createShowPayload")) || {};
+
+      const updatedPayload = {
+        ...prevPayload,
+        detailImages: [...(prevPayload.detailImages || []), ...uploadedUrls],
+      };
+
+      localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
+    } catch (err) {
+      console.error("이미지 업로드 오류", err);
+      addToast("이미지 업로드 중 오류 발생", "error");
+    }
   };
 
   const handleDelete = (index, e) => {
     e.stopPropagation();
-
-    const removed = previews[index];
+    e.preventDefault();
+    const removedUrl = images[index];
 
     const newImages = images.filter((_, i) => i !== index);
     const newPreviews = previews.filter((_, i) => i !== index);
@@ -224,16 +136,16 @@ const RegisterShowStep2 = ({ viewer = false }) => {
     setImages(newImages);
     setPreviews(newPreviews);
 
-    // 3) 🔥 localStorage detailImages도 덮어쓰기!
+    // localStorage 갱신
     const prevPayload =
-      JSON.parse(localStorage.getItem("register-show-step2")) || {};
+      JSON.parse(localStorage.getItem("createShowPayload")) || {};
 
     const updatedPayload = {
       ...prevPayload,
-      detailImages: newImages,
+      detailImages: newImages, // 이미지 배열 자체가 S3 URL 배열
     };
 
-    localStorage.setItem("register-show-step2", JSON.stringify(updatedPayload));
+    localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
 
     addToast("이미지가 삭제되었습니다.", "success");
   };
@@ -243,41 +155,29 @@ const RegisterShowStep2 = ({ viewer = false }) => {
     // TODO: 2단계 페이지로 이동
     navigate(`/register-show/${showId}/step1`);
   };
-
-  // 다음 단계로
-  // const handleNext = () => {
-
-  //   navigate(`/register-show/${showId}/step3`);
-  // };
   const handleNext = () => {
     // 1) 최신 입력값으로 payload 생성
-    const newPayload = createpayload();
+    const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
 
-    // 2) 저장해둔 preview 데이터 불러오기
-    const storedPreview = JSON.parse(
-      localStorage.getItem("previewImages") || "[]"
-    );
-
-    // 3) 기존 createShowPayload 불러오기 (있으면 병합)
-    const savedPayload = JSON.parse(
-      localStorage.getItem("register-show-step2") || "{}"
-    );
-
-    // 4) payload 병합 (새 값이 우선)
-    const mergedPayload = {
-      ...savedPayload,
-      ...newPayload,
-      detailImages: storedPreview.detailImages || [],
-    };
-
-    // 5) 로컬 저장
-    localStorage.setItem("register-show-step2", JSON.stringify(mergedPayload));
-
-    console.log("merged payload saved:", mergedPayload);
-
+    console.log("createshowpayload ~", payload);
     navigate(`/register-show/${showId}/step3`);
   };
 
+  const handleText = (e) => {
+    const value = e.target.value;
+    setTempText(value); // 화면 상태 업데이트
+
+    // localStorage 업데이트
+    const prevPayload =
+      JSON.parse(localStorage.getItem("createShowPayload")) || {};
+
+    const updatedPayload = {
+      ...prevPayload,
+      detailText: value,
+    };
+
+    localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
+  };
   // 기존 임시 저장 데이터 불러오기
   useEffect(() => {
     // const saved = JSON.parse(localStorage.getItem("registerShowStep2"));
@@ -363,7 +263,7 @@ const RegisterShowStep2 = ({ viewer = false }) => {
             <Input
               placeholder="제 00회 정기공연입니다! ..."
               value={tempText}
-              onChange={(e) => setTempText(e.target.value)}
+              onChange={handleText}
             />
           </DownContent>
         </MainContent>

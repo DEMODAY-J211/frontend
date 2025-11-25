@@ -81,6 +81,15 @@ const RegisterShowStep3 = ({ viewer = false }) => {
 
   // 좌석 판매 방법 옵션
   const salesMethods = ["스탠딩석", "주최 측 배정", "예매자 선택", "자동 배정"];
+  const salesMethodMap = {
+    스탠딩석: "STANDING",
+    "주최 측 배정": "EVENTHOST",
+    "예매자 선택": "SELECTBYUSER",
+    "자동 배정": "SCHEDULING",
+  };
+  useEffect(() => {
+    console.log(selectedVenue);
+  }, [selectedVenue]);
 
   // 공연 장소 선택 핸들러 (단일 선택)
   const handleVenueSelect = (venue) => {
@@ -144,7 +153,9 @@ const RegisterShowStep3 = ({ viewer = false }) => {
       setExcludedSeats(seatData.excludedSeats || []);
       setUpdatedSeatCount(seatData.excludedSeats?.length || 0);
       addToast(
-        `제외된 좌석: ${seatData.excludedSeats?.length || 0}개 / 판매 가능 좌석: ${seatData.totalAvailableSeats || 0}개`,
+        `제외된 좌석: ${
+          seatData.excludedSeats?.length || 0
+        }개 / 판매 가능 좌석: ${seatData.totalAvailableSeats || 0}개`,
         "success"
       );
     }
@@ -153,21 +164,53 @@ const RegisterShowStep3 = ({ viewer = false }) => {
       setExcludedSeats(seatData.vipSeats || []);
       setUpdatedSeatCount(seatData.vipSeats?.length || 0);
       addToast(
-        `VIP석: ${seatData.vipSeats?.length || 0}개 / 판매 가능 좌석: ${seatData.totalAvailableSeats || 0}개`,
+        `VIP석: ${seatData.vipSeats?.length || 0}개 / 판매 가능 좌석: ${
+          seatData.totalAvailableSeats || 0
+        }개`,
         "success"
       );
     }
   };
 
   // 임시 저장 핸들러
-  const handleTempSave = () => {
-    const formData = {
-      venue: selectedVenue,
-      salesMethod: selectedMethod,
-      quantity: quantity,
+  const handleTempSave = async () => {
+    // 1) 기존 payload 불러오기
+    const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
+    const selectedKey = salesMethodMap[selectedMethod]; // "standing"
+
+    // 2) 공연장 정보 추가
+    const updatedPayload = {
+      ...payload,
+      locationId: selectedVenue.id,
+      locationName: selectedVenue.name,
+      seatType: selectedKey,
+      seatCount: quantity,
     };
-    localStorage.setItem("registerShowStep3", JSON.stringify(formData));
-    addToast("임시 저장되었습니다!", "success");
+    console.log("update", updatedPayload);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedPayload),
+          credentials: "include",
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) {
+        addToast(result.message || "임시저장 실패", "error");
+        return;
+      }
+      console.log(result);
+      addToast("임시저장 완료!", "success");
+    } catch (error) {
+      console.error("임시저장 오류:", error);
+      addToast("임시저장 중 오류 발생", "error");
+    }
   };
 
   // 이전 단계로
@@ -383,7 +426,11 @@ const RegisterShowStep3 = ({ viewer = false }) => {
               ) : (
                 <QuantityControl>
                   <QuantityButtons>
-                    <QuantityDisplay>{quantity}</QuantityDisplay>
+                    <QuantityInput
+                      value={quantity}
+                      onChange={(e) => setQuantity(Number(e.target.value))}
+                    />
+                    {/* <QuantityDisplay>{quantity}</QuantityDisplay> */}
                   </QuantityButtons>
                   <Unit>개</Unit>
                 </QuantityControl>
@@ -514,8 +561,7 @@ const SelectButton = styled.button`
     return props.active ? "#FFFFFE" : "#333333";
   }};
 
-  font-weight: ${(props) =>
-    props.active || props.$locked ? "bold" : "300"};
+  font-weight: ${(props) => (props.active || props.$locked ? "bold" : "300")};
   font-size: 16px;
   cursor: ${(props) => {
     if (props.disabled) return "not-allowed";
@@ -529,7 +575,9 @@ const SelectButton = styled.button`
     transform: ${(props) =>
       props.disabled || props.$locked ? "none" : "translateY(-2px)"};
     box-shadow: ${(props) =>
-      props.disabled || props.$locked ? "none" : "0 2px 8px rgba(0, 0, 0, 0.1)"};
+      props.disabled || props.$locked
+        ? "none"
+        : "0 2px 8px rgba(0, 0, 0, 0.1)"};
   }
 `;
 
@@ -616,6 +664,17 @@ const PlusButton = styled.button`
 `;
 
 const QuantityDisplay = styled.div`
+  font-weight: 500;
+  font-size: 20px;
+  color: #fffffe;
+  width: 36px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const QuantityInput = styled.input`
   font-weight: 500;
   font-size: 20px;
   color: #fffffe;
