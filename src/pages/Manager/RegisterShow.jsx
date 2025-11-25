@@ -13,38 +13,71 @@ const RegisterShow = () => {
   const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [isDirty, setIsDirty] = useState(false); // 폼 수정 여부
+  // const [isDirty, setIsDirty] = useState(false); // 폼 수정 여부
   const [nextPath, setNextPath] = useState(null); // 이동하려던 경로 저장
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const fetchDeleteShow = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/manager/shows/draft`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Register Show :", result);
+
+        // data가 배열이고 길이가 0보다 크면 공연장이 있는 것
+        if (result.success) {
+          console.log(result.message);
+          console.log(result.data);
+        }
+      } else {
+        console.error("Failed to Delete draft shows:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching  Delete draft shows:", error);
+    }
+  };
+  
+  
   // 브라우저 새로고침 방지만!
-  usePreventLeave(isDirty);
+  usePreventLeave(true);
 
   // -------------- ★ 내부 이동 제어 ---------------
   const handleProtectedNavigation = (path) => {
-    if (!isDirty) {
-      navigate(path);
-      return;
-    }
 
-    // 수정 중이면 모달 열기
+    // 수정 여부와 상관없이 항상 모달 띄우기
     setNextPath(path);
     setIsModalOpen(true);
   };
 
-  // 모달에서 "이동하기" 클릭
+  // 모달에서 "임시저장" 클릭
   const confirmLeave = () => {
     console.log(showId);
     localStorage.setItem("draft_showId", showId);
+    if (nextPath) navigate(nextPath, { replace: true });
     setIsModalOpen(false);
-    navigate(nextPath, { replace: true });
+    
+
   };
 
-  // 모달에서 "취소" 클릭
+  // 모달에서 "중단하기" 클릭
 const cancelLeave = () => {
   if (nextPath) {
-    navigate(nextPath, { replace: true }); // 원래 가려던 페이지로 이동
-  }
+    fetchDeleteShow();
+    navigate(nextPath, { replace: true });
+  };
+  setIsModalOpen(false);
+  setNextPath(null);
+};
+
+// 모달 닫기
+const cancelModal = () => {
   setIsModalOpen(false);
   setNextPath(null);
 };
@@ -164,11 +197,11 @@ const cancelLeave = () => {
         currentStep={currentStep}
         setCurrentStep={setCurrentStep}
       />
-      <Outlet context={{ isDirty, setIsDirty }} />
+      <Outlet context={{}} />
       {isModalOpen && (
         <ModalOverlay onClick={cancelLeave}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <CloseButton onClick={cancelLeave}>×</CloseButton>
+            <CloseButton onClick={cancelModal}>×</CloseButton>
             <ModalTitle>
               임시저장 없이
               <br />
