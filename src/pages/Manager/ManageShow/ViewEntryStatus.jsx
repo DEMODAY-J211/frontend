@@ -608,7 +608,7 @@ const ViewEntryStatus = () => {
         <Header>
 
           <Title>예매자 관리</Title>
-          {showTimeList && showTimeList.length > 0 && (
+          {/* {showTimeList && showTimeList.length > 0 && (
   <ShowtimeDropdown
  
     value={currentShowtimeId || showTimeList[0].showTimeId}
@@ -628,7 +628,7 @@ const ViewEntryStatus = () => {
     ))}
     
   </ShowtimeDropdown>
-)}
+)} */}
 
         </Header>
 
@@ -939,6 +939,23 @@ const Time = styled.div`
   cursor: pointer;
 `;
 
+
+const ShowtimeDropdown = styled.select`
+  padding: 8px 16px;
+  border-radius: 15px;
+  border: 1px solid var(--color-primary);
+    background: ${({ $active }) => ($active ? 'var(--color-primary)' : '#fff')};
+  color: ${({ $active }) => ($active ? '#fff' : 'var(--color-primary)')};
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(252, 40, 71, 0.2);
+  }
+`;
 
 
 const StatusHeader = styled.div`
