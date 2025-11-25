@@ -35,6 +35,8 @@ const RegisterShow = () => {
         if (result.success) {
           console.log(result.message);
           console.log(result.data);
+          // 제출 후 localStorage 삭제
+          localStorage.removeItem("createShowPayload");
         }
       } else {
         console.error("Failed to Delete draft shows:", response.status);
