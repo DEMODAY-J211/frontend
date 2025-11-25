@@ -150,7 +150,7 @@ export default function CheckTicket() {
           </Wrapper>
         </TicketWrapper>
         {showData?.reservationstatus !== "CANCEL_REQUESTED" &&
-          (showData?.saleMethod === "Select_by_User" ? (
+          (showData?.saleMethod === "SELECTBYUSER" ? (
             <Footerbtn
               buttons={[
                 { text: "예매 취소", color: "red", onClick: handleCancel },
