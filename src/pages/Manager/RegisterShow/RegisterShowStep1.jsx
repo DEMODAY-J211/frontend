@@ -293,50 +293,63 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   };
 
   const handleTempSave = async () => {
-    if (!validateFields()) {
-      addToast("필수 항목을 입력해주세요!", "error");
-      return;
-    }
 
-    const formattedShowTimes = showTimes.map((t) => ({
-      showStart: `${t.showStartDate}T${t.showStartTime}:00`,
-      showEnd: `${t.showStartDate}T${t.showEndTime}:00`,
-    }));
+  // if (!validateFields()) {
+  //   addToast("필수 항목을 입력해주세요!", "error");
+  //   return;
+  // }
 
-    const bookStart = `${bookStartDate}T${bookStartTime}:00`;
-    const lastShowDate = showTimes[showTimes.length - 1].showStartDate;
-    const bookEnd = `${lastShowDate}T23:59:00`;
+  // 값이 비었을 경우는 그냥 빈 값 그대로 저장하도록
+  const formattedShowTimes = showTimes.map((t) => ({
+    showStart:
+      t.showStartDate && t.showStartTime
+        ? `${t.showStartDate}T${t.showStartTime}:00`
+        : "",
+    showEnd:
+      t.showStartDate && t.showEndTime
+        ? `${t.showStartDate}T${t.showEndTime}:00`
+        : "",
+  }));
 
-    const finalPayload = {
-      ...formData,
-      showTimes: formattedShowTimes,
-      bookStart,
-      bookEnd,
-    };
+  const bookStart =
+    bookStartDate && bookStartTime
+      ? `${bookStartDate}T${bookStartTime}:00`
+      : "";
 
-    localStorage.setItem("createShowPayload", JSON.stringify(finalPayload));
-    console.log(finalPayload);
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(finalPayload),
-        }
-      );
+  const lastShowDate = showTimes[showTimes.length - 1]?.showStartDate || "";
+  const bookEnd = lastShowDate ? `${lastShowDate}T23:59:00` : "";
 
-      const result = await res.json();
-      if (res.ok) {
-        addToast("임시 저장되었습니다!", "success");
-      } else {
-        alert(result.message || "오류");
-      }
-    } catch (err) {
-      alert("서버 오류");
-    }
+  const finalPayload = {
+    ...formData,
+    showTimes: formattedShowTimes,
+    bookStart,
+    bookEnd,
   };
+
+  localStorage.setItem("createShowPayload", JSON.stringify(finalPayload));
+
+  // 서버로도 전송
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(finalPayload),
+      }
+    );
+
+    const result = await res.json();
+    if (res.ok) {
+      addToast("임시 저장되었습니다!", "success");
+    } else {
+      alert(result.message || "오류");
+    }
+  } catch (err) {
+    alert("서버 오류");
+  }
+};
 
   // 다음
   const handleNext = () => {
