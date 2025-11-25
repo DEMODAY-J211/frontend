@@ -374,7 +374,7 @@ const HomeManager = () => {
               <MyShowLeft>
                 <BtnName>단체 소개</BtnName>
                 <BtnInfo>
-                  단체 소개 수정하기!
+                  나의 단체 소개글을 여기서 수정해보세요!
                 </BtnInfo>
               </MyShowLeft>
               <MyShowRight>
@@ -391,7 +391,6 @@ const HomeManager = () => {
                 <BtnName>내 공연 관리</BtnName>
                 <BtnInfo>
                   예매자 관리, 입장 현황, 공연 정보 수정까지 한 번에!
-                  나의 역대 공연 관리하기!
                 </BtnInfo>
               </MyShowLeft>
               <MyShowRight>
@@ -417,8 +416,7 @@ const HomeManager = () => {
               <BtnName>내 공연장 관리</BtnName>
               <BtnIcon src={locationimg} alt="내 공연장 관리" />
               <BtnInfo>
-                설명글입니다. 여기에 뭐 적을지 정해야 하구.. 어쩌구저쩌구..
-                어쩌구 저쩌구.
+                나의 공연장을 여기서 관리해보세요!
               </BtnInfo>
             </MyLocation>
           </TopRight>
