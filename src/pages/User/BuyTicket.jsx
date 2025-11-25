@@ -16,7 +16,7 @@ export default function BuyTicket() {
   const { managerId, showId } = useParams();
   const { selectedShowtime, selectedOption, quantity, showData } =
     location.state || {};
-  // console.log(selectedShowtime, selectedOption, quantity, showData);
+  console.log(selectedShowtime, selectedOption, quantity, showData);
   // const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   // const [accountBank, setAccountBank] = useState("");
@@ -90,7 +90,7 @@ export default function BuyTicket() {
   };
 
   const totalPrice = selectedOption
-    ? selectedOption.ticketoptionPrice * quantity
+    ? selectedOption.ticketOptionPrice * quantity
     : 0;
   // console.log(totalPrice);
 
@@ -117,7 +117,7 @@ export default function BuyTicket() {
             </ShowInfoHeader>
             <TicketInfo>
               <TicketType>
-                {selectedOption.ticketoptionName}·{quantity}매
+                {selectedOption.ticketOptionName}·{quantity}매
               </TicketType>
             </TicketInfo>
           </InfoSection>
@@ -226,7 +226,7 @@ export default function BuyTicket() {
             </ShowInfoHeader>
             <TicketInfo>
               <TicketType>
-                {selectedOption.ticketoptionName}·{quantity}매
+                {selectedOption.ticketOptionName}·{quantity}매
               </TicketType>
               <TotalPrice>{totalPrice.toLocaleString()}원</TotalPrice>
             </TicketInfo>

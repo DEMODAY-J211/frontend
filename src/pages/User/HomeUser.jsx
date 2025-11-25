@@ -18,6 +18,9 @@ export default function HomeUser() {
   const [userReservations, setUserReservations] = useState([]);
   const currentShow = useMemo(() => shows[currentIndex], [shows, currentIndex]);
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [teamTitle, setTeamTitle] = useState(null);
+
   // const managerData = JSON.parse(localStorage.getItem("managerData"));
   const { isLoggedIn, setIsLoggedIn } = useAuth();
   console.log("isloggedin", isLoggedIn);
@@ -42,7 +45,9 @@ export default function HomeUser() {
     );
     return matches ? matches[2] : null;
   }
-
+  if (!isLoggedIn) {
+    setShowModal(true); // 로그인 안 되어 있으면 로그인 모달
+  }
   // if (managerData) {
   //   console.log("저장된 매니저 데이터:", managerData);
   // }
@@ -80,6 +85,7 @@ export default function HomeUser() {
       );
       const result = await response.json();
       console.log("managerId의 등록된 공연 Data", result);
+      setTeamTitle(result.data.managerName);
       if (result.success) {
         // setManagerData(result.data);
         setShows(result.data.showList);
@@ -156,7 +162,11 @@ export default function HomeUser() {
       <HomeUserContainer>
         {isLoginModalOpen && <LoginRequiredModal close={closeLoginModal} />}
 
-        <NavbarUser managerId={managerId} onIconClick={handleHeaderIconClick} />
+        <NavbarUser
+          managerId={managerId}
+          text={teamTitle}
+          onIconClick={handleHeaderIconClick}
+        />
         {!currentShow ? (
           <p>공연 정보를 불러오는 중입니다...</p>
         ) : (
@@ -212,6 +222,11 @@ export default function HomeUser() {
           </ShowList>
         )}
       </HomeUserContainer>
+
+      {/* 로그인 안 되어 있으면 모달 */}
+      {!isLoggedIn && showModal && (
+        <LoginRequiredModal onClose={() => setShowModal(false)} />
+      )}
     </PageWrapper>
   );
 }

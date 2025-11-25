@@ -69,8 +69,9 @@ const RegisterShowStep4 = ({ viewer = false }) => {
       "더 좋은 공연을 만들기 위해 짧은 설문에 참여 부탁드립니다! \n\n" +
       "설문 링크: (링크를 넣어주세요)",
   };
-  const [showMessage, setShowMessage] = useState(defaultMessages);
+  // const [showMessage, setShowMessage] = useState(defaultMessages);
 
+  const [messages, setMessages] = useState(defaultMessages);
   const macroMap = {
     단체명: "team_name",
     공연명: "show_name",
@@ -96,7 +97,17 @@ const RegisterShowStep4 = ({ viewer = false }) => {
 
   const handleCheckboxToggle = (id) => {
     if (id === "showGuide") return; // ❗ 공연 안내는 비활성화
-    setPreviews((prev) => ({ ...prev, [id]: !prev[id] }));
+    // setPreviews((prev) => ({ ...prev, [id]: !prev[id] }));
+    setPreviews((prev) => {
+      const next = !prev[id];
+
+      setMessages((msg) => ({
+        ...msg,
+        [id]: next ? defaultMessages[id] : "", // 체크 → default, 해제 → 공백
+      }));
+
+      return { ...prev, [id]: next };
+    });
   };
   // 임시 저장 핸들러
   const handleTempSave = async () => {
@@ -120,30 +131,20 @@ const RegisterShowStep4 = ({ viewer = false }) => {
     }
 
     // true인 항목 필터링
-    const trueKeys = Object.keys(formData).filter(
-      (key) => formData[key] === true
-    );
-    console.log("turkey", trueKeys);
+    const trueKeys = Object.keys(previews).filter((key) => previews[key]);
 
+    const sendMessage = {};
     trueKeys.forEach((key) => {
-      // macro 변환 적용
-      const elem = document.getElementById(`textarea-${key}`);
-      if (!elem) return;
-
-      const userEdited = elem.innerText.trim();
-      showMessage[key] = convertMessageForBackend(userEdited);
+      sendMessage[key] = convertMessageForBackend(messages[key]);
     });
-    console.log(showMessage);
 
-    // userEditedMessage는 showGuide 같은 필드에 넣는다고 가정
-    showMessage.showGuide = userEditedMessage;
-
-    console.log("보낼 showMessage:", showMessage);
+    console.log("turkey", trueKeys);
 
     const updatedPayload = {
       ...payload,
-      showMessage: showMessage, // 이미지 배열 자체가 S3 URL 배열
+      showMessage: sendMessage, // true인 메시지만 포함
     };
+
     console.log("updatedapyalad", updatedPayload);
 
     localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
@@ -157,7 +158,7 @@ const RegisterShowStep4 = ({ viewer = false }) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(showMessage),
+          body: JSON.stringify(updatedPayload),
           credentials: "include",
         }
       );
@@ -265,6 +266,23 @@ const RegisterShowStep4 = ({ viewer = false }) => {
                 </CheckboxButton>
                 {item.id === "showGuide" && <RequiredText>(필수)</RequiredText>}
               </Flex>
+              {previews[item.id] && (
+                <MessageTextarea
+                  id={`textarea-${item.id}`}
+                  contentEditable
+                  suppressContentEditableWarning={true}
+                  onInput={(e) => {
+                    setMessages((prev) => ({
+                      ...prev,
+                      [item.id]: e.target.innerText.trim(),
+                    }));
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: renderWithMacroBox(messages[item.id]),
+                  }}
+                />
+              )}
+
               {previews[item.id] && (
                 <MessageTextarea
                   id={`textarea-${item.id}`}

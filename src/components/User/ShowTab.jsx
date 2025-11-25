@@ -2,7 +2,11 @@ import { useState } from "react";
 import styled from "styled-components";
 import TeamInfo from "./TeamInfo";
 
-export default function ShowTab({ hasGroupInfo = true, showDetailText = "" }) {
+export default function ShowTab({
+  hasGroupInfo = true,
+  showDetailText = "",
+  showDetailImages = [],
+}) {
   const [activeTab, setActiveTab] = useState(
     hasGroupInfo ? "공연상세" : "예매확인/취소"
   );
@@ -24,7 +28,14 @@ export default function ShowTab({ hasGroupInfo = true, showDetailText = "" }) {
       </TabContainer>
       <div>
         {activeTab === "공연상세" && (
-          <ContentWrapper>{showDetailText}</ContentWrapper>
+          <ContentWrapper>
+            {" "}
+            {/* 이미지 리스트 */}
+            {showDetailImages?.map((url, i) => (
+              <DetailImage key={i} src={url} alt={`detail-${i}`} />
+            ))}
+            {showDetailText}
+          </ContentWrapper>
         )}
         {activeTab === "판매정보" && (
           <ContentWrapper>
@@ -102,4 +113,16 @@ const ContentWrapper = styled.div`
     font-size: 20px;
     font-weight: 500;
   }
+`;
+
+const DetailImage = styled.img`
+  width: 100%;
+  margin-bottom: 16px;
+  border-radius: 8px;
+`;
+
+const DetailText = styled.div`
+  white-space: pre-line; /* 줄바꿈 적용 */
+  font-size: 16px;
+  line-height: 1.5;
 `;

@@ -8,6 +8,7 @@ import Footerbtn from "../../components/Save/Footerbtn";
 import BottomSheet from "../../components/User/BottomSheet";
 import AlertModal from "../../components/Modal/AlertModal";
 import { formatKoreanDate } from "../../utils/dateFormat";
+import { useAuth } from "../Auth/AuthContext";
 // s01001
 
 const serverUrl = import.meta.env.VITE_API_URL;
@@ -15,19 +16,16 @@ const serverUrl = import.meta.env.VITE_API_URL;
 export default function ViewShowDetail() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [login, setLogin] = useState(true); //true: 로그인 상태 , false: 로그아웃 상태
-  const [showModal, setShowModal] = useState(false);
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [showData, setShowData] = useState({});
   const [showAlert, setShowAlert] = useState(false);
   const [bookingStatus, setBookingStatus] = useState("before");
   // "before" | "available" | "closed"
   const { managerId, showId } = location.state || {};
-
+  const [select, setSelect] = useState();
+  const { isLoggedIn } = useAuth();
   const handlebtn = () => {
-    if (!login) {
-      setShowModal(true); // 로그인 안 되어 있으면 로그인 모달
-    } else if (!showBottomSheet) {
+    if (!showBottomSheet) {
       setShowBottomSheet(true); // 로그인 되어 있으면 bottomsheet
     } else if (showBottomSheet) {
       navigate(`../selectseat/${showId}`);
@@ -64,6 +62,10 @@ export default function ViewShowDetail() {
   };
 
   useEffect(() => {
+    setSelect(showData?.saleMethod);
+    console.log(showData?.saleMethod);
+  }, [showData]);
+  useEffect(() => {
     fetchShows();
   }, []);
 
@@ -89,7 +91,7 @@ export default function ViewShowDetail() {
     }
   }, [showData]);
   return (
-    <PageWrapper $dimmed={showModal}>
+    <PageWrapper>
       <HomeUserContainer>
         <NavbarUser Backmode={true} text="제12회 정기공연" />
         {!showData ? (
@@ -164,10 +166,11 @@ export default function ViewShowDetail() {
               <ShowTab
                 hasGroupInfo={true}
                 showDetailText={showData.showDetailText}
+                showDetailImages={showData.detailImageUrls}
               ></ShowTab>
             </ShowContainer>
 
-            {!(login && showBottomSheet) && (
+            {!(isLoggedIn && showBottomSheet) && (
               <Footerbtn
                 buttons={[
                   {
@@ -186,18 +189,13 @@ export default function ViewShowDetail() {
           </>
         )}
       </HomeUserContainer>
-      {/* 로그인 안 되어 있으면 모달 */}
-      {!login && showModal && (
-        <LoginRequiredModal onClose={() => setShowModal(false)} />
-      )}
 
       {/* 로그인 되어 있으면 바텀시트 */}
-      {login && showBottomSheet && (
+      {isLoggedIn && showBottomSheet && (
         <BottomSheet
           onClose={() => setShowBottomSheet(false)}
           onNeedModal={() => setShowAlert(true)}
-          showData={showData}
-          managerId={managerId}
+          tempData={showData}
         />
       )}
 

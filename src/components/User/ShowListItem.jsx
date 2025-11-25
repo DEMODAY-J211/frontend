@@ -20,7 +20,8 @@ export default function ShowListItem({ reservation, activeTab }) {
   const statusText = {
     PENDING_PAYMENT: "승인 대기중",
     CANCEL_REQUESTED: "취소 완료",
-    COMPLETED: "예매 완료", // 예매완료 상태가 특정 코드라면 여기에!
+    CONFIRMED: "예매 완료", // 예매완료 상태가 특정 코드라면 여기에!
+    AFTERSHOW: "관람 완료",
   };
 
   const displayText = statusText[reservationStatus] || "알 수 없는 상태";
