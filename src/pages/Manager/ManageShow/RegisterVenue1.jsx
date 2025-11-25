@@ -253,7 +253,7 @@ const RegisterVenue1 = () => {
                 ) : (
                   <>
                     <BsUpload size={32} />
-                    <UploadText>공연장 좌석표 사진 업로드하기</UploadText>
+                    <UploadText>공연장 사진 업로드하기(필수)</UploadText>
                   </>
                 )}
               </UploadBox>
