@@ -14,63 +14,66 @@ const RegisterShowStep2 = ({ viewer = false }) => {
   const [previews, setPreviews] = useState([]); // 미리보기 URL 리스트
   const [uploadedUrls, setUploadedUrls] = useState([]); // S3 URL
 
-  const [tempText, setTempText] = useState("");
-  const handleDelete = (index, e) => {
-    e.stopPropagation(); // 클릭 이벤트 전파 방지
-    const newImages = [...images];
-    const newPreviews = [...previews];
-
-    newImages.splice(index, 1);
-    newPreviews.splice(index, 1);
-
-    setImages(newImages);
-    setPreviews(newPreviews);
-
-    addToast("이미지가 삭제되었습니다.", "success");
-  };
-
   useEffect(() => {
     console.log("new", images);
   }, [images]);
   useEffect(() => {
     console.log("previe", previews);
   }, [previews]);
+  useEffect(() => {
+    console.log("uploadedUrls", uploadedUrls);
+  }, [uploadedUrls]);
+  const [tempText, setTempText] = useState("");
 
-  const uploadBoxCount = images.length < 5 ? Math.max(images.length + 1, 3) : 5;
+  // -------------------------
+  // 로컬 스토리지 유틸 (step 방식)
+  // -------------------------
 
-  // const fetchImages = async () => {
-  //   const newUrls = [];
-  //   for (const file of images) {
-  //     const formData = new FormData();
-  //     formData.append("image", file);
+  const STEPS_KEY = "createShowPayload_steps";
 
-  //     const response = await fetch(
-  //       `${import.meta.env.VITE_API_URL}/shows/${showId}/images`,
-  //       {
-  //         method: "POST",
-  //         body: formData,
-  //         credentials: "include",
-  //       }
-  //     );
-  //     const data = await response.json();
-  //     newUrls.push(data.data);
-  //   }
+  /**
+   * stepName (string) 으로 부분 payload 저장.
+   * 예: saveStep("step_images", { detailImages: [...] })
+   */
+  const saveStep = (stepName, data) => {
+    const all = JSON.parse(localStorage.getItem(STEPS_KEY)) || {};
+    all[stepName] = {
+      ...(all[stepName] || {}),
+      ...data,
+    };
+    localStorage.setItem(STEPS_KEY, JSON.stringify(all));
+  };
 
-  //   // 업로드 완료한 파일은 images에서 제거
-  //   setUploadedUrls((prev) => [...prev, ...newUrls]);
-  //   setImages([]); // 이미 업로드 완료했으므로 초기화
+  /**
+   * 모든 step을 병합한 최종 payload 생성
+   * step 저장 순서에 의존하지 않게 객체들을 순서대로 병합 (Object.assign)
+   */
+  const getMergedPayloadFromSteps = () => {
+    const all = JSON.parse(localStorage.getItem(STEPS_KEY)) || {};
+    const merged = Object.assign(
+      {},
+      ...Object.keys(all).map((k) => all[k] || {})
+    );
+    return merged;
+  };
 
-  //   return [...uploadedUrls, ...newUrls]; // 최종 S3 URL 배열 반환
-  // };
+  /**
+   * 특정 step을 제거하고 싶을 때 사용 (선택적)
+   */
+  const removeStep = (stepName) => {
+    const all = JSON.parse(localStorage.getItem(STEPS_KEY)) || {};
+    delete all[stepName];
+    localStorage.setItem(STEPS_KEY, JSON.stringify(all));
+  };
 
+  // -------------------------
+  // fetchImages (수정된 버전) - 업로드 결과를 step_images에 저장
+  // -------------------------
   const fetchImages = async () => {
     if (!images || images.length === 0) return [];
-    const newUrls = [];
 
     try {
       const formData = new FormData();
-
-      // 여러 파일을 "files" 라는 key로 담는다고 가정 (백엔드가 요구하는 key와 동일해야 함)
       images.forEach((file) => {
         formData.append("images", file);
       });
@@ -85,7 +88,6 @@ const RegisterShowStep2 = ({ viewer = false }) => {
       );
 
       const result = await response.json();
-
       if (!response.ok) {
         console.error("이미지 업로드 실패:", result);
         alert(result.message || "이미지 업로드 중 오류");
@@ -93,11 +95,40 @@ const RegisterShowStep2 = ({ viewer = false }) => {
       }
 
       console.log("이미지 업로드 성공:", result);
-      // 업로드 완료한 파일은 images에서 제거
-      setUploadedUrls((prev) => [...prev, ...result.data]);
-      setImages([]); // 이미 업로드 완료했으므로 초기화
 
-      return [...uploadedUrls, ...newUrls]; // 최종 S3 URL 배열 반환
+      // 업로드된 최신 S3 URL 배열
+      const uploaded = result.data ?? [];
+
+      // // 기존 step_images (있으면) 가져오기
+      // const currentSteps = JSON.parse(localStorage.getItem(STEPS_KEY)) || {};
+      // const prevImagesInStep =
+      //   (currentSteps.step_images && currentSteps.step_images.detailImages) ||
+      //   [];
+
+      // // 화면(프리뷰)에 보이는 S3 URL (이미 화면에서 유지되는 것) + 상태(uploadedUrls) + 이번 업로드
+      // const existingVisibleS3 = previews.filter((p) =>
+      //   p.startsWith("https://")
+      // );
+      // const merged = Array.from(
+      //   new Set([
+      //     ...prevImagesInStep,
+      //     ...existingVisibleS3,
+      //     ...uploaded,
+      //     ...uploadedUrls,
+      //   ])
+      // );
+
+      // // step 단위로 저장 (여기서는 "step_images")
+      // saveStep("step_images", { detailImages: merged });
+
+      // 로컬 상태 갱신
+      // setUploadedUrls((prev) => Array.from(new Set([...uploaded])));
+      // setImages([]); // 업로드 끝난 이미지 클리어
+
+      // 업로드된 URL 반환
+
+      setImages(uploaded);
+      return uploaded;
     } catch (error) {
       console.error("이미지 업로드 오류:", error);
       addToast("이미지 업로드 실패", "error");
@@ -105,107 +136,26 @@ const RegisterShowStep2 = ({ viewer = false }) => {
     }
   };
 
-  // const fetchImages = async () => {
-  //   if (!images || images.length === 0) return [];
-
-  //   try {
-  //     const formData = new FormData();
-
-  //     // 여러 파일을 "files" 라는 key로 담는다고 가정 (백엔드가 요구하는 key와 동일해야 함)
-  //     images.forEach((file) => {
-  //       formData.append("images", file);
-  //     });
-
-  //     const response = await fetch(
-  //       `${import.meta.env.VITE_API_URL}/shows/${showId}/images`,
-  //       {
-  //         method: "POST",
-  //         body: formData,
-  //         credentials: "include",
-  //       }
-  //     );
-
-  //     const result = await response.json();
-
-  //     if (!response.ok) {
-  //       console.error("이미지 업로드 실패:", result);
-  //       alert(result.message || "이미지 업로드 중 오류");
-  //       return [];
-  //     }
-
-  //     console.log("이미지 업로드 성공:", result);
-  //     setImages(result.data);
-  //     // 백엔드에서 이미지 URL 목록이 result.urls 형태라고 가정
-  //     return result.data || [];
-  //   } catch (error) {
-  //     console.error("이미지 업로드 오류:", error);
-  //     addToast("이미지 업로드 실패", "error");
-  //     return [];
-  //   }
-  // };
-  // (A) 기본 Payload 초기 구조
-  const getBasePayload = () => ({
-    title: "",
-    poster: "",
-    showTimes: [],
-    bookStart: "",
-    bookEnd: "",
-    ticketOptions: [],
-    bankMaster: "",
-    bankName: "",
-    bankAccount: "",
-    detailImages: [],
-    detailText: "",
-    locationId: null,
-    locationName: "",
-    SaleMethod: "SCHEDULING",
-    seatCount: 0,
-    showMessage: {
-      payGuide: "",
-      bookConfirm: "",
-      showGuide: "",
-      reviewRequest: "",
-      reviewUrl: "",
-    },
-    status: "DRAFT",
-  });
-
-  // (B) 공용 createPayload 함수 (Step1~5 공통 사용)
-  const createPayload = (currentPayload) => {
-    // 1) 기본값
-    const base = getBasePayload();
-
-    // 2) 기존 저장된 값
-    const saved = JSON.parse(localStorage.getItem("createShowPayload") || "{}");
-
-    // 3) 중첩 병합(showMessage 안전하게 처리)
-    const merged = {
-      ...base,
-      ...saved,
-      ...currentPayload, // 이번 스텝 값이 최종 우선
-      showMessage: {
-        ...base.showMessage,
-        ...(saved.showMessage || {}),
-        ...(currentPayload.showMessage || {}),
-      },
-    };
-
-    return merged;
-  };
-
+  // -------------------------
+  // handleTempSave (step 기반으로 수정)
+  // -------------------------
   const handleTempSave = async () => {
-    // const formData = { previews };
-    // localStorage.setItem("createShowPayload", JSON.stringify(formData));
     try {
-      const updatedImages = await fetchImages();
-      console.log("updatedimages", updatedImages);
-      const currentPayload = {
-        detailImages: updatedImages ?? previews,
+      // 1) 새로 업로드한 이미지 URL 받기 (fetchImages 내부에서 step_images에 저장됨)
+      const newlyUploaded = await fetchImages(); // ex: ["s3/new1.jpg"]
+      console.log("newlyuploaded", newlyUploaded);
+
+      // 2) Payload 생성
+      const payload = {
+        detailImages: newlyUploaded,
         detailText: tempText,
+        status: "DRAFT",
       };
 
-      const finalPayload = createPayload(currentPayload);
-      console.log(finalPayload);
+      // 호환을 위해 (기존 코드가 여전히 createShowPayload 사용하면) 기존 키도 업데이트
+      localStorage.setItem("register-show-step2", JSON.stringify(payload));
+
+      // 7) 서버로 PATCH 요청 (기존 로직 유지)
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
         {
@@ -213,18 +163,17 @@ const RegisterShowStep2 = ({ viewer = false }) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(finalPayload),
+          body: JSON.stringify(payload),
           credentials: "include",
         }
       );
 
       const result = await response.json();
       if (response.ok) {
-        console.log("등록 성공:", result);
-        localStorage.setItem("createShowPayload", JSON.stringify(finalPayload));
+        console.log("임시 저장 성공:", result);
         addToast("임시 저장되었습니다!", "success");
       } else {
-        console.error("등록 실패:", result);
+        console.error("임시 저장 실패:", result);
         alert(result.message || "등록 중 오류가 발생했습니다.");
       }
     } catch (error) {
@@ -232,6 +181,16 @@ const RegisterShowStep2 = ({ viewer = false }) => {
       alert("서버 연결 실패");
     }
   };
+
+  const uploadBoxCount = images.length < 5 ? Math.max(images.length + 1, 3) : 5;
+
+  const getBasePayload = () => ({
+    detailImages: [],
+    detailText: "",
+    status: "DRAFT",
+  });
+
+  const [formData, setFormData] = useState(getBasePayload);
 
   // 파일 업로드 핸들러
   const handleFileChange = (e, index) => {
@@ -252,6 +211,31 @@ const RegisterShowStep2 = ({ viewer = false }) => {
 
     setImages(newImages);
     setPreviews(newPreviews);
+  };
+
+  const handleDelete = (index, e) => {
+    e.stopPropagation();
+
+    const removed = previews[index];
+
+    const newImages = images.filter((_, i) => i !== index);
+    const newPreviews = previews.filter((_, i) => i !== index);
+
+    setImages(newImages);
+    setPreviews(newPreviews);
+
+    // 3) 🔥 localStorage detailImages도 덮어쓰기!
+    const prevPayload =
+      JSON.parse(localStorage.getItem("register-show-step2")) || {};
+
+    const updatedPayload = {
+      ...prevPayload,
+      detailImages: newImages,
+    };
+
+    localStorage.setItem("register-show-step2", JSON.stringify(updatedPayload));
+
+    addToast("이미지가 삭제되었습니다.", "success");
   };
 
   // 이전 단계로
@@ -276,21 +260,18 @@ const RegisterShowStep2 = ({ viewer = false }) => {
 
     // 3) 기존 createShowPayload 불러오기 (있으면 병합)
     const savedPayload = JSON.parse(
-      localStorage.getItem("createShowPayload") || "{}"
+      localStorage.getItem("register-show-step2") || "{}"
     );
 
     // 4) payload 병합 (새 값이 우선)
     const mergedPayload = {
       ...savedPayload,
       ...newPayload,
-      detailImages:
-        storedPreview.length > 0
-          ? storedPreview
-          : savedPayload.detailImages || [],
+      detailImages: storedPreview.detailImages || [],
     };
 
     // 5) 로컬 저장
-    localStorage.setItem("createShowPayload", JSON.stringify(mergedPayload));
+    localStorage.setItem("register-show-step2", JSON.stringify(mergedPayload));
 
     console.log("merged payload saved:", mergedPayload);
 
@@ -303,13 +284,29 @@ const RegisterShowStep2 = ({ viewer = false }) => {
     // if (saved?.poster) {
     //   setPoster(saved.poster);
     // }
-    const savedData = JSON.parse(localStorage.getItem("createShowPayload"));
-    if (savedData?.poster) {
-      // setPoster(savedData.poster);
-      // setPosterFile(savedData.poster);
-      // setPoster(savedData.detailImages);
+    const savedData = JSON.parse(localStorage.getItem("register-show-step2"));
+    if (savedData) {
+      setPreviews(savedData.detailImages);
+      setUploadedUrls(savedData.detailImages);
       setTempText(savedData.detailText);
     }
+  }, []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("createShowPayload");
+    if (!saved) return;
+
+    const parsed = JSON.parse(saved);
+
+    // formData에 저장된 값 병합
+    setFormData((prev) => ({
+      ...prev,
+      ...parsed,
+    }));
+
+    // UI용 값도 채우고 싶다면 여기서 setState들 호출
+    if (parsed.detailText) setTempText(parsed.detailText);
+    if (parsed.detailImages) setPreviews(parsed.detailImages);
   }, []);
 
   return (
