@@ -192,7 +192,7 @@ const App = () => {
               element={<ProtectedRoute element={ViewEntryStatus} />}
             />
             <Route
-              path="/qrmanager/:showId"
+              path="/qrmanager"
               element={<ProtectedRoute element={QRManager} />}
             />
             {/* <Route
