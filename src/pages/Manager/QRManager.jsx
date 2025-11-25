@@ -24,7 +24,7 @@ const QRManager = () => {
         const response = await fetch(
           `${
             import.meta.env.VITE_API_URL
-          }/manager/shows/${showId}/QR?showtimeId=${showtimeId}&reservationId=${qrCode}`,
+          }/manager/shows/${showId}/QR?showtimeId=${showtimeId}&reservationItemId=${qrCode}`,
           {
             method: "GET",
             credentials: "include",

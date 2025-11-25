@@ -439,7 +439,12 @@ const RegisterShowStep1 = ({ viewer = false }) => {
             <RightContent>
               {/* 공연명 */}
               <Q>
-                <Name>공연명</Name>
+                <Name>
+                  공연명
+                  <p>*</p>
+                </Name>
+
+
                 <Input
                   value={formData.title}
                   onChange={(e) => {
@@ -457,7 +462,11 @@ const RegisterShowStep1 = ({ viewer = false }) => {
               <Q>
                 <Name>
                   공연 날짜/회차
-                  <AddButton onClick={addShowTime}>추가하기</AddButton>
+                  <p>*</p>
+                  {!viewer && (
+                    <AddButton onClick={addShowTime}>추가하기</AddButton>
+                  )}
+                  
                 </Name>
 
                 {showTimes.map((t, idx) => (
@@ -535,7 +544,8 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                     </Column>
 
                     {formData.showTimes.length > 1 && (
-                      <DeleteIcon onClick={() => removeShowTime(idx)} />
+                      (!viewer && 
+                      <DeleteIcon onClick={() => removeShowTime(idx)} />)
                     )}
                   </DateRow>
                 ))}
@@ -543,7 +553,9 @@ const RegisterShowStep1 = ({ viewer = false }) => {
 
               {/* 예매 시작 bookStart */}
               <Q>
-                <Name>예매 기간</Name>
+                <Name>예매 기간
+                  <p>*</p>
+                </Name>
 
                 <DateRow>
                   {/* bookStartDate */}
@@ -599,7 +611,10 @@ const RegisterShowStep1 = ({ viewer = false }) => {
               <Q>
                 <Name>
                   티켓 옵션
-                  <AddButton onClick={addTicketOption}>추가하기</AddButton>
+                  {!viewer && (
+                    <AddButton onClick={addTicketOption}>추가하기</AddButton>
+                  )}
+                  
                 </Name>
 
                 {formData.ticketOptions.map((opt, idx) => (
@@ -650,7 +665,8 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                       <span>원</span>
 
                       {formData.ticketOptions.length > 1 && (
-                        <DeleteIcon onClick={() => removeTicketOption(idx)} />
+                        (!viewer && 
+                        <DeleteIcon onClick={() => removeTicketOption(idx)} />)
                       )}
                     </PriceRow>
                   </TicketContent>
@@ -823,13 +839,14 @@ const Name = styled.div`
   font-size: 25px;
   font-weight: 500;
   display: flex;
-  gap: 20px;
+  gap: 5px;
   display: flex;
   align-items: center;
 
   p{
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 300;
+    color: var(--color-primary);
   }
 `;
 
