@@ -10,14 +10,28 @@ export default function NavbarUser({
   Backmode = false,
   text = "",
   onIconClick,
+  nav = "",
 }) {
   const { managerId } = useParams();
   const navigate = useNavigate();
   // console.log("managerId,", managerId);
+  const navi = () => {
+    console.log("nav 값:", nav);
+
+    if (!nav) {
+      navigate(-1);
+      return;
+    }
+
+    navigate(nav, { replace: true });
+  };
+
+  console.log("nav prop:", nav);
+  console.log("managerId:", managerId);
   return Backmode ? (
     // 예매하기(서브 헤더) 헤더 ex. <NavbarUser Backmode={true} text="예매하기" />
     <HeaderContainer>
-      <div className="buttoncontainer" onClick={() => navigate(-1)}>
+      <div className="buttoncontainer" onClick={navi}>
         <RiArrowLeftSLine size="32px" />
       </div>
       <MainContainer>{text ? text : "제11회 정기공연"}</MainContainer>
@@ -32,7 +46,7 @@ export default function NavbarUser({
         style={{ cursor: "pointer" }}
       />
       <TextContainer>
-        서강연극회
+        {text ? text : "서강연극회"}
         <div className="buttoncontainer">
           <RiInformationLine
             size="24px"

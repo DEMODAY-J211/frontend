@@ -49,6 +49,7 @@ export default function MobileTicket() {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [IsOpen, setIsOpen] = useState(false);
+  const [selectedQR, setSelectedQR] = useState("");
 
   function handleNext() {
     setCurrentIndex((prev) => Math.min(prev + 1, showInfo.tickets.length - 1));
@@ -56,10 +57,12 @@ export default function MobileTicket() {
   function handlePrev() {
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   }
-  function openModal(qrSrc) {
+  function openModal(qrSrc, index) {
     setSelectedQR(qrSrc);
+    setCurrentIndex(index);
     setIsOpen(true);
   }
+
   function closeModal() {
     setIsOpen(false);
     setSelectedQR("");
@@ -101,6 +104,9 @@ export default function MobileTicket() {
   useEffect(() => {
     fetchticket();
   }, []);
+  useEffect(() => {
+    console.log(showInfo);
+  }, [showInfo]);
   return (
     <PageWrapper>
       <HomeUserContainer>
@@ -191,10 +197,9 @@ export default function MobileTicket() {
                   즐거운 관람되세요!
                 </p>
               </ShowContainer>
-              <img
-                src={showInfo?.tickets?.[currentIndex]?.qrCode}
-                alt="QR Modal"
-              />
+              {showInfo?.tickets && (
+                <img src={showInfo.tickets[0]?.qrCode} alt="QR Modal" />
+              )}
             </ModalContent>
           </QRModal>
         )}

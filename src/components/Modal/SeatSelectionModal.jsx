@@ -288,7 +288,8 @@ const SeatSelectionModal = ({
     if (onSave) {
       onSave({
         seatMap: seatMapToSave,
-        excludedSeats: salesMethod === "예매자 선택" ? Array.from(clearedSeats) : [],
+        excludedSeats:
+          salesMethod === "예매자 선택" ? Array.from(clearedSeats) : [],
         vipSeats: salesMethod === "자동 배정" ? Array.from(clearedSeats) : [],
         totalAvailableSeats: totalAvailableSeats,
       });

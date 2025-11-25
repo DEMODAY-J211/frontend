@@ -83,7 +83,11 @@ export default function CheckTicket() {
         />
       )}
       <HomeUserContainer>
-        <NavbarUser Backmode={true} text="예매 상세 내역" />
+        <NavbarUser
+          Backmode={true}
+          nav={`/${managerId}/homeuser`}
+          text="예매 상세 내역"
+        />
         <TicketWrapper>
           <ShowContainer>
             <img className="poster" src={showData.showPoster} />
@@ -103,10 +107,12 @@ export default function CheckTicket() {
               <p>{showData.reservationNumber}</p>
             </Content>
             <Content>
-              <p>좌석번호</p>
-              <p>
-                {showData.seatList} ({showData.quantity}매)
-              </p>
+              <p>좌석번호</p>{" "}
+              {showData.saleMethod === "SELECTBYUSER" ? (
+                <p>{`${showData.seatList} (${showData.quantity}매)`}</p>
+              ) : (
+                <p>{`${showData.quantity}매`}</p>
+              )}
             </Content>
             <Content>
               <p>예매자명</p>

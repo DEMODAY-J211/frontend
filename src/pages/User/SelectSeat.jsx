@@ -80,32 +80,73 @@ const SelectSeat = () => {
       alert("좌석 정보를 불러오는데 실패했습니다.");
     }
   };
+  // const generateSeatLayout = (seats) => {
+  //   if (!seats || seats.length === 0) return;
 
+  //   // 1️⃣ Rows(구역) 추출 (A, B, C ...)
+  //   const sections = [...new Set(seats.map((s) => s.seatTable))].sort();
+
+  //   // 2️⃣ 각 Section(예: A)에 대해 열(Column) 정렬하여 seat layout 생성
+  //   const layout = sections.map((section) => {
+  //     const rowSeats = seats
+  //       .filter((s) => s.seatTable === section)
+  //       .sort((a, b) => a.seatColumn - b.seatColumn); // A1, A2, A3 순서
+
+  //     return rowSeats.map((s) => ({
+  //       id: `seat-${s.showSeatId}`,
+  //       label: `${s.seatTable}${s.seatColumn}`,
+  //       row: s.seatTable,
+  //       col: s.seatColumn,
+  //       isAvailable: s.isAvailable, // 백엔드 값 그대로 사용
+  //       isReserved: !s.isAvailable,
+  //       seatId: s.seatId,
+  //       showSeatId: s.showSeatId,
+  //     }));
+  //   });
+
+  //   setSeatLayout(layout);
+  // };
   const generateSeatLayout = (seats) => {
     if (!seats || seats.length === 0) return;
 
-    // 1️⃣ Rows(구역) 추출 (A, B, C ...)
-    const sections = [...new Set(seats.map((s) => s.seatSection))].sort();
+    // 1️⃣ 층별 분류 (예: 1층, 2층)
+    const floors = [...new Set(seats.map((s) => s.seatFloor))].sort();
 
-    // 2️⃣ 각 Section(예: A)에 대해 열(Column) 정렬하여 seat layout 생성
-    const layout = sections.map((section) => {
-      const rowSeats = seats
-        .filter((s) => s.seatSection === section)
-        .sort((a, b) => a.seatColumn - b.seatColumn); // A1, A2, A3 순서
+    const fullLayout = {};
 
-      return rowSeats.map((s) => ({
-        id: `seat-${s.showSeatId}`,
-        label: `${s.seatSection}${s.seatColumn}`,
-        row: s.seatSection,
-        col: s.seatColumn,
-        isAvailable: s.isAvailable, // 백엔드 값 그대로 사용
-        isReserved: !s.isAvailable,
-        seatId: s.seatId,
-        showSeatId: s.showSeatId,
-      }));
+    floors.forEach((floor) => {
+      // 해당 floor 좌석만 필터링
+      const floorSeats = seats.filter((s) => s.seatFloor === floor);
+
+      // 2️⃣ row(행) 목록 추출
+      const rows = [...new Set(floorSeats.map((s) => s.seatRow))].sort(
+        (a, b) => a - b
+      );
+
+      // 3️⃣ row별로 seatColumn 기준으로 정렬하여 2D 배열 만들기
+      const layout2D = rows.map((row) => {
+        const rowSeats = floorSeats
+          .filter((s) => s.seatRow === row)
+          .sort((a, b) => a.seatColumn - b.seatColumn);
+
+        return rowSeats.map((s) => ({
+          id: `seat-${s.showSeatId}`,
+          label: s.seatTable, // "가-1"
+          row: s.seatRow,
+          col: s.seatColumn,
+          isAvailable: s.isAvailable,
+          isReserved: !s.isAvailable,
+          seatId: s.seatId,
+          showSeatId: s.showSeatId,
+          section: s.seatSection,
+          floor: s.seatFloor,
+        }));
+      });
+
+      fullLayout[floor] = layout2D;
     });
 
-    setSeatLayout(layout);
+    setSeatLayout(fullLayout);
   };
 
   const handleSeatClick = (seat) => {
@@ -158,6 +199,7 @@ const SelectSeat = () => {
         quantity,
         showData,
       },
+      replcae: true,
     });
     // navigate(`/${managerId}/payment/${showId}`, {
     //   state: {
@@ -204,7 +246,11 @@ const SelectSeat = () => {
     <PageWrapper>
       <HomeUserContainer>
         {/* 헤더 */}
-        <NavbarUser Backmode={true} text="좌석 선택" />
+        <NavbarUser
+          Backmode={true}
+          nav={`/${managerId}/homeuser`}
+          text="좌석 선택"
+        />
 
         {/* 공연 정보 */}
         <InfoSection>
@@ -230,7 +276,7 @@ const SelectSeat = () => {
         {/* 좌석표 */}
         <SeatMapSection>
           <SeatMapTitle>{showData.showLocation}</SeatMapTitle>
-          <SeatMapGrid>
+          {/* <SeatMapGrid>
             {seatLayout.map((row, rowIndex) => (
               <SeatRow key={rowIndex}>
                 {row.map((seat, colIndex) => (
@@ -247,7 +293,33 @@ const SelectSeat = () => {
                 ))}
               </SeatRow>
             ))}
-          </SeatMapGrid>
+          </SeatMapGrid> */}
+          {Object.entries(seatLayout).map(([floorName, rows]) => (
+            <div key={floorName}>
+              {/* 층 이름 */}
+              <SeatMapTitle>{floorName}층</SeatMapTitle>
+
+              {/* 좌석 그리드 */}
+              <SeatMapGrid>
+                {rows.map((row, rowIndex) => (
+                  <SeatRow key={rowIndex}>
+                    {row.map((seat, colIndex) => (
+                      <SeatButton
+                        key={colIndex}
+                        isAvailable={seat.isAvailable}
+                        isReserved={seat.isReserved}
+                        isSelected={selectedSeats.some((s) => s.id === seat.id)}
+                        onClick={() => handleSeatClick(seat)}
+                        disabled={seat.isReserved}
+                      >
+                        {seat.label}
+                      </SeatButton>
+                    ))}
+                  </SeatRow>
+                ))}
+              </SeatMapGrid>
+            </div>
+          ))}
 
           {/* 선택된 좌석 표시 */}
           {selectedSeats.length > 0 && (
