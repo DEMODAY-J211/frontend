@@ -195,10 +195,12 @@ const cancelModal = () => {
     <Container>
       <NavbarManager onProtectedNavigate={handleProtectedNavigation} />
       {/* 단계 표시 */}
+      <MainContent>
       <RegisterShowNavbar
         currentStep={currentStep}
         setCurrentStep={setCurrentStep}
       />
+      </MainContent>
       <Outlet context={{}} />
       {isModalOpen && (
         <ModalOverlay onClick={cancelLeave}>
@@ -230,11 +232,23 @@ export default RegisterShow;
 
 /* ============== Styled Components ============== */
 
+const MainContent = styled.div`
+padding: 30px 100px 0px 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+`;
+
 const Container = styled.div`
   width: 100%;
-  min-height: 100vh;
+  margin: 0 auto;
   background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 `;
+
 
 // 공연 등록 모달 스타일
 const ModalOverlay = styled.div`
