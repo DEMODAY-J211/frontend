@@ -41,10 +41,14 @@ const RegisterShow = () => {
   };
 
   // 모달에서 "취소" 클릭
-  const cancelLeave = () => {
-    setIsModalOpen(false);
-    setNextPath(null);
-  };
+const cancelLeave = () => {
+  if (nextPath) {
+    navigate(nextPath, { replace: true }); // 원래 가려던 페이지로 이동
+  }
+  setIsModalOpen(false);
+  setNextPath(null);
+};
+
 
   useEffect(() => {
     const step = location.pathname.split("/").pop();
