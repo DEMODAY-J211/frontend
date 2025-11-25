@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import NavbarManager from "../../../components/Navbar/NavbarManager";
 import { useNavigate } from "react-router-dom";
@@ -28,10 +28,8 @@ const ManageUser = () => {
     reservationData,
     setReservationData,
     initialData,
+    showTitle,
     showTimeList,
-    selectedShowTime,
-    selectedShowTimeId,
-    setSelectedShowTimeId,
     isLoading,
     error
   } = useReservationData(showId, currentShowtimeId);
@@ -114,21 +112,21 @@ const handleSave = async () => {
     return;
   }
 
-  // 한글 상태를 영어로 매핑
-  const statusToEnglish = {
-    "입금대기": "PENDING_PAYMENT",
-    "입금확정": "CONFIRMED",
-    "입금확인": "CONFIRMED", // 백엔드에서 입금확인으로 오는 경우도 처리
-    "환불대기": "PENDING_REFUND",
-    "취소완료": "CANCELED"
-  };
+  // // 한글 상태를 영어로 매핑
+  // const statusToEnglish = {
+  //   "입금대기": "PENDING_PAYMENT",
+  //   "입금확정": "CONFIRMED",
+  //   "입금확인": "CONFIRMED", // 백엔드에서 입금확인으로 오는 경우도 처리
+  //   "환불대기": "PENDING_REFUND",
+  //   "취소완료": "CANCELED"
+  // };
 
   try {
     // changedUsers에서 변경된 예매자 정보만 추출
     const changedReservations = changedUsers.map(reservation => ({
       reservationId: reservation.reservationId,
       name: reservation.name,
-      status: statusToEnglish[reservation.status] || reservation.status,
+      status: reservation.status,
       isReserved: reservation.isReserved
     }));
 
@@ -252,6 +250,13 @@ setShowChangeStatusModal(false);
     setSelectedUsers([]); // 회차 변경 시 선택 초기화
   };
 
+  useEffect(() => {
+  if (showTimeList.length > 0 && currentShowtimeId === null) {
+    setCurrentShowtimeId(showTimeList[0].showTimeId);
+  }
+}, [showTimeList]);
+
+
   // 로딩 및 에러 처리
   if (isLoading) {
     return (
@@ -287,24 +292,27 @@ setShowChangeStatusModal(false);
         <Header>
           <Title>예매자 관리</Title>
           {showTimeList && showTimeList.length > 0 && (
-            <ShowtimeSelectWrapper>
-              {showTimeList.map((showtime) => (
-                <ShowtimeButton
-                  key={showtime.showTimeId}
-                  $active={selectedShowTimeId === showtime.showTimeId}
-                  onClick={() => handleShowtimeChange(showtime.showTimeId)}
-                >
-                  {new Date(showtime.showTime).toLocaleString('ko-KR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </ShowtimeButton>
-              ))}
-            </ShowtimeSelectWrapper>
-          )}
+  <ShowtimeDropdown
+ 
+    value={currentShowtimeId || showTimeList[0].showTimeId}
+    onChange={(e) => handleShowtimeChange(Number(e.target.value))}
+  >
+    {showTimeList.map((showtime) => (
+      <option key={showtime.showTimeId} value={showtime.showTimeId}>
+        <h2>{showTitle}&nbsp;&nbsp;&nbsp;&nbsp;</h2>
+        {new Date(showtime.showTime).toLocaleString("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </option>
+    ))}
+    
+  </ShowtimeDropdown>
+)}
+
         </Header>
 
 
@@ -328,7 +336,7 @@ setShowChangeStatusModal(false);
           <InputWrapper>
             <SearchInput
             type="text"
-            placeholder="예매자 검색하기"
+            placeholder="이름 또는 전화번호로 검색"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -458,20 +466,14 @@ setShowChangeStatusModal(false);
 
         {showSelectUserModal && (
         <SelectUserModal
-            onClose={closeModal}
-            selectedUsers={selectedUsers} // 선택된 사용자 전달
-            onConfirm={(newStatus) => {
-            setReservationData((prev) =>
-                prev.map((item) =>
-                selectedUsers.some(u => u.reservationId === item.reservationId)
-                    ? { ...item, status: newStatus }
-                    : item
-                )
-            );
-            setIsChanged(true);
-            setShowSelectUserModal(false);
-            }}
-        />
+    onClose={closeModal}
+    selectedUsers={selectedUsers} 
+    onConfirm={(newStatus) => {
+        selectedUsers.forEach(user => handleStatusChange(user.reservationId, newStatus));
+        setShowSelectUserModal(false);
+    }}
+/>
+
         )}
         {showChangeStatusModal && (
         <ChangeUserStatusModal
@@ -549,6 +551,23 @@ const ShowtimeButton = styled.button`
   }
 `;
 
+const ShowtimeDropdown = styled.select`
+  padding: 8px 16px;
+  border-radius: 15px;
+  border: 1px solid var(--color-primary);
+    background: ${({ $active }) => ($active ? 'var(--color-primary)' : '#fff')};
+  color: ${({ $active }) => ($active ? '#fff' : 'var(--color-primary)')};
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(252, 40, 71, 0.2);
+  }
+`;
+
 /* ---------------- 검색 ---------------- */
 
 const SearchWrapper = styled.div`
@@ -564,7 +583,7 @@ const SearchInput = styled.input`
   border-radius: 10px;
   border: 1px solid #c5c5c5;
   background: #fff;
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
   outline: none;
 
@@ -860,3 +879,5 @@ const SaveButton = styled.button`
 
 
 `;
+
+

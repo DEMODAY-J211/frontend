@@ -607,13 +607,31 @@ const RegisterShowStep1 = ({ viewer = false }) => {
 
                     <PriceRow>
                       <span>판매가</span>
-                      <PriceInput
-                        placeholder="0"
-                        value={opt.price}
-                        onChange={(e) =>
-                          updateTicketOption(idx, "price", e.target.value)
-                        }
-                      />
+<PriceInput
+  type="text"
+  placeholder="0"
+  value={opt.price}
+  onChange={(e) => {
+    // 숫자가 아닌 값이 들어오면 무시
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      updateTicketOption(idx, "price", value);
+    }
+  }}
+  onKeyDown={(e) => {
+    // 허용할 키: 숫자 0~9, 백스페이스, Delete, 화살표, Tab 등
+    if (
+      !(
+        (e.key >= "0" && e.key <= "9") ||
+        ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
+      )
+    ) {
+      e.preventDefault(); // 숫자가 아니면 입력 차단
+    }
+  }}
+/>
+
+
                       <span>원</span>
 
                       {formData.ticketOptions.length > 1 && (

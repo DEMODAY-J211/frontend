@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 export const useReservationData = (showId, showtimeId) => {
   const [reservationData, setReservationData] = useState([]);
   const [initialData, setInitialData] = useState([]);
+  const [showTitle, setShowTitle] = useState("");
   const [showTimeList, setShowTimeList] = useState([]);
-  const [selectedShowTime, setSelectedShowTime] = useState(null);
-  const [selectedShowTimeId, setSelectedShowTimeId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -42,8 +41,8 @@ export const useReservationData = (showId, showtimeId) => {
         }
 
         // API 응답 데이터 설정
-        const { showTimeList = [], selectedshowTime, selectedshowTimeId, reservationList = [] } = result.data;
-
+        const { showTitle: apiShowTitle = "", showTimeList = [], selectedshowTime, selectedshowTimeId, reservationList = [] } = result.data;
+        
         console.log('=== 파싱된 데이터 ===');
         console.log('회차 목록 (showTimeList):', showTimeList);
         console.log('선택된 회차 시간 (selectedshowTime):', selectedshowTime);
@@ -63,10 +62,8 @@ export const useReservationData = (showId, showtimeId) => {
             });
           });
         }
-
+        setShowTitle(apiShowTitle);
         setShowTimeList(showTimeList);
-        setSelectedShowTime(selectedshowTime);
-        setSelectedShowTimeId(selectedshowTimeId);
         setReservationData(reservationList);
         setInitialData(JSON.parse(JSON.stringify(reservationList))); // 깊은 복사
 
@@ -85,10 +82,8 @@ export const useReservationData = (showId, showtimeId) => {
     reservationData,
     setReservationData,
     initialData,
+    showTitle,
     showTimeList,
-    selectedShowTime,
-    selectedShowTimeId,
-    setSelectedShowTimeId,
     isLoading,
     error,
   };
