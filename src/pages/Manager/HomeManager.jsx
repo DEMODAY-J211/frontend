@@ -30,6 +30,7 @@ const HomeManager = () => {
   const [hasVenues, setHasVenues] = useState(false); // 공연장 등록 여부
   const [hasShows, setHasShows] = useState(false); // 공연 등록 여부
   const [draftId, setDraftId] = useState(null);
+  const [link, setLink] = useState(null);
 
   // 페이지 로드 시 즐겨찾기 공연장 확인
   useEffect(() => {
@@ -95,16 +96,25 @@ const HomeManager = () => {
   checkDraftId();
 }, []);
 
-  const handleCopyLink = async () => {
-    const link = "https://example.com"; // 실제 복사할 링크
-    try {
-      await navigator.clipboard.writeText(link);
-      addToast("링크를 복사했어요!", "success"); // 성공 토스트
-      console.log(link);
-    } catch (error) {
-      addToast("링크 복사 실패", "error"); // 실패 토스트
-    }
-  };
+const handleCopyLink = async () => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/manager/link`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!response.ok) throw new Error(response.status);
+
+    const result = await response.json();
+    if (!result.success) throw new Error("Failed to fetch link");
+
+    await navigator.clipboard.writeText(result.data.url); // 바로 복사
+    addToast("링크를 복사했어요!", "success");
+  } catch (error) {
+    console.error(error);
+    addToast("링크 복사 실패", "error");
+  }
+};
 
   const handleOpenTeamModal = () => {
     setIsEditTeamModalOpen(true);
@@ -363,7 +373,9 @@ const HomeManager = () => {
                 나의 공연을 여기서 등록해보세요! {" "}
               </BtnInfo>
               <Draft>
-                <DraftNum>임시저장(1)</DraftNum>
+                <DraftNum>
+                  {draftId ? `임시저장(1)` : ""}
+                </DraftNum>
                 {/* <DraftExplained>임시저장된 공연이 1개 있어요!</DraftExplained> */}
               </Draft>
             </BtnWriting>
@@ -416,7 +428,7 @@ const HomeManager = () => {
               <BtnName>내 공연장 관리</BtnName>
               <BtnIcon src={locationimg} alt="내 공연장 관리" />
               <BtnInfo>
-                나의 공연장을 여기서 관리해보세요!
+                공연장 목록에 찿는 공연장이 이미 있을 경우, 즐겨찾기를 해주세요!
               </BtnInfo>
             </MyLocation>
           </TopRight>
