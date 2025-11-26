@@ -188,7 +188,7 @@ const RegisteredVenues = () => {
                     <VenueInfo>
                       <VenueName>{venue.name}</VenueName>
                       <VenueAddress>{venue.address}</VenueAddress>
-                      <VenueCapacity>{venue.capacity}</VenueCapacity>
+                      {/* <VenueCapacity>{venue.capacity}</VenueCapacity> */}
                     </VenueInfo>
 
                     <FavoriteIcon

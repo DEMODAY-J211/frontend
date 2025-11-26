@@ -27,7 +27,7 @@ const checkboxItems = [
   { id: "reviewRequest", label: "공연 후 설문 안내" },
 ];
 
-const RegisterShowStep4 = ({ viewer = false }) => {
+const RegisterShowStep4 = ({ viewer = false , initialData}) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { showId } = useParams();
@@ -182,7 +182,7 @@ Object.keys(previews).forEach((key) => {
       return;
     }
 
-    addToast("임시 저장되었습니다!", "success");
+    addToast("변경사항 저장완료!", "success");
   } catch (error) {
     console.error("임시저장 오류:", error);
     addToast("임시저장 중 오류 발생", "error");
@@ -211,6 +211,31 @@ Object.keys(previews).forEach((key) => {
     }
   };
 
+ useEffect(() => {
+  if (initialData) {
+    console.log("Initial Data:", initialData);  // initialData가 올바르게 전달되는지 확인
+
+    // previews 상태 초기화
+    const updatedPreviews = {
+      payGuide: initialData.showMessage.payGuide ? true : false,
+      bookConfirm: initialData.showMessage.bookConfirm ? true : true,
+      showGuide: initialData.showMessage.showGuide ? true : true,
+      reviewRequest: initialData.showMessage.reviewRequest ? true : false,
+    };
+    setPreviews(updatedPreviews);
+
+    // messages 상태 초기화 (initialData에 메시지가 포함되었다면)
+    const updatedMessages = {
+      payGuide: initialData.showMessage.payGuide || defaultMessages.payGuide,
+      bookConfirm: initialData.showMessage.bookConfirm || defaultMessages.bookConfirm,
+      showGuide: initialData.showMessage.showGuide || defaultMessages.showGuide,
+      reviewRequest: initialData.showMessage.reviewRequest || defaultMessages.reviewRequest,
+    };
+    setMessages(updatedMessages);
+  }
+}, [initialData]);  // initialData가 변경될 때마다 실행
+
+
   // 기존 임시 저장 데이터 불러오기
 useEffect(() => {
   const saved = JSON.parse(localStorage.getItem("registerShowStep4"));
@@ -222,6 +247,8 @@ useEffect(() => {
     if (saved.messages) setMessages(saved.messages);
   }
 }, []);
+
+
 
 
   return (

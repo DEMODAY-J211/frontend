@@ -36,6 +36,7 @@ import RegisterShowStep1 from "./pages/Manager/RegisterShow/RegisterShowStep1";
 import RegisterShowStep4 from "./pages/Manager/RegisterShow/RegisterShowStep4";
 import RegisterShowStep2 from "./pages/Manager/RegisterShow/RegisterShowStep2";
 import RegisterShowStep5 from "./pages/Manager/RegisterShow/RegisterShowStep5";
+import EditShow from "./pages/Manager/ManageShow/EditShow";
 
 //주현수
 import SelectSeat from "./pages/User/SelectSeat";
@@ -246,6 +247,10 @@ const App = () => {
             <Route
               path="/write-teaminfo"
               element={<ProtectedRoute element={WriteTeamInfo} />}
+            />
+            <Route
+              path="/manageshow/editshow/:showId"
+              element={<ProtectedRoute element={EditShow} />}
             />
           </Routes>
         </ToastProvider>

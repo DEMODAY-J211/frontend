@@ -32,7 +32,7 @@ const ManageShow = () => {
     },
     {
       menuname: "공연 정보 수정",
-      desc: "공연 정보를 수정할 수 있어요!",
+      desc: "공연 상세 정보를 수정할 수 있어요!",
       icon: <img src={editshow} alt="editshow" />,
       path: "/manageshow/editshow",
     },
