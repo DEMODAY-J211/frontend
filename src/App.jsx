@@ -185,7 +185,10 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
             <Route path="/landing" element={<Landing />} />
-            <Route path=":managerId/homeuser" element={<HomeUser />} />
+            <Route
+              path=":managerId/homeuser"
+              element={<ProtectedRoute element={HomeUser} />}
+            />
 
             {/* 보호된 라우트: User */}
             <Route
