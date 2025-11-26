@@ -851,7 +851,7 @@ const ViewEntryStatus = () => {
               <InputWrapper>
                 <SearchInput
                   type="text"
-                  placeholder="예매자 검색하기"
+                  placeholder="이름 또는 전화번호로 검색"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
