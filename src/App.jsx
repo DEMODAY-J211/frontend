@@ -66,12 +66,28 @@ const RootRedirect = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const loginSuccess = params.get("login");
+    const roleParam = params.get("role"); // 백엔드 redirect 로 받아온 role
+
+    // 1. 로그인 성공 파라미터가 있는 경우 → 쿠키 검사 없이 바로 이동
+    if (loginSuccess === "success") {
+      const role = roleParam || localStorage.getItem("userRole");
+
+      if (role === "MANAGER") {
+        navigate("/homemanager", { replace: true });
+      } else {
+        navigate("/homeuser", { replace: true });
+      }
+      return;
+    }
+
+    // 2. 기존 로직 (세션 쿠키 검사)
     const jsession = document.cookie.includes("JSESSIONID");
 
     if (jsession) {
-      // role 가져오기 (백엔드 redirect 시 param 돌려준 경우만)
       const role = localStorage.getItem("userRole");
-      if (role === "manager") navigate("/homemanager", { replace: true });
+      if (role === "MANAGER") navigate("/homemanager", { replace: true });
       else navigate("/homeuser", { replace: true });
     } else {
       navigate("/login", { replace: true });
