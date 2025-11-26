@@ -262,7 +262,7 @@ useEffect(() => {
               {previews[item.id] && (
                 <MessageTextarea
                   id={`textarea-${item.id}`}
-                  contentEditable
+                  contentEditable={!viewer}
                   suppressContentEditableWarning={true}
                   dangerouslySetInnerHTML={{
                     __html: renderWithMacroBox(messages[item.id]),

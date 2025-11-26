@@ -146,10 +146,26 @@ const ViewerBlock = styled.div`
       border-color: #ccc !important;
     }
 
+    input[type="checkbox"] {
+      opacity: 0.6; /* 체크 안 되어도 전체 연하게 */
+    }
+
+    input[type="checkbox"]:checked {
+      opacity: 1; /* 체크된 항목만 진하게 */
+    }
+
+    label {
+      color: #888; 
+    }
+
+    input[type="checkbox"]:checked + label {
+      color: #333;
+    }
+
     button {
       opacity: 0.6 !important;
-      background: #ddd !important; 
-      color: #888 !important;
+      // background: #ddd !important; 
+      // color: #888 !important;
     }
   `}
 `;

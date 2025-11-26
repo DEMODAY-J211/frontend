@@ -17,27 +17,27 @@ const RegisterShowNavbar = ({ currentStep, setCurrentStep }) => {
         <p>* 필수 항목을 모두 입력해야 임시저장할 수 있습니다.</p>
       </Title>
       <ProgressSteps>
-        <StepItem active={currentStep === 1} onClick={() => handleStepClick(1)}>
+        <StepItem active={currentStep === 1} >
           ① 공연 기본정보
         </StepItem>
         <ArrowIcon />
 
-        <StepItem active={currentStep === 2} onClick={() => handleStepClick(2)}>
+        <StepItem active={currentStep === 2} >
           ② 공연 상세정보
         </StepItem>
         <ArrowIcon />
 
-        <StepItem active={currentStep === 3} onClick={() => handleStepClick(3)}>
+        <StepItem active={currentStep === 3} >
           ③ 공연 장소·좌석
         </StepItem>
         <ArrowIcon />
 
-        <StepItem active={currentStep === 4} onClick={() => handleStepClick(4)}>
+        <StepItem active={currentStep === 4} >
           ④ 알림 메시지
         </StepItem>
         <ArrowIcon />
 
-        <StepItem active={currentStep === 5} onClick={() => handleStepClick(5)}>
+        <StepItem active={currentStep === 5} >
           ⑤ 미리 보기
         </StepItem>
       </ProgressSteps>
@@ -78,7 +78,7 @@ const StepItem = styled.div`
   padding: 10px;
   color: ${(props) => (props.active ? "#FC2847" : "#737373")};
   border-bottom: ${(props) => (props.active ? "2px solid #FC2847" : "none")};
-  cursor: pointer;
+
   transition: all 0.3s ease;
 `;
 

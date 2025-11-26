@@ -20,25 +20,25 @@ const ManageShow = () => {
   const menuItems = [
     {
       menuname: "예매자 관리",
-      desc: "예매자 목록을 확인하고 관리할 수 있습니다.",
+      desc: "예매자 목록을 확인하고 관리할 수 있어요!",
       icon: <img src={manageuser} alt="manageuser" />,
       path: "/manageshow/manageuser",
     },
     {
       menuname: "입장 현황",
-      desc: "현재 입장 현황을 확인할 수 있습니다.",
+      desc: "현재 입장 현황을 확인할 수 있어요!",
       icon: <img src={entrystatus} alt="entrystatus" />,
       path: "/manageshow/entrystatus",
     },
     {
       menuname: "공연 정보 수정",
-      desc: "공연 정보를 수정할 수 있습니다.",
+      desc: "공연 정보를 수정할 수 있어요!",
       icon: <img src={editshow} alt="editshow" />,
-      path: "/manageshow/manageuser",
+      path: "/manageshow/editshow",
     },
     {
       menuname: "QR 코드 확인",
-      desc: "QR 체크인 화면으로 이동합니다.",
+      desc: "QR 체크인 화면으로 이동하기!",
       icon: <img src={checkqrimg} alt="checkqrimg" />,
       path: "/qrmanager",
     },
