@@ -6,6 +6,7 @@ import { RiInformationLine, RiArrowLeftSLine } from "react-icons/ri";
 import { IoTicket } from "react-icons/io5";
 import tikitta_small from "../../assets/tikitta_small.svg";
 import { IoMdLogIn } from "react-icons/io";
+import { useAuth } from "../../pages/Auth/AuthContext";
 
 export default function NavbarUser({
   Backmode = false,
@@ -15,6 +16,7 @@ export default function NavbarUser({
 }) {
   const { managerId } = useParams();
   const navigate = useNavigate();
+  const { isLoggedIn, logout } = useAuth();
   // console.log("managerId,", managerId);
   const navi = () => {
     console.log("nav 값:", nav);
@@ -48,12 +50,16 @@ export default function NavbarUser({
       />
       <TextContainer>
         {text ? text : "서강연극회"}
-        <div className="buttoncontainer">
-          <RiInformationLine
-            size="24px"
-            onClick={() => navigate(`/${managerId}/viewteaminfo`)}
-          />
-          <IoMdLogIn />
+        <div className="button">
+          <div className="buttoncontainer">
+            <RiInformationLine
+              size="24px"
+              onClick={() => navigate(`/${managerId}/viewteaminfo`)}
+            />
+          </div>
+          <div className="buttoncontainer">
+            <IoMdLogIn size="24px" onClick={isLoggedIn ? logout : () => {}} />
+          </div>
         </div>
       </TextContainer>
       <div className="buttoncontainer">
@@ -107,4 +113,9 @@ const TextContainer = styled.div`
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+
+  .button {
+    display: flex;
+    gap: 5px;
+  }
 `;

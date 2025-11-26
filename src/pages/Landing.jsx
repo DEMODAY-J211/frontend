@@ -7,6 +7,7 @@ import tikitta_big from "../assets/tikitta_big.svg";
 import landing_user from "../assets/landing_user.png";
 import landing_manager from "../assets/landing_manager.png";
 import NavbarLanding from "../components/Navbar/NavbarLanding";
+import { useAuth } from "./Auth/AuthContext";
 
 export default function Landing() {
   const { setUser } = useAuth();
