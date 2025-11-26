@@ -6,80 +6,20 @@ import { IoIosQrScanner } from "react-icons/io";
 import { useEffect, useState } from "react";
 
 import { Html5QrcodeScanner } from "html5-qrcode";
+import { formatKoreanDate } from "../../utils/dateFormat";
+import { useRef } from "react";
+import { Html5Qrcode } from "html5-qrcode";
 
 const QRManager = () => {
   // TODO: 실제 값은 props나 context에서 가져와야 함
-  const [showId, setShowId] = useState(1); // 공연 ID
-  const [showtimeId, setShowtimeId] = useState(15); // 회차 ID
   const [lastScannedCode, setLastScannedCode] = useState(null);
   const [error, setError] = useState(null);
-  const [selectedShowTimeId, setSelectedShowTimeId] = useState(null);
-
-  useEffect(() => {
-    // QR 검증 함수
-    const validateQRCode = async (qrCode) => {
-      console.log("=== QR 코드 검증 시작 ===", qrCode);
-
-      try {
-        const response = await fetch(
-          `${
-            import.meta.env.VITE_API_URL
-          }/manager/shows/${showId}/QR?showtimeId=${showtimeId}&reservationId=${qrCode}`,
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const result = await response.json();
-        console.log("응답:", result);
-
-        if (response.ok && result.success) {
-          alert(
-            `✅ ${result.message}\n이름: ${result.data.name}\n좌석: ${result.data.seat}\n입장 시간: ${result.data.checkinTime}`
-          );
-        } else {
-          alert(`❌ ${result.message}`);
-        }
-      } catch (err) {
-        alert("❌ 서버 연결 실패");
-        console.error(err);
-      }
-    };
-
-    // === 스캐너는 딱 한 번만 초기화 ===
-    const scanner = new Html5QrcodeScanner("reader", {
-      fps: 10,
-      qrbox: 300,
-      rememberLastUsedCamera: true,
-    });
-
-    scanner.render(
-      (decodedText) => {
-        console.log("QR 감지:", decodedText);
-
-        if (decodedText !== lastScannedCode) {
-          setLastScannedCode(decodedText);
-          validateQRCode(decodedText);
-        }
-      },
-      (err) => {
-        // 스캔 실패 시 로그만 찍음
-        // console.warn("스캔 실패:", err);
-      }
-    );
-
-    // 언마운트 시 카메라 정리
-    return () => {
-      scanner.clear().catch(console.error);
-    };
-  }, []);
-
+  const [currentShowId, setCurrentShowId] = useState(null);
+  const [currentShowtimeId, setCurrentShowtimeId] = useState(null);
+  const html5QrCodeRef = useRef(null);
   const [showList, setShowList] = useState(null);
+  const qrcodeId = "reader";
+
   const viewShows = async () => {
     try {
       const response = await fetch(
@@ -106,21 +46,221 @@ const QRManager = () => {
       setError(error.message);
     }
   };
-  // 회차 선택 핸들러
-  const handleShowtimeChange = (showId, showtimeId) => {
-    setSelectedShowTimeId(showtimeId);
-    setCurrentShowtimeId(showtimeId);
-    setSelectedUsers([]); // 회차 변경 시 선택 초기화
-    setShowtimeId(showtimeId);
-    setShowId(showId);
-  };
-  useEffect(() => {
-    console.log(showList);
-  }, [showList]);
+
   // 첫 로드 시 API 호출
   useEffect(() => {
     viewShows();
   }, []);
+  const currentShowIdRef = useRef(null);
+  const currentShowtimeIdRef = useRef(null);
+  const lastScannedCodeRef = useRef(null);
+  // current 값이 변경될 때마다 ref 업데이트
+  useEffect(() => {
+    currentShowIdRef.current = currentShowId;
+    currentShowtimeIdRef.current = currentShowtimeId;
+  }, [currentShowId, currentShowtimeId]);
+
+  useEffect(() => {
+    if (!showList || showList.length === 0) return;
+
+    // 첫 공연/회차 자동 선택
+    if (!currentShowId || !currentShowtimeId) {
+      setCurrentShowId(showList[0].showId);
+      setCurrentShowtimeId(showList[0].showTimeList[0].showTimeId);
+    }
+  }, [showList]);
+
+  // 3️⃣ QR 스캐너 초기화
+  // useEffect(() => {
+  //   if (!html5QrCodeRef.current) {
+  //     html5QrCodeRef.current = new Html5Qrcode(qrcodeId);
+
+  //     const qrCodeSuccessCallback = (decodedText) => {
+  //       if (!currentShowId || !currentShowtimeId) return;
+
+  //       if (decodedText !== lastScannedCode) {
+  //         setLastScannedCode(decodedText);
+  //         validateQRCode(decodedText, currentShowId, currentShowtimeId);
+  //       }
+  //     };
+
+  //     const config = { fps: 10, qrbox: 500, aspectRatio: 1.77778 };
+
+  //     html5QrCodeRef.current.start(
+  //       { facingMode: "environment" },
+  //       config,
+  //       qrCodeSuccessCallback
+  //     );
+  //   }
+
+  //   return async () => {
+  //     if (html5QrCodeRef.current) {
+  //       const state = html5QrCodeRef.current.getState();
+  //       if (state === 2) {
+  //         // 2 = RUNNING
+  //         html5QrCodeRef.current
+  //           .stop()
+  //           .then(() => html5QrCodeRef.current.clear())
+  //           .catch(console.error);
+  //       }
+  //     }
+  //   };
+  // }, []);
+
+  // QR 스캐너는 한 번만 초기화
+  useEffect(() => {
+    const init = async () => {
+      const container = document.getElementById(qrcodeId);
+      if (!container) return;
+
+      if (!html5QrCodeRef.current) {
+        html5QrCodeRef.current = new Html5Qrcode(qrcodeId);
+
+        const qrCodeSuccessCallback = (decodedText) => {
+          console.log("QR detected:", decodedText);
+
+          // 최신 current 값을 ref에서 읽음
+          const showId = currentShowIdRef.current;
+          const showTimeId = currentShowtimeIdRef.current;
+
+          if (!showId || !showTimeId) {
+            console.warn("current 값이 아직 준비되지 않음");
+            return;
+          }
+
+          if (lastScannedCodeRef.current === decodedText) return;
+          lastScannedCodeRef.current = decodedText;
+
+          validateQRCode(decodedText, showId, showTimeId);
+        };
+
+        const config = {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.77778,
+        };
+
+        try {
+          await html5QrCodeRef.current.start(
+            { facingMode: "environment" },
+            config,
+            qrCodeSuccessCallback
+          );
+        } catch (err) {
+          console.error("QR 초기화 실패:", err);
+        }
+      }
+    };
+
+    init();
+
+    return () => {
+      if (html5QrCodeRef.current) {
+        const state = html5QrCodeRef.current.getState();
+        if (state === 2) {
+          html5QrCodeRef.current
+            .stop()
+            .then(() => html5QrCodeRef.current.clear())
+            .catch(console.error);
+        }
+      }
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   const init = async () => {
+  //     const container = document.getElementById(qrcodeId);
+  //     if (!container) return;
+  //     // if (!currentShowId || !currentShowtimeId) return;
+
+  //     if (!html5QrCodeRef.current) {
+  //       html5QrCodeRef.current = new Html5Qrcode(qrcodeId);
+
+  //       const qrCodeSuccessCallback = (decodedText) => {
+  //         console.log("QR detected:", decodedText);
+
+  //         // if (decodedText === lastScannedCode) return;
+
+  //         setLastScannedCode(decodedText);
+  //         validateQRCode(decodedText, currentShowId, currentShowtimeId);
+  //       };
+
+  //       const config = {
+  //         fps: 10,
+  //         qrbox: { width: 250, height: 250 },
+  //         aspectRatio: 1.77778,
+  //       };
+
+  //       try {
+  //         await html5QrCodeRef.current.start(
+  //           { facingMode: "environment" },
+  //           config,
+  //           qrCodeSuccessCallback
+  //         );
+  //       } catch (err) {
+  //         console.error("QR 초기화 실패:", err);
+  //       }
+  //     }
+  //   };
+
+  //   init();
+
+  //   return () => {
+  //     if (html5QrCodeRef.current) {
+  //       const state = html5QrCodeRef.current.getState();
+  //       if (state === 2) {
+  //         html5QrCodeRef.current
+  //           .stop()
+  //           .then(() => html5QrCodeRef.current.clear())
+  //           .catch(console.error);
+  //       }
+  //     }
+  //   };
+  // }, [currentShowId, currentShowtimeId]);
+
+  useEffect(() => {
+    console.log("selected", currentShowId, currentShowtimeId);
+  }, [currentShowId, currentShowtimeId]);
+
+  // QR 검증 함수
+  const validateQRCode = async (qrCode, showId, showTimeId) => {
+    console.log("=== QR 코드 검증 시작 ===", qrCode);
+
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/manager/shows/${showId}/QR?showtimeId=${showTimeId}&reservationItemId=${qrCode}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+      console.log("응답:", result);
+
+      if (response.ok && result.success) {
+        alert(
+          `✅ ${result.message}\n이름: ${result.data.name}\n좌석: ${result.data.seat}\n입장 시간: ${result.data.checkinTime}`
+        );
+      } else {
+        alert(`❌ ${result.message}`);
+      }
+    } catch (err) {
+      alert("❌ 서버 연결 실패");
+      console.error(err);
+    }
+  };
+  // 회차 선택 핸들러
+  const handleShowtimeChange = (showId, showtimeId) => {
+    setCurrentShowId(showId);
+    setCurrentShowtimeId(showtimeId);
+  };
   return (
     <Content>
       <NavbarManager />
@@ -128,58 +268,35 @@ const QRManager = () => {
         {/* 제목 + 시간 선택 */}
         <Header>
           <Title>입장 확인</Title>
-          {/* {showList?.showTimeList && showList?.showTimeList.length > 0 && (
-            <ShowtimeSelectWrapper>
-              {showTimeList.map((showtime) => (
-                <ShowtimeButton
-                  key={showtime.showTimeId}
-                  $active={selectedShowTimeId === showtime.showTimeId}
-                  onClick={() => handleShowtimeChange(showtime.showTimeId)}
-                >
-                  {new Date(showtime.showTime).toLocaleString("ko-KR", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </ShowtimeButton>
-              ))}
-            </ShowtimeSelectWrapper>
-          )} */}
-          {showList?.map((show, idx) => (
-            <div key={show.showId ?? idx}>
-              <h3>{show.title}</h3>
-
-              <ShowtimeSelectWrapper>
-                {show.showTimeList.map((time) => (
-                  <ShowtimeButton
-                    key={time.showTimeId}
-                    $active={selectedShowTimeId === time.showTimeId}
-                    onClick={() =>
-                      handleShowtimeChange(time.showId, time.showTimeId)
-                    }
-                  >
-                    {new Date(time.showTime).toLocaleString("ko-KR", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </ShowtimeButton>
-                ))}
-              </ShowtimeSelectWrapper>
-            </div>
-          ))}
-
-          <SelectTime>
-            <ShowName>제21회 정기공연</ShowName>
-            <Time>
-              <ShowTime>2025.10.14 15:00</ShowTime>
-              <MdOutlineUnfoldMore size={16} color="var(--color-primary)" />
-            </Time>
-          </SelectTime>
+          {showList &&
+            showList.length > 0 &&
+            showList[0].showTimeList &&
+            showList[0].showTimeList.length > 0 && (
+              <ShowtimeDropdown
+                value={
+                  currentShowtimeId && currentShowId
+                    ? `${currentShowId}-${currentShowtimeId}`
+                    : ``
+                }
+                onChange={(e) => {
+                  const [showId, showTimeId] = e.target.value.split("-");
+                  handleShowtimeChange(Number(showId), Number(showTimeId));
+                }}
+              >
+                {showList.map((show) =>
+                  show.showTimeList.map((showtime, idx) => (
+                    <option
+                      key={`${show.showId}-${showtime.showTimeId}`}
+                      value={`${show.showId}-${showtime.showTimeId}`}
+                    >
+                      {`[${idx + 1}회차]${show.title}(${formatKoreanDate(
+                        showtime.showTime
+                      )})`}
+                    </option>
+                  ))
+                )}
+              </ShowtimeDropdown>
+            )}
         </Header>
 
         <QRContainer>
@@ -188,11 +305,8 @@ const QRManager = () => {
             <Info>모바일에서도 이용할 수 있어요!</Info>
             <Info>링크를 복사해 휴대폰에서 열어주세요.</Info>
           </TextContainer>
-
-          <ScannerContainer>
-            {/* <IoIosQrScanner size={512} color="var(--color-primary)"/> */}
-            <div id="reader"></div>
-          </ScannerContainer>
+          {/* <div id="reader" /> */}
+          <ScannerContainer id="reader"></ScannerContainer>
         </QRContainer>
       </QRManagerContent>
     </Content>
@@ -271,12 +385,6 @@ const QRContainer = styled.div`
 
   /* QR 스캐너 영역 추가 */
   #reader {
-    width: 500px;
-    max-width: 90%;
-    aspect-ratio: 1;
-    background: #fff;
-    border-radius: 15px;
-    overflow: hidden;
   }
 `;
 
@@ -295,37 +403,29 @@ const Info = styled.div`
   font-size: 20px;
   font-weight: 300;
 `;
+
 const ScannerContainer = styled.div`
-  display: flex;
-  width: 1162px;
-  height: 547px;
-  padding: 18px 325px 17px 325px;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
+  max-width: 1200px;
   background-color: #b5b5b5;
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
 `;
 
-const ShowtimeSelectWrapper = styled.div`
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-`;
-
-const ShowtimeButton = styled.button`
+const ShowtimeDropdown = styled.select`
   padding: 8px 16px;
   border-radius: 15px;
   border: 1px solid var(--color-primary);
   background: ${({ $active }) => ($active ? "var(--color-primary)" : "#fff")};
   color: ${({ $active }) => ($active ? "#fff" : "var(--color-primary)")};
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-
-  &:hover {
-    background: ${({ $active }) =>
-      $active ? "var(--color-primary)" : "var(--color-tertiary)"};
-    transform: translateY(-2px);
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(252, 40, 71, 0.2);
   }
 `;

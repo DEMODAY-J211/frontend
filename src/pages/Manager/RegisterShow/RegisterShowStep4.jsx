@@ -34,7 +34,7 @@ const RegisterShowStep4 = ({ viewer = false }) => {
 
   const [previews, setPreviews] = useState({
     payGuide: false,
-    bookConfirm: false,
+    bookConfirm: true,
     showGuide: true,
     reviewRequest: false,
   });
@@ -176,74 +176,27 @@ const RegisterShowStep4 = ({ viewer = false }) => {
     }
   };
 
-    // 이전 단계로
+  // 이전 단계로
   const handlePrevious = () => {
     navigate(`/register-show/${showId}/step3`);
   };
 
   const handleNext = () => {
-    const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
-    const formData = previews;
-
-    localStorage.setItem("registerShowStep4", JSON.stringify(formData));
-    console.log("formdata", formData);
-    console.log("payload", payload);
-
-    const showGuideTextarea = document.getElementById("textarea-showGuide");
-    if (!showGuideTextarea) return;
-    console.log("form", formData);
-
-    const userEditedMessage = showGuideTextarea.innerText.trim();
-
-    if (!userEditedMessage) {
-      addToast("필수 항목을 입력해주세요: 공연 안내", "error");
-      return;
-    }
-
-    // true인 항목 필터링
-    const trueKeys = Object.keys(formData).filter(
-      (key) => formData[key] === true
-    );
-    console.log("turkey", trueKeys);
-
-    trueKeys.forEach((key) => {
-      // macro 변환 적용
-      const elem = document.getElementById(`textarea-${key}`);
-      if (!elem) return;
-
-      const userEdited = elem.innerText.trim();
-      showMessage[key] = convertMessageForBackend(userEdited);
-    });
-    console.log(showMessage);
-
-    // userEditedMessage는 showGuide 같은 필드에 넣는다고 가정
-    showMessage.showGuide = userEditedMessage;
-
-    console.log("보낼 showMessage:", showMessage);
-
-    const updatedPayload = {
-      ...payload,
-      showMessage: showMessage, // 이미지 배열 자체가 S3 URL 배열
-    };
-    console.log("updatedapyalad", updatedPayload);
-
-    localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
-
     navigate(`/register-show/${showId}/step5`);
   };
 
   const handleSaveAndNext = async () => {
-  try {
-    // 1️⃣ 임시 저장 먼저
-    await handleTempSave(); // handleTempSave가 async라면 await 사용
+    try {
+      // 1️⃣ 임시 저장 먼저
+      await handleTempSave(); // handleTempSave가 async라면 await 사용
 
-    // 2️⃣ 임시 저장 완료 후 다음 단계
-    handleNext();
-  } catch (error) {
-    console.error("임시 저장 중 오류:", error);
-    // 필요 시 사용자에게 알림
-  }
-};
+      // 2️⃣ 임시 저장 완료 후 다음 단계
+      handleNext();
+    } catch (error) {
+      console.error("임시 저장 중 오류:", error);
+      // 필요 시 사용자에게 알림
+    }
+  };
 
   // 기존 임시 저장 데이터 불러오기
   useEffect(() => {
@@ -264,8 +217,9 @@ const RegisterShowStep4 = ({ viewer = false }) => {
             <Name>알림 메시지 양식</Name>
             <Desc>
               * 1. 회색 박스 안의 정보는 티킷타에서 자동으로 넣어주는 내용이니
-              수정하지 않으셔도 됩니다! <br/>
-              &nbsp;&nbsp;&nbsp;2. 이모티콘을 넣으면 문자가 발송되지 않으니 유의해주세요. 
+              수정하지 않으셔도 됩니다! <br />
+              &nbsp;&nbsp;&nbsp;2. 이모티콘을 넣으면 문자가 발송되지 않으니
+              유의해주세요.
             </Desc>
           </Flex>
 
@@ -281,7 +235,9 @@ const RegisterShowStep4 = ({ viewer = false }) => {
                   {previews[item.id] ? <GrCheckboxSelected /> : <GrCheckbox />}
                   {item.label}
                 </CheckboxButton>
-                {item.id === "showGuide" && <RequiredText>(필수)</RequiredText>}
+                {(item.id === "showGuide" || item.id === "bookConfirm") && (
+                  <RequiredText>(필수)</RequiredText>
+                )}
               </Flex>
               {previews[item.id] && (
                 <MessageTextarea

@@ -15,8 +15,21 @@ const RegisterShowStep3 = ({ viewer = false }) => {
   const { addToast } = useToast();
 
   // 상태 관리
-  const [selectedVenue, setSelectedVenue] = useState(null); // 단일 선택
-  const [selectedMethod, setSelectedMethod] = useState(null); // 기본 선택 없음
+  const [selectedVenue, setSelectedVenue] = useState(() => {
+    const saved = localStorage.getItem("selectedVenue");
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [selectedMethod, setSelectedMethod] = useState(() => {
+    const saved = localStorage.getItem("selectedMethod");
+    return saved ? JSON.parse(saved) : null;
+  });
+  // 공연 장소 목록 (API에서 가져옴)
+  const [venues, setVenues] = useState(() => {
+    // 로컬스토리지에 저장된 venues가 있으면 초기값으로 사용
+    const saved = localStorage.getItem("venues");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [quantity, setQuantity] = useState(100);
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
   const [excludedSeats, setExcludedSeats] = useState([]); // 제외된 좌석
@@ -25,8 +38,6 @@ const RegisterShowStep3 = ({ viewer = false }) => {
   const [seatMapData, setSeatMapData] = useState(null); // 좌석표 데이터 (API 전송용)
   const [editMode, setEditMode] = useState(false);
 
-  // 공연 장소 목록 (API에서 가져옴)
-  const [venues, setVenues] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // 페이지 로드 시 즐겨찾기 공연장 목록 불러오기
@@ -49,6 +60,7 @@ const RegisterShowStep3 = ({ viewer = false }) => {
           if (result.success && result.data && Array.isArray(result.data)) {
             // API 응답에서 공연장 목록 설정
             setVenues(result.data);
+            localStorage.setItem("venues", JSON.stringify(result.data));
           } else {
             setVenues([]);
             addToast("즐겨찾기한 공연장이 없습니다.", "info");
@@ -57,21 +69,11 @@ const RegisterShowStep3 = ({ viewer = false }) => {
           console.error("Failed to fetch venues:", response.status);
           addToast("공연장 목록을 불러오는데 실패했습니다.", "error");
           // API 실패 시 더미 데이터 사용
-          setVenues([
-            { id: 1, name: "올림픽공원 KSPO DOME" },
-            { id: 2, name: "잠실실내체육관" },
-            { id: 3, name: "고척스카이돔" },
-          ]);
         }
       } catch (error) {
         console.error("Error fetching favorite venues:", error);
         addToast("서버와의 통신 중 오류가 발생했습니다.", "error");
         // 네트워크 오류 시 더미 데이터 사용
-        setVenues([
-          { id: 1, name: "올림픽공원 KSPO DOME" },
-          { id: 2, name: "잠실실내체육관" },
-          { id: 3, name: "고척스카이돔" },
-        ]);
       } finally {
         setIsLoading(false);
       }
@@ -80,7 +82,20 @@ const RegisterShowStep3 = ({ viewer = false }) => {
     if (!venues || venues.length === 0) {
       fetchFavoriteVenues();
     }
-  }, [venues]); // venues 상태를 의존으로 넣으면 필요 시만 호출
+  }, []); // venues 상태를 의존으로 넣으면 필요 시만 호출
+
+  // selectedVenue나 selectedMethod가 변경되면 로컬스토리지에 저장
+  useEffect(() => {
+    if (selectedVenue) {
+      localStorage.setItem("selectedVenue", JSON.stringify(selectedVenue));
+    }
+  }, [selectedVenue]);
+
+  useEffect(() => {
+    if (selectedMethod) {
+      localStorage.setItem("selectedMethod", JSON.stringify(selectedMethod));
+    }
+  }, [selectedMethod]);
 
   // 좌석 판매 방법 옵션
   const salesMethods = ["스탠딩석", "주최 측 배정", "예매자 선택", "자동 배정"];
@@ -331,17 +346,17 @@ const RegisterShowStep3 = ({ viewer = false }) => {
   };
 
   const handleSaveAndNext = async () => {
-  try {
-    // 1️⃣ 임시 저장 먼저
-    await handleTempSave(); // handleTempSave가 async라면 await 사용
+    try {
+      // 1️⃣ 임시 저장 먼저
+      await handleTempSave(); // handleTempSave가 async라면 await 사용
 
-    // 2️⃣ 임시 저장 완료 후 다음 단계
-    handleNext();
-  } catch (error) {
-    console.error("임시 저장 중 오류:", error);
-    // 필요 시 사용자에게 알림
-  }
-};
+      // 2️⃣ 임시 저장 완료 후 다음 단계
+      handleNext();
+    } catch (error) {
+      console.error("임시 저장 중 오류:", error);
+      // 필요 시 사용자에게 알림
+    }
+  };
 
   return (
     <>

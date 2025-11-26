@@ -116,7 +116,7 @@ const RootRedirect = () => {
     // } else {
     //   navigate("/login", { replace: true });
     // }
-  }, [location, navigate, setIsLoggedIn]);
+  }, []);
 
   return null;
 };

@@ -29,7 +29,8 @@ const SelectSeat = () => {
     quantity,
     showData
   );
-  const totalPrice = selectedOption.ticketoptionPrice * quantity;
+  const totalPrice = selectedOption?.ticketOptionPrice * quantity;
+  console.log(selectedOption);
   // 공연 정보 (이전 페이지에서 전달받음)
 
   // API로부터 받아올 데이터
@@ -267,7 +268,7 @@ const SelectSeat = () => {
           </ShowInfoHeader>
           <TicketInfo>
             <TicketType>
-              {selectedOption.ticketoptionName}·{quantity}매
+              {selectedOption?.ticketOptionName}·{quantity}매
             </TicketType>
             <TotalPrice>{totalPrice?.toLocaleString()}원</TotalPrice>
           </TicketInfo>
