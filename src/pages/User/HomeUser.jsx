@@ -18,12 +18,26 @@ export default function HomeUser() {
   const [userReservations, setUserReservations] = useState([]);
   const currentShow = useMemo(() => shows[currentIndex], [shows, currentIndex]);
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(false);
   const [teamTitle, setTeamTitle] = useState(null);
-
-  // const managerData = JSON.parse(localStorage.getItem("managerData"));
   const { isLoggedIn, setIsLoggedIn } = useAuth();
-  console.log("isloggedin", isLoggedIn);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const openLoginModal = () => setIsLoginModalOpen(true);
+  const closeLoginModal = () => setIsLoginModalOpen(false);
+
+  const requireLogin = (action) => {
+    if (!isLoggedIn) {
+      openLoginModal();
+      return;
+    }
+    action(); // 로그인된 경우에만 실행
+  };
+
+  const handleHeaderIconClick = () => {
+    requireLogin(() => {
+      navigate(`/${managerId}/myticketlist`);
+    });
+  };
+
   useEffect(() => {
     console.log("managerId :", managerId);
   }, [managerId]);
@@ -32,25 +46,6 @@ export default function HomeUser() {
     console.log("shows :", shows);
   }, [shows]);
 
-  useEffect(() => {
-    const jsessionId = getCookie("JSESSIONID");
-    if (jsessionId) {
-      setIsLoggedIn(true);
-    }
-  }, [setIsLoggedIn]);
-
-  function getCookie(name) {
-    const matches = document.cookie.match(
-      new RegExp("(^| )" + name + "=([^;]+)")
-    );
-    return matches ? matches[2] : null;
-  }
-  if (!isLoggedIn) {
-    setShowModal(true); // 로그인 안 되어 있으면 로그인 모달
-  }
-  // if (managerData) {
-  //   console.log("저장된 매니저 데이터:", managerData);
-  // }
   function handleNext() {
     setCurrentIndex((prev) => Math.min(prev + 1, shows.length - 1));
   }
@@ -60,14 +55,11 @@ export default function HomeUser() {
   // console.log(isLoggedIn);
   const handleBuyTicket = () => {
     if (!currentShow) return;
-
-    navigate(`/${managerId}/viewshowdetail/${currentShow.showId}`, {
-      state: {
-        managerId: managerId,
-        showId: currentShow.showId,
-      },
+    requireLogin(() => {
+      navigate(`/${managerId}/viewshowdetail/${currentShow.showId}`);
     });
   };
+
   // console.log("currentshow manaerId", currentShow.managerId);
   const fetchShows = async () => {
     try {
@@ -98,12 +90,8 @@ export default function HomeUser() {
 
   const fetchUserRes = async () => {
     // 유저가 예매한 공연
-    // console.log("=== 예매 내역 조회 시작 ===");
-    // console.log("managerId:", managerId);
-    // console.log(
-    //   "요청 URL:",
-    //   `${import.meta.env.VITE_API_URL}/user/${managerId}/myshow`
-    // );
+    console.log("=== 예매 내역 조회 시작 ===");
+    console.log("managerId:", managerId);
 
     try {
       // const token = localStorage.getItem("accessToken");
@@ -129,34 +117,20 @@ export default function HomeUser() {
           userresponse,
           result2.data
         );
-        setIsLoggedIn(true);
+        // setIsLoggedIn(true);
       }
     } catch (error) {
-      setIsLoggedIn(false);
+      // setIsLoggedIn(false);
       console.error("예매한 공연 조회 실패:", error);
       // alert("예매한 공연 조회를 할 수 없습니다.");
     }
   };
+
   useEffect(() => {
     fetchShows(); // 공연 리스트
     fetchUserRes(); // 유저가 예매한 공연 리스트
   }, []);
 
-  useEffect(() => {
-    console.log("userReservation", userReservations);
-    // console.log("managerData", managerData);
-  });
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const openLoginModal = () => setIsLoginModalOpen(true);
-  const closeLoginModal = () => setIsLoginModalOpen(false);
-
-  const handleHeaderIconClick = () => {
-    if (isLoggedIn) {
-      navigate(`/${managerId}/myticketlist`);
-    } else {
-      openLoginModal(); // 로그인 안되어 있으면 모달 오픈
-    }
-  };
   return (
     <PageWrapper>
       <HomeUserContainer>
@@ -222,11 +196,6 @@ export default function HomeUser() {
           </ShowList>
         )}
       </HomeUserContainer>
-
-      {/* 로그인 안 되어 있으면 모달 */}
-      {!isLoggedIn && showModal && (
-        <LoginRequiredModal onClose={() => setShowModal(false)} />
-      )}
     </PageWrapper>
   );
 }

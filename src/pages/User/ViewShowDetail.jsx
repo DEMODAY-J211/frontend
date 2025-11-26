@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import ShowTab from "../../components/User/ShowTab";
@@ -14,15 +14,13 @@ import { useAuth } from "../Auth/AuthContext";
 const serverUrl = import.meta.env.VITE_API_URL;
 
 export default function ViewShowDetail() {
+  const { managerId, showId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [showData, setShowData] = useState({});
   const [showAlert, setShowAlert] = useState(false);
   const [bookingStatus, setBookingStatus] = useState("before");
   // "before" | "available" | "closed"
-  const { managerId, showId } = location.state || {};
-  const [select, setSelect] = useState();
   const { isLoggedIn } = useAuth();
   const handlebtn = () => {
     if (!showBottomSheet) {
@@ -170,7 +168,7 @@ export default function ViewShowDetail() {
               ></ShowTab>
             </ShowContainer>
 
-            {!(isLoggedIn && showBottomSheet) && (
+            {!showBottomSheet && (
               <Footerbtn
                 buttons={[
                   {
@@ -191,7 +189,7 @@ export default function ViewShowDetail() {
       </HomeUserContainer>
 
       {/* 로그인 되어 있으면 바텀시트 */}
-      {isLoggedIn && showBottomSheet && (
+      {showBottomSheet && (
         <BottomSheet
           onClose={() => setShowBottomSheet(false)}
           onNeedModal={() => setShowAlert(true)}
