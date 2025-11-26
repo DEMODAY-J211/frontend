@@ -104,6 +104,7 @@ const handleMenuClick = (item) => {
 
   const viewShows = async () => {
     try {
+      setLoading(true);
       setError("");
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/manager/shows/list`,
@@ -123,10 +124,23 @@ const handleMenuClick = (item) => {
         throw new Error(result.message || "공연 목록 조회 실패");
       }
 
+      console.log('=== 공연 목록 API 응답 ===');
+      console.log('전체 응답:', result);
+      console.log('공연 목록:', result.data.published);
+
+      if (result.data.published && result.data.published.length > 0) {
+        console.log('=== 각 공연 정보 ===');
+        result.data.published.forEach((show, index) => {
+          console.log(`공연 ${index + 1}:`, show);
+        });
+      }
+
       setPosters(result.data.published ?? []);
     } catch (error) {
       console.error("Error fetching shows:", error);
       setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
