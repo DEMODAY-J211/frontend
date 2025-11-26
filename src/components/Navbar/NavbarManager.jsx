@@ -10,7 +10,7 @@ const NavbarManager = ({ onProtectedNavigate }) => {
   const navigate = useNavigate();
   const [login, setLogin] = useState(true); //true: 로그인 상태 , false: 로그아웃 상태
 
-  const { logout } = useContext(AuthContext);
+  const { isLoggedIn, setIsLoggedIn, logout } = useContext(AuthContext);
 
   const handleClick = (path) => {
     if (onProtectedNavigate) {
@@ -36,7 +36,7 @@ const NavbarManager = ({ onProtectedNavigate }) => {
         </NavItem>
       </NavbarLeft>
       <NavbarRight>
-        {login === true ? (
+        {isLoggedIn === true ? (
           <Button onClick={logout}>로그아웃</Button>
         ) : (
           <Button onClick={() => handleClick("/login")}>로그인</Button>
