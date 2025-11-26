@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { RiInformationLine, RiArrowLeftSLine } from "react-icons/ri";
 import { IoTicket } from "react-icons/io5";
 import tikitta_small from "../../assets/tikitta_small.svg";
+import { IoMdLogIn } from "react-icons/io";
 
 export default function NavbarUser({
   Backmode = false,
@@ -52,6 +53,7 @@ export default function NavbarUser({
             size="24px"
             onClick={() => navigate(`/${managerId}/viewteaminfo`)}
           />
+          <IoMdLogIn />
         </div>
       </TextContainer>
       <div className="buttoncontainer">
