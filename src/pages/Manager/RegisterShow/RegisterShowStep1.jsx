@@ -154,22 +154,22 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
   // 공연 날짜/회차
   const [showTimes, setShowTimes] = useState([
     {
-      showStartDate: today(), // 기본 오늘 날짜
-      showStartTime: "00:00",
-      showEndTime: "00:00",
+      showStartDate: "YYYY/MM/DD", // 기본 오늘 날짜
+      showStartTime: "--:--",
+      showEndTime: "--:--",
     },
   ]);
   // 예매 시작(bookStart)
-  const [bookStartDate, setBookStartDate] = useState(today());
-  const [bookStartTime, setBookStartTime] = useState(today());
+  const [bookStartDate, setBookStartDate] = useState("YYYY/MM/DD");
+  const [bookStartTime, setBookStartTime] = useState("--:--");
 
   const addShowTime = () => {
     setShowTimes([
       ...showTimes,
       {
         showStartDate: today(),
-        showStartTime: "00:00",
-        showEndTime: "00:00",
+        showStartTime: "--:--",
+        showEndTime: "--:--",
       },
     ]);
   };
@@ -552,8 +552,8 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
                             setShowTimeError(false);
                         }}
                       >
-                        <option value="" disabled>
-                          00:00
+                        <option value="--:--" disabled>
+                          --:--
                         </option>
                         {timeOptions.map((time, i) => (
                           <option key={i} value={time}>
@@ -578,8 +578,8 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
                             setShowTimeError(false);
                         }}
                       >
-                        <option value="" disabled>
-                          00:00
+                        <option value="--:--" disabled>
+                          --:--
                         </option>
                         {timeOptions.map((time, i) => (
                           <option key={i} value={time}>
@@ -636,8 +636,8 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
                           setBookStartTimeError(false);
                       }}
                     >
-                      <option value="" disabled>
-                        00:00
+                      <option value="--:--" disabled>
+                        --:--
                       </option>
                       {timeOptions.map((time, i) => (
                         <option key={i} value={time}>
