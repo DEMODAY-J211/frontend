@@ -112,10 +112,12 @@ const RegisterShowStep5 = () => {
     <>
       <Container>
         {/* <RegisterShowNavbar currentStep={5} /> */}
-        <RegisterShowStep1 viewer={true} />
+        <ViewerBlock viewer={true}>
+        <RegisterShowStep1  viewer={true}/>
         <RegisterShowStep2 viewer={true} />
-        <RegisterShowStep3 viewer={true} />
-        <RegisterShowStep4 viewer={true} />
+        <RegisterShowStep3 viewer={true}/>
+        <RegisterShowStep4 viewer={true}/>
+        </ViewerBlock>
         <Footer>
           <PrevButton onClick={handlePrevious}>←이전</PrevButton>
           <RightButtonGroup>
@@ -129,6 +131,30 @@ const RegisterShowStep5 = () => {
 };
 
 export default RegisterShowStep5;
+
+const ViewerBlock = styled.div`
+  pointer-events: ${({ viewer }) => (viewer ? "none" : "auto")};
+  opacity: ${({ viewer }) => (viewer ? 0.9 : 1)};  /* 살짝 흐리게 */
+
+  /* viewer 모드일 때 내부 input, select, textarea, button 비활성화 스타일 */
+  ${({ viewer }) =>
+    viewer &&
+    `
+    input, select, textarea {
+      background: #f0f0f0 !important; 
+      color: #888 !important;
+      border-color: #ccc !important;
+    }
+
+    button {
+      opacity: 0.6 !important;
+      background: #ddd !important; 
+      color: #888 !important;
+    }
+  `}
+`;
+
+
 
 const Container = styled.div`
   width: 100%;

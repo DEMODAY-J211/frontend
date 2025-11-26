@@ -293,50 +293,63 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   };
 
   const handleTempSave = async () => {
-    if (!validateFields()) {
-      addToast("필수 항목을 입력해주세요!", "error");
-      return;
-    }
 
-    const formattedShowTimes = showTimes.map((t) => ({
-      showStart: `${t.showStartDate}T${t.showStartTime}:00`,
-      showEnd: `${t.showStartDate}T${t.showEndTime}:00`,
-    }));
+  // if (!validateFields()) {
+  //   addToast("필수 항목을 입력해주세요!", "error");
+  //   return;
+  // }
 
-    const bookStart = `${bookStartDate}T${bookStartTime}:00`;
-    const lastShowDate = showTimes[showTimes.length - 1].showStartDate;
-    const bookEnd = `${lastShowDate}T23:59:00`;
+  // 값이 비었을 경우는 그냥 빈 값 그대로 저장하도록
+  const formattedShowTimes = showTimes.map((t) => ({
+    showStart:
+      t.showStartDate && t.showStartTime
+        ? `${t.showStartDate}T${t.showStartTime}:00`
+        : "",
+    showEnd:
+      t.showStartDate && t.showEndTime
+        ? `${t.showStartDate}T${t.showEndTime}:00`
+        : "",
+  }));
 
-    const finalPayload = {
-      ...formData,
-      showTimes: formattedShowTimes,
-      bookStart,
-      bookEnd,
-    };
+  const bookStart =
+    bookStartDate && bookStartTime
+      ? `${bookStartDate}T${bookStartTime}:00`
+      : "";
 
-    localStorage.setItem("createShowPayload", JSON.stringify(finalPayload));
-    console.log(finalPayload);
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(finalPayload),
-        }
-      );
+  const lastShowDate = showTimes[showTimes.length - 1]?.showStartDate || "";
+  const bookEnd = lastShowDate ? `${lastShowDate}T23:59:00` : "";
 
-      const result = await res.json();
-      if (res.ok) {
-        addToast("임시 저장되었습니다!", "success");
-      } else {
-        alert(result.message || "오류");
-      }
-    } catch (err) {
-      alert("서버 오류");
-    }
+  const finalPayload = {
+    ...formData,
+    showTimes: formattedShowTimes,
+    bookStart,
+    bookEnd,
   };
+
+  localStorage.setItem("createShowPayload", JSON.stringify(finalPayload));
+
+  // 서버로도 전송
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(finalPayload),
+      }
+    );
+
+    const result = await res.json();
+    if (res.ok) {
+      addToast("임시 저장되었습니다!", "success");
+    } else {
+      alert(result.message || "오류");
+    }
+  } catch (err) {
+    alert("서버 오류");
+  }
+};
 
   // 다음
   const handleNext = () => {
@@ -439,7 +452,12 @@ const RegisterShowStep1 = ({ viewer = false }) => {
             <RightContent>
               {/* 공연명 */}
               <Q>
-                <Name>공연명</Name>
+                <Name>
+                  공연명
+                  <p>*</p>
+                </Name>
+
+
                 <Input
                   value={formData.title}
                   onChange={(e) => {
@@ -457,7 +475,11 @@ const RegisterShowStep1 = ({ viewer = false }) => {
               <Q>
                 <Name>
                   공연 날짜/회차
-                  <AddButton onClick={addShowTime}>추가하기</AddButton>
+                  <p>*</p>
+                  {!viewer && (
+                    <AddButton onClick={addShowTime}>추가하기</AddButton>
+                  )}
+                  
                 </Name>
 
                 {showTimes.map((t, idx) => (
@@ -535,7 +557,8 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                     </Column>
 
                     {formData.showTimes.length > 1 && (
-                      <DeleteIcon onClick={() => removeShowTime(idx)} />
+                      (!viewer && 
+                      <DeleteIcon onClick={() => removeShowTime(idx)} />)
                     )}
                   </DateRow>
                 ))}
@@ -543,7 +566,9 @@ const RegisterShowStep1 = ({ viewer = false }) => {
 
               {/* 예매 시작 bookStart */}
               <Q>
-                <Name>예매 기간</Name>
+                <Name>예매 기간
+                  <p>*</p>
+                </Name>
 
                 <DateRow>
                   {/* bookStartDate */}
@@ -599,7 +624,10 @@ const RegisterShowStep1 = ({ viewer = false }) => {
               <Q>
                 <Name>
                   티켓 옵션
-                  <AddButton onClick={addTicketOption}>추가하기</AddButton>
+                  {!viewer && (
+                    <AddButton onClick={addTicketOption}>추가하기</AddButton>
+                  )}
+                  
                 </Name>
 
                 {formData.ticketOptions.map((opt, idx) => (
@@ -650,7 +678,8 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                       <span>원</span>
 
                       {formData.ticketOptions.length > 1 && (
-                        <DeleteIcon onClick={() => removeTicketOption(idx)} />
+                        (!viewer && 
+                        <DeleteIcon onClick={() => removeTicketOption(idx)} />)
                       )}
                     </PriceRow>
                   </TicketContent>
@@ -823,13 +852,14 @@ const Name = styled.div`
   font-size: 25px;
   font-weight: 500;
   display: flex;
-  gap: 20px;
+  gap: 5px;
   display: flex;
   align-items: center;
 
   p{
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 300;
+    color: var(--color-primary);
   }
 `;
 
