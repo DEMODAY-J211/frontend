@@ -81,17 +81,6 @@ const RootRedirect = () => {
       }
       return;
     }
-
-    // 2. 기존 로직 (세션 쿠키 검사)
-    const jsession = document.cookie.includes("JSESSIONID");
-
-    if (jsession) {
-      const role = localStorage.getItem("userRole");
-      if (role === "MANAGER") navigate("/homemanager", { replace: true });
-      else navigate("/homeuser", { replace: true });
-    } else {
-      navigate("/login", { replace: true });
-    }
   }, []);
 
   return null;
