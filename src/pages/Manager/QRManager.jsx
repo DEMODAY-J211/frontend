@@ -9,6 +9,7 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 import { formatKoreanDate } from "../../utils/dateFormat";
 import { useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
+import { useToast } from "../../components/Toast/useToast";
 
 const QRManager = () => {
   // TODO: 실제 값은 props나 context에서 가져와야 함
@@ -19,6 +20,7 @@ const QRManager = () => {
   const html5QrCodeRef = useRef(null);
   const [showList, setShowList] = useState(null);
   const qrcodeId = "reader";
+  const { addToast } = useToast();
 
   const viewShows = async () => {
     try {
@@ -69,43 +71,6 @@ const QRManager = () => {
       setCurrentShowtimeId(showList[0].showTimeList[0].showTimeId);
     }
   }, [showList]);
-
-  // 3️⃣ QR 스캐너 초기화
-  // useEffect(() => {
-  //   if (!html5QrCodeRef.current) {
-  //     html5QrCodeRef.current = new Html5Qrcode(qrcodeId);
-
-  //     const qrCodeSuccessCallback = (decodedText) => {
-  //       if (!currentShowId || !currentShowtimeId) return;
-
-  //       if (decodedText !== lastScannedCode) {
-  //         setLastScannedCode(decodedText);
-  //         validateQRCode(decodedText, currentShowId, currentShowtimeId);
-  //       }
-  //     };
-
-  //     const config = { fps: 10, qrbox: 500, aspectRatio: 1.77778 };
-
-  //     html5QrCodeRef.current.start(
-  //       { facingMode: "environment" },
-  //       config,
-  //       qrCodeSuccessCallback
-  //     );
-  //   }
-
-  //   return async () => {
-  //     if (html5QrCodeRef.current) {
-  //       const state = html5QrCodeRef.current.getState();
-  //       if (state === 2) {
-  //         // 2 = RUNNING
-  //         html5QrCodeRef.current
-  //           .stop()
-  //           .then(() => html5QrCodeRef.current.clear())
-  //           .catch(console.error);
-  //       }
-  //     }
-  //   };
-  // }, []);
 
   // QR 스캐너는 한 번만 초기화
   useEffect(() => {
@@ -245,8 +210,12 @@ const QRManager = () => {
       console.log("응답:", result);
 
       if (response.ok && result.success) {
-        alert(
+        console.log(
           `✅ ${result.message}\n이름: ${result.data.name}\n좌석: ${result.data.seat}\n입장 시간: ${result.data.checkinTime}`
+        );
+        addToast(
+          `${result.message}님 입장이 완료되었습니다. 좌석은 ${result.data.seat}입니다. 즐거운 관람되세요!`,
+          "success"
         );
       } else {
         alert(`❌ ${result.message}`);
