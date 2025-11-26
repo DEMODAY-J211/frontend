@@ -20,6 +20,7 @@ export default function ViewShowDetail() {
   const [showData, setShowData] = useState({});
   const [showAlert, setShowAlert] = useState(false);
   const [bookingStatus, setBookingStatus] = useState("before");
+
   // "before" | "available" | "closed"
   const { isLoggedIn } = useAuth();
   const handlebtn = () => {
@@ -59,10 +60,6 @@ export default function ViewShowDetail() {
     }
   };
 
-  useEffect(() => {
-    setSelect(showData?.saleMethod);
-    console.log(showData?.saleMethod);
-  }, [showData]);
   useEffect(() => {
     fetchShows();
   }, []);

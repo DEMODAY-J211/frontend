@@ -49,51 +49,52 @@ import KakaoCallback from "./pages/Auth/KakaoCallback";
 import RegisteredVenues from "./pages/Manager/RegisteredVenues";
 
 // Protected Route 컴포넌트
-const ProtectedRoute = ({ element: Element }) => {
+const ProtectedRoute = ({ element: Element, ...rest }) => {
   const { isLoggedIn, isInitialized } = useAuth();
   const location = useLocation();
-
-  if (!isInitialized) return null;
-
+  // AuthContext 초기화 대기 중
+  if (!isInitialized) {
+    return null; // 또는 로딩 스피너
+  }
+  const currentPath = location.pathname + location.search;
+  console.log("currentPath", currentPath);
+  const isLoginPage = location.pathname === "/login";
   return isLoggedIn ? (
-    <Element />
+    <Element {...rest} />
   ) : (
-    <Navigate to="/login" state={{ from: location.pathname }} replace />
+    <Navigate
+      to="/login"
+      replace
+      state={isLoginPage ? null : { from: currentPath }}
+    />
   );
 };
 
+// ESA52Bhyr -> 여전히 jession2개
+
+// 루트 경로 처리 컴포넌트
 const RootRedirect = () => {
+  const location = useLocation();
   const navigate = useNavigate();
+  const { setIsLoggedIn } = useAuth();
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const loginSuccess = params.get("login");
-    const roleParam = params.get("role"); // 백엔드 redirect 로 받아온 role
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const loginSuccess = urlParams.get("login");
 
-    // 1. 로그인 성공 파라미터가 있는 경우 → 쿠키 검사 없이 바로 이동
     if (loginSuccess === "success") {
-      const role = roleParam || localStorage.getItem("userRole");
-
-      if (role === "MANAGER") {
-        navigate("/homemanager", { replace: true });
-      } else {
-        navigate("/homeuser", { replace: true });
-      }
-      return;
-    }
-
-    // 2. 기존 로직 (세션 쿠키 검사)
-    const jsession = document.cookie.includes("JSESSIONID");
-
-    if (jsession) {
-      const role = localStorage.getItem("userRole");
-      if (role === "MANAGER") navigate("/homemanager", { replace: true });
-      else navigate("/homeuser", { replace: true });
+      console.log("✅ 루트 경로에서 로그인 성공 감지");
+      setIsLoggedIn(true);
+      localStorage.setItem("isLoggedIn", "true");
+      // URL 파라미터 제거하고 /homemanager 또는 /homeuser로 이동
+      // 임시로 /homemanager로 이동 (나중에 role 기반으로 변경 가능)
+      // navigate("/homemanager", { replace: true });
+      // navigate("/homemanager", { replace: true });
     } else {
+      // 로그인 성공 파라미터가 없으면 로그인 페이지로
       navigate("/login", { replace: true });
     }
-  }, []);
-
+  }, [location, navigate, setIsLoggedIn]);
   return null;
 };
 

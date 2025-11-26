@@ -49,7 +49,7 @@ export default function NavbarUser({
         style={{ cursor: "pointer" }}
       />
       <TextContainer>
-        {text ? text : "서강연극회"}
+        {text ? text : "연극회"}
         <div className="button">
           <div className="buttoncontainer">
             <RiInformationLine

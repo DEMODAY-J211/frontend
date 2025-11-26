@@ -1,48 +1,84 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  // localStorage에서 초기값 가져오기 (리렌더링 방지)
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginSuccess = urlParams.get("login");
+    if (loginSuccess === "success") {
+      return true;
+    }
+    return localStorage.getItem("isLoggedIn") === "true";
+  });
+
   const [user, setUser] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const navigate = useNavigate();
 
-  // 쿠키 읽는 함수
-  const getCookie = (name) => {
-    return document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(name + "="))
-      ?.split("=")[1];
-  };
-
+  // ✅ 로그인 상태 확인: URL 파라미터 또는 localStorage
   useEffect(() => {
-    console.log("🍪 쿠키:", document.cookie);
+    console.log("=== AuthContext 초기화 ===");
+    console.log("🍪 모든 쿠키:", document.cookie);
+    console.log("📍 현재 URL:", window.location.href);
 
-    const jsessionId = getCookie("JSESSIONID");
+    // URL에서 login=success 파라미터 확인
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginSuccess = urlParams.get("login");
+    console.log("🔍 login 파라미터:", loginSuccess);
+    const role = urlParams.get("role"); // role 파라미터 (manager / user)
 
-    // 로그인 여부 = 쿠키 존재 여부
-    setIsLoggedIn(!!jsessionId);
+    if (loginSuccess === "success") {
+      console.log("✅ 카카오 로그인 성공 - 로그인 상태로 설정");
+      localStorage.setItem("isLoggedIn", "true");
 
-    // role 저장된 게 있다면 불러오기
-    const savedRole = localStorage.getItem("userRole");
-    if (savedRole) setUser({ type: savedRole });
+      // role이 있으면 user 상태 업데이트
+      if (role) {
+        console.log(role, role.toLowerCase());
+        setUser({ type: role.toLowerCase() }); // 필요하면 다른 정보도 추가 가능
+        localStorage.setItem("userRole", role.toLowerCase()); // 선택: 로컬에도 저장
+      }
+      // URL에서 파라미터 제거 (깔끔하게)
+      if (role === "MANAGER") {
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+      } else {
+        // window.history.replaceState({}, "", "/2/homeuser");
+        console.log(document.cookie);
+        navigate("/2/homeuser", { replace: true });
+      }
+    }
 
+    // 초기화 완료
     setIsInitialized(true);
   }, []);
 
   const logout = () => {
     localStorage.clear();
-    // JSESSIONID 삭제 요청
-    document.cookie =
-      "JSESSIONID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    setIsLoggedIn(false);
 
+    // 쿠키가 있다면 쿠키도 만료시키기 (선택)
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+    // 로그인 페이지로 이동
     window.location.href = "/login";
   };
-
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn, user, setUser, isInitialized, logout }}
+      value={{
+        isLoggedIn,
+        setIsLoggedIn,
+        user,
+        setUser,
+        isInitialized,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
