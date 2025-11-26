@@ -98,10 +98,10 @@ const RegisterShowStep3 = ({ viewer = false }) => {
   }, [selectedMethod]);
 
   // 좌석 판매 방법 옵션
-  const salesMethods = ["스탠딩석", "주최 측 배정", "예매자 선택", "자동 배정"];
+  const salesMethods = ["스탠딩석", "내가 현장에서 배정", "예매자 선택", "자동 배정"];
   const salesMethodMap = {
     스탠딩석: "STANDING",
-    "주최 측 배정": "EVENTHOST",
+    "내가 현장에서 배정": "EVENTHOST",
     "예매자 선택": "SELECTBYUSER",
     "자동 배정": "SCHEDULING",
   };
@@ -368,7 +368,9 @@ const RegisterShowStep3 = ({ viewer = false }) => {
           <FormContent>
             {/* 공연 장소 섹션 */}
             <Section>
-              <SectionTitle>공연 장소</SectionTitle>
+              <SectionTitle>공연 장소
+                <p>*</p>
+              </SectionTitle>
               <ButtonGroup>
                 {venues.map((venue) => (
                   <SelectButton
@@ -389,7 +391,9 @@ const RegisterShowStep3 = ({ viewer = false }) => {
 
             {/* 좌석 판매 방법 섹션 */}
             <Section>
-              <SectionTitle>좌석 판매 방법</SectionTitle>
+              <SectionTitle>좌석 판매 방법
+                <p>*</p>
+              </SectionTitle>
               <ButtonGroup>
                 {salesMethods
                   .filter((method) => {
@@ -584,6 +588,13 @@ const SectionTitle = styled.h2`
   font-size: 25px;
   color: #000000;
   margin: 0;
+  display: flex;
+  gap: 3px;
+      p{
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--color-primary);
+  }
 `;
 
 const ButtonGroup = styled.div`

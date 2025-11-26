@@ -639,14 +639,16 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                         updateTicketOption(idx, "name", e.target.value)
                       }
                     />
-
-                    <Input
+                    {!viewer && (
+                      <Input
                       placeholder="티켓 옵션 설명"
                       value={opt.description}
                       onChange={(e) =>
                         updateTicketOption(idx, "description", e.target.value)
                       }
                     />
+                    )}
+ 
 
                     <PriceRow>
                       <span>판매가</span>

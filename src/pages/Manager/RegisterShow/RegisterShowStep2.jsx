@@ -228,8 +228,10 @@ const RegisterShowStep2 = ({ viewer = false }) => {
         <MainContent>
           {/* <RegisterShowNavbar currentStep={2} /> */}
 
-          <UpperContent>
-            <Name>공연 상세이미지</Name>
+          
+            {!viewer && (
+              <UpperContent>
+              <Name>공연 상세이미지</Name>
             <UploadBoxWrapper>
               {Array.from({ length: uploadBoxCount }).map((_, idx) => (
                 <UploadBox
@@ -269,6 +271,8 @@ const RegisterShowStep2 = ({ viewer = false }) => {
               onChange={handleFileChange}
             />
           </UpperContent>
+            )}
+            
 
           <DownContent>
             <Name>공연 상세 정보
@@ -367,7 +371,7 @@ const Name = styled.div`
   font-size: 25px;
   font-weight: 500;
   display: flex;
-  gap: 5px;
+  gap: 3px;
 
     p{
     font-size: 18px;
