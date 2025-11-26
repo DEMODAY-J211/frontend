@@ -19,7 +19,7 @@ const bankOptions = [
   { id: 9, name: "토스뱅크", code: "TOSS" },
 ];
 
-const RegisterShowStep1 = ({ viewer = false }) => {
+const RegisterShowStep1 = ({ viewer = false, initialData }) => {
   // const { setIsDirty } = useOutletContext();
   // const handleAnyInput = () => {
   //   setIsDirty(true);
@@ -75,25 +75,55 @@ const RegisterShowStep1 = ({ viewer = false }) => {
   const [formData, setFormData] = useState(getBasePayload);
 
   useEffect(() => {
-    const saved = localStorage.getItem("createShowPayload");
-    if (!saved) return;
-    console.log("save", saved);
+  if (!initialData) return;
+
+  // 1️⃣ formData 세팅
+  setFormData((prev) => ({
+    ...prev,
+    ...initialData,
+    title: initialData.title || prev.title,
+    ticketOptions: initialData.ticketOptions || prev.ticketOptions,
+    bankMaster: initialData.bankMaster || "",
+    bankName: initialData.bankName || "",
+    bankAccount: initialData.bankAccount || "",
+    poster: initialData.poster || "",
+  }));
+
+  // 2️⃣ showTimes, bookStartDate/Time state 세팅
+  if (initialData.showTimes?.length > 0) {
+    const converted = initialData.showTimes.map((t) => {
+      const [startDate, startTime] = t.showStart.split("T");
+      const [endDate, endTime] = t.showEnd.split("T");
+      return {
+        showStartDate: startDate,
+        showStartTime: startTime?.slice(0, 5),
+        showEndTime: endTime?.slice(0, 5),
+      };
+    });
+    setShowTimes(converted);
+  }
+
+  if (initialData.bookStart) {
+    const [date, time] = initialData.bookStart.split("T");
+    setBookStartDate(date);
+    setBookStartTime(time?.slice(0, 5) || "00:00");
+  }
+
+  // 3️⃣ poster 세팅
+  if (initialData.poster) {
+    setPoster(initialData.poster);
+    setPosterFile(initialData.poster);
+  }
+
+  // 4️⃣ localStorage 존재하면 병합 (초기 데이터 우선)
+  const saved = localStorage.getItem("createShowPayload");
+  if (saved) {
     try {
       const parsed = JSON.parse(saved);
-
       setFormData((prev) => ({
         ...prev,
         ...parsed,
       }));
-
-      // UI 전용 state도 필요하면 여기에 채우기
-      // 단, formData와 UI 필드 이름이 다르니까 직접 매핑
-      if (parsed.bookStart) {
-        const [date, time] = parsed.bookStart.split("T");
-        setBookStartDate(date);
-        setBookStartTime(time?.slice(0, 5) || "00:00");
-      }
-
       if (parsed.showTimes?.length > 0) {
         const converted = parsed.showTimes.map((t) => {
           const [startDate, startTime] = t.showStart.split("T");
@@ -104,13 +134,19 @@ const RegisterShowStep1 = ({ viewer = false }) => {
             showEndTime: endTime?.slice(0, 5),
           };
         });
-
         setShowTimes(converted);
+      }
+      if (parsed.bookStart) {
+        const [date, time] = parsed.bookStart.split("T");
+        setBookStartDate(date);
+        setBookStartTime(time?.slice(0, 5) || "00:00");
       }
     } catch (e) {
       console.error("JSON parse error:", e);
     }
-  }, []);
+  }
+}, [initialData]);
+
 
   const [posterFile, setPosterFile] = useState(null); // 파일
   const [poster, setPoster] = useState(null); // 미리보기 URL
@@ -342,7 +378,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
 
     const result = await res.json();
     if (res.ok) {
-      addToast("임시 저장되었습니다!", "success");
+      addToast("변경사항 저장완료!", "success");
     } else {
       alert(result.message || "오류");
     }

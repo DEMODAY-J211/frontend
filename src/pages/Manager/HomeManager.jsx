@@ -221,7 +221,10 @@ const handleCopyLink = async () => {
       // 임시저장된 공연이 있는 경우 → 삭제 먼저 실행
       if (draftId) {
         await fetchDeleteShow();
-        // localStorage.removeItem("draft_showId");
+        localStorage.removeItem("createShowPayload");
+        localStorage.removeItem("selectedMethod");
+        localStorage.removeItem("selectedVenue");
+        localStorage.removeItem("venues");
       }
 
       // 항상 새 공연 생성

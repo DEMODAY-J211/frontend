@@ -9,7 +9,7 @@ import { useToast } from "../../../components/Toast/useToast";
 import SeatSelectionModal from "../../../components/Modal/SeatSelectionModal";
 import RegisterShowNavbar from "./RegisterShowNavbar";
 
-const RegisterShowStep3 = ({ viewer = false }) => {
+const RegisterShowStep3 = ({ viewer = false , initialData}) => {
   const navigate = useNavigate();
   const { showId } = useParams();
   const { addToast } = useToast();
@@ -39,6 +39,24 @@ const RegisterShowStep3 = ({ viewer = false }) => {
   const [editMode, setEditMode] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+  if (initialData) {
+    // Set the venue based on initialData
+    setSelectedVenue({
+      id: initialData.locationId,
+      name: initialData.locationName,
+      type: initialData.seatType,  // "STANDING" or other types
+      quantity: initialData.seatCount,
+    });
+
+    // Set the sales method (좌석 판매 방법) based on the initial data
+    setSelectedMethod(initialData.seatType === "STANDING" ? "스탠딩석" : null);
+
+    // Set the quantity
+    setQuantity(initialData.seatCount);
+  }
+}, [initialData]);
 
   // 페이지 로드 시 즐겨찾기 공연장 목록 불러오기
   useEffect(() => {
@@ -228,7 +246,7 @@ const RegisterShowStep3 = ({ viewer = false }) => {
         return;
       }
       console.log(result);
-      addToast("임시저장 완료!", "success");
+      addToast("변경사항 저장완료!", "success");
     } catch (error) {
       console.error("임시저장 오류:", error);
       addToast("임시저장 중 오류 발생", "error");

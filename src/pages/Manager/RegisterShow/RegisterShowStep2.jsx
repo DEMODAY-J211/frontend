@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../../../components/Toast/useToast";
 import { useState, useEffect } from "react";
 
-const RegisterShowStep2 = ({ viewer = false }) => {
+const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpdateFormData}) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { showId } = useParams();
@@ -14,7 +14,35 @@ const RegisterShowStep2 = ({ viewer = false }) => {
   const [previews, setPreviews] = useState([]); // 미리보기 URL 리스트
   const [uploadedUrls, setUploadedUrls] = useState([]); // S3 URL
 
+  
+
+    useEffect(() => {
+       if (!initialData) return;
+     setFormData((prev) => ({
+      ...prev,
+      ...initialData, // API 데이터 구조에 맞게 수정 필요
+    }));
+
+    // 화면 상태 업데이트
+  if (initialData.detailText) setTempText(initialData.detailText);
+  if (initialData.detailImages) {
+    setPreviews(initialData.detailImages);
+    setUploadedUrls(initialData.detailImages);
+  }
+  
+  // localStorage 업데이트
+  const prevPayload =
+    JSON.parse(localStorage.getItem("createShowPayload")) || {};
+  const updatedPayload = {
+    ...prevPayload,
+    ...initialData,
+  };
+  localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
+}, [initialData]);
+
+
   useEffect(() => {
+    
     console.log("new", images);
   }, [images]);
   useEffect(() => {
@@ -54,7 +82,7 @@ const RegisterShowStep2 = ({ viewer = false }) => {
         return;
       }
       console.log(result);
-      addToast("임시저장 완료!", "success");
+      addToast("변경사항 저장 완료", "success");
     } catch (error) {
       console.error("임시저장 오류:", error);
       addToast("임시저장 중 오류 발생", "error");
@@ -78,6 +106,12 @@ const RegisterShowStep2 = ({ viewer = false }) => {
       addToast("이미지는 최대 5장까지 업로드 가능합니다.", "error");
       return;
     }
+
+    setImages((prevImages) => {
+      const newImages = [...prevImages, ...files];
+      onUpdateFormData({ detailImages: newImages });
+      return newImages;
+    });
 
     // 백엔드 업로드 API용 FormData 준비
     const formData = new FormData();
@@ -179,6 +213,9 @@ const RegisterShowStep2 = ({ viewer = false }) => {
     const value = e.target.value;
     setTempText(value); // 화면 상태 업데이트
 
+    // 부모 컴포넌트로 전달
+    onUpdateFormData({ detailText: value });
+
     // localStorage 업데이트
     const prevPayload =
       JSON.parse(localStorage.getItem("createShowPayload")) || {};
@@ -230,48 +267,57 @@ const RegisterShowStep2 = ({ viewer = false }) => {
 
           
             {!viewer && (
-              <UpperContent>
-              <Name>공연 상세이미지</Name>
-            <UploadBoxWrapper>
-              {Array.from({ length: uploadBoxCount }).map((_, idx) => (
-                <UploadBox
-                  key={idx}
-                  onClick={() =>
-                    document.getElementById(`upload-${idx}`).click()
-                  }
-                >
-                  {idx < previews.length ? (
-                    <UploadBoxContent>
-                      <img src={previews[idx]} alt={`preview-${idx}`} />
-                      <HoverOverlay onClick={(e) => handleDelete(idx, e)}>
-                        삭제
-                      </HoverOverlay>
-                    </UploadBoxContent>
-                  ) : idx === previews.length && images.length < 5 ? (
-                    <PlusIcon>+</PlusIcon>
-                  ) : (
-                    <EmptySlot>이미지 업로드</EmptySlot>
-                  )}
+  <UpperContent>
+    <Name>공연 상세이미지</Name>
+    <UploadBoxWrapper>
+      {Array.from({ length: uploadBoxCount }).map((_, idx) => (
+        <UploadBox
+          key={idx}
+          onClick={() => !editor && document.getElementById(`upload-${idx}`).click()} // editor일 때 클릭 비활성화
+          style={{
+            cursor: editor ? 'not-allowed' : 'pointer', // editor일 때 마우스 커서 비활성화
+          }}
+        >
+          {idx < previews.length ? (
+            <UploadBoxContent>
+              <img src={previews[idx]} alt={`preview-${idx}`} />
+              {!editor && (
+              <HoverOverlay 
+                onClick={(e) => editor ? e.preventDefault() : handleDelete(idx, e)} // editor일 때 삭제 비활성화
+              >
+                삭제
+              </HoverOverlay>
+              )}
+              
+            </UploadBoxContent>
+          ) : idx === previews.length && images.length < 5 ? (
+            <PlusIcon>+</PlusIcon>
+          ) : (
+            <EmptySlot>이미지 업로드</EmptySlot>
+          )}
 
-                  <HiddenInput
-                    id={`upload-${idx}`}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) => handleFileChange(e, idx)}
-                  />
-                </UploadBox>
-              ))}
-            </UploadBoxWrapper>
+          <HiddenInput
+            id={`upload-${idx}`}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => !editor && handleFileChange(e, idx)} // editor일 때 파일 업로드 방지
+            disabled={editor} // editor일 때 input 비활성화
+          />
+        </UploadBox>
+      ))}
+    </UploadBoxWrapper>
 
-            <HiddenInput
-              id="posterUpload"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-          </UpperContent>
-            )}
+    <HiddenInput
+      id="posterUpload"
+      type="file"
+      accept="image/*"
+      onChange={handleFileChange}
+      disabled={editor} // editor일 때 input 비활성화
+    />
+  </UpperContent>
+)}
+
             
 
           <DownContent>
@@ -287,7 +333,7 @@ const RegisterShowStep2 = ({ viewer = false }) => {
         </MainContent>
 
         {/* 하단 버튼 */}
-        {!viewer && (
+        {!viewer && !editor && (
           <Footer>
             <PrevButton onClick={handlePrevious}>←이전</PrevButton>
             <RightButtonGroup>
@@ -296,6 +342,7 @@ const RegisterShowStep2 = ({ viewer = false }) => {
             </RightButtonGroup>
           </Footer>
         )}
+    
       </Container>
     </>
   );
