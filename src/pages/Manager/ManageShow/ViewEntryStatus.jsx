@@ -34,34 +34,47 @@ const ViewEntryStatus = () => {
   const [changedItems, setChangedItems] = useState([]); // 변경된 항목들
   const [loading, setLoading] = useState(false); // 로딩 상태
 
-  const [currentShowtimeId, setCurrentShowtimeId] = useState("");
+  const [currentShowtimeId, setCurrentShowtimeId] = useState(null);
+  const [hasSeatData, setHasSeatData] = useState(false);
 
-  // TODO: URL 파라미터에서 실제 showId와 showtimeId 가져오기
-  const showId = useParams(); // 임시값
-  // const [showtimeId] = useState(1); // 임시값
+  // URL 파라미터에서 showId 가져오기
+  const { showId } = useParams();
 
   // 회차 선택 핸들러
-    const handleShowtimeChange = (showtimeId) => {
-      setCurrentShowtimeId(showtimeId);
-      // setSelectedUsers([]); // 회차 변경 시 선택 초기화
-    };
-  
+  const handleShowtimeChange = (showtimeId) => {
+    setCurrentShowtimeId(showtimeId);
+    setSelectedSeats([]); // 회차 변경 시 선택 초기화
+    setSelectedRows([]); // 회차 변경 시 선택 초기화
+    setSelectedNames([]); // 회차 변경 시 선택 초기화
+  };
 
+  // showId 변경 시 데이터 로딩
+  useEffect(() => {
+    if (showId) {
+      loadSeatData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showId, currentShowtimeId]);
+
+  // showTimeList를 받아온 후 첫 번째 showtimeId 자동 설정
   useEffect(() => {
     if (showTimeList.length > 0 && currentShowtimeId === null) {
       setCurrentShowtimeId(showTimeList[0].showTimeId);
     }
-    loadSeatData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showTimeList]);
+  }, [showTimeList, currentShowtimeId]);
 
   const loadSeatData = async () => {
     try {
       setLoading(true);
 
+      // Query parameter 구성 (ManageUser와 동일한 방식)
+      const queryParams = currentShowtimeId ? `?showtimeId=${currentShowtimeId}` : '';
+
+      // (debug log removed)
+
       // 세션 기반 로그인: 쿠키로 인증
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin`,
+        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin${queryParams}`,
         {
           credentials: 'include', // 세션 쿠키 자동 전송
           headers: {
@@ -83,19 +96,24 @@ const ViewEntryStatus = () => {
       }
 
       const result = await response.json();
-      console.log('API 응답:', result);
+      // (debug log removed)
+      // showTitle, showTimeList, seat 레이아웃, reservation 추출
+      const { showTitle: apiShowTitle = "", showTimeList = [], reservation = [], seat: seatLayoutFromAPI = [] } = result.data;
 
-      // showTitle, showTimeList 추출
-      setShowTitle(result.data.showTitle || "");
-      setShowTimeList(result.data.showTimeList || []);
+      // 좌석 데이터 존재 여부 확인
+      const hasSeatLayout = seatLayoutFromAPI && seatLayoutFromAPI.length > 0;
+      setHasSeatData(hasSeatLayout);
 
-      // 응답 데이터 구조 확인 및 추출
-      const reservationDataFromAPI = Array.isArray(result)
-        ? result
-        : (result.data || result.reservations || []);
+      // 좌석 데이터가 없으면 리스트 뷰로 강제 전환
+      if (!hasSeatLayout) {
+        setViewMode("list");
+      }
+
+      setShowTitle(apiShowTitle);
+      setShowTimeList(showTimeList);
 
       // 전화번호 포맷팅 및 필드명 변환
-      const formattedData = reservationDataFromAPI.map((item, index) => ({
+      const formattedData = reservation.map((item) => ({
         ...item,
         // API 응답 필드명 변환
         isEntered: item.entered ?? item.isEntered ?? false,
@@ -104,12 +122,10 @@ const ViewEntryStatus = () => {
         phone: item.phone && item.phone.includes('-')
           ? item.phone
           : (item.phone ? item.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3') : ''),
-        // row, col이 없으면 임시로 생성 (좌석 이름에서 추출)
-        row: item.row ?? (item.seat ? item.seat.charCodeAt(0) - 65 : Math.floor(index / 10)),
-        col: item.col ?? (item.seat ? parseInt(item.seat.substring(1)) - 1 : index % 10)
       }));
 
-      const newSeatLayout = generateSeatLayout(formattedData);
+      // seat 배열과 reservation 배열을 조합하여 좌석 레이아웃 생성
+      const newSeatLayout = generateSeatLayoutFromAPI(seatLayoutFromAPI, formattedData);
 
       setReservationData(formattedData);
       setDisplayData(JSON.parse(JSON.stringify(formattedData))); // displayData 초기화
@@ -194,51 +210,59 @@ const ViewEntryStatus = () => {
         },
       ];
 
-      const mockSeatLayout = generateSeatLayout(mockReservationData);
-
+      // Mock 데이터는 빈 레이아웃 사용
       setReservationData(mockReservationData);
       setDisplayData(JSON.parse(JSON.stringify(mockReservationData)));
-      setSeatLayout(mockSeatLayout);
+      setSeatLayout([]);
       setInitialData(JSON.parse(JSON.stringify(mockReservationData)));
     } finally {
       setLoading(false);
     }
   };
 
-  const generateSeatLayout = (reservations) => {
-    // reservations에서 최대 row, col 값 찾기
-    if (!reservations || reservations.length === 0) {
+  const generateSeatLayoutFromAPI = (seatLayoutFromAPI, reservations) => {
+    // 백엔드에서 받은 seat 배열과 reservation 데이터를 조합
+    if (!seatLayoutFromAPI || seatLayoutFromAPI.length === 0) {
       return [];
     }
 
-    const maxRow = Math.max(...reservations.map(r => r.row ?? 0));
-    const maxCol = Math.max(...reservations.map(r => r.col ?? 0));
+    // reservation 데이터를 seat 이름으로 빠르게 찾기 위한 Map 생성
+    const reservationMap = new Map();
+    reservations.forEach(reservation => {
+      if (reservation.seat) {
+        reservationMap.set(reservation.seat, reservation);
+      }
+    });
 
-    // (maxRow + 1) x (maxCol + 1) 크기의 2차원 배열 생성
-    const totalRows = maxRow + 1;
-    const totalCols = maxCol + 1;
-
-    // 빈 배열 생성
-    const layout = Array.from({ length: totalRows }, (_, rowIndex) => {
-      return Array.from({ length: totalCols }, (_, colIndex) => {
-        // 해당 row, col에 일치하는 좌석 찾기
-        const reservation = reservations.find(
-          (r) => r.row === rowIndex && r.col === colIndex
-        );
-
-        if (reservation) {
-          // 좌석 데이터가 있으면 반환
-          return {
-            id: `seat-${rowIndex}-${colIndex}`,
-            label: reservation.seat,
-            ...reservation,
-          };
+    // seat 배열을 순회하며 레이아웃 생성
+    const layout = seatLayoutFromAPI.map((row, rowIndex) => {
+      return row.map((seatLabel, colIndex) => {
+        // 0이면 빈 공간
+        if (seatLabel === 0 || !seatLabel) {
+          return null;
         }
 
-        // 데이터가 없으면 null (빈 공간, 좌석 아님)
-        return null;
+        // 좌석명이 있으면 해당 좌석의 예매 정보 찾기
+        const reservation = reservationMap.get(seatLabel);
+
+        return {
+          id: `seat-${rowIndex}-${colIndex}`,
+          label: seatLabel,
+          row: rowIndex,
+          col: colIndex,
+          // 예매 정보가 있으면 포함, 없으면 기본값
+          isReserved: reservation ? reservation.isReserved : false,
+          isEntered: reservation ? reservation.isEntered : false,
+          userName: reservation ? reservation.userName : null,
+          phone: reservation ? reservation.phone : null,
+          reservationItemId: reservation ? reservation.reservationItemId : null,
+          reservationId: reservation ? reservation.reservationId : null,
+          userId: reservation ? reservation.userId : null,
+        };
       });
     });
+
+   
 
     return layout;
   };
@@ -251,8 +275,7 @@ const ViewEntryStatus = () => {
   };
 
   const handleSeatClick = (seat) => {
-    if (!seat.isReserved) return; // 예약 안 된 좌석은 클릭 불가
-
+    // 모든 좌석 클릭 가능 (예약 안 된 좌석 포함)
     // 선택된 좌석 토글
     const isSelected = selectedSeats.find((s) => s.id === seat.id);
 
@@ -266,12 +289,11 @@ const ViewEntryStatus = () => {
   };
 
   const handleToggleSeatStatus = (seat) => {
-    if (!seat.isReserved) return;
-
-    // 좌석 상태 토글 (입장완료 <-> 미입장)
+    // 예약 안된 좌석도 입장 완료 가능하도록 제약 제거
+    // 좌석 상태 토글 (입장완료 <-> 미입장) - null 체크 추가
     const newLayout = seatLayout.map((row) =>
       row.map((s) => {
-        if (s.id === seat.id) {
+        if (s && s.id === seat.id) {
           return { ...s, isEntered: !s.isEntered };
         }
         return s;
@@ -280,38 +302,53 @@ const ViewEntryStatus = () => {
 
     setSeatLayout(newLayout);
 
-    // reservationData와 displayData 모두 업데이트
-    if (seat.reservationItemId) {
-      const newData = reservationData.map((r) => {
-        if (r.reservationItemId === seat.reservationItemId) {
-          return { ...r, isEntered: !r.isEntered };
-        }
-        return r;
-      });
+    // 좌석 라벨이 있으면 변경사항 추적 (예약 여부 무관)
+    if (seat.label) {
+      // 예약된 좌석인 경우 displayData 업데이트
+      if (seat.reservationItemId) {
+        const newData = reservationData.map((r) => {
+          if (r.reservationItemId === seat.reservationItemId) {
+            return { ...r, isEntered: !r.isEntered };
+          }
+          return r;
+        });
 
-      const newDisplayData = displayData.map((r) => {
-        if (r.reservationItemId === seat.reservationItemId) {
-          return { ...r, isEntered: !r.isEntered };
-        }
-        return r;
-      });
+        const newDisplayData = displayData.map((r) => {
+          if (r.reservationItemId === seat.reservationItemId) {
+            return { ...r, isEntered: !r.isEntered };
+          }
+          return r;
+        });
 
-      setReservationData(newData);
-      setDisplayData(newDisplayData);
+        setReservationData(newData);
+        setDisplayData(newDisplayData);
+      }
+
       setIsChanged(true);
 
-      // 변경된 항목 계산
-      const changed = newDisplayData.filter((item) => {
-        const original = initialData.find(
-          (u) => u.reservationItemId === item.reservationItemId
-        );
-        return original && original.isEntered !== item.isEntered;
-      });
-      setChangedItems(changed);
-    }
+      // 변경된 좌석을 좌석명 기준으로 추적
+      const updatedSeat = {
+        seat: seat.label,
+        isEntered: !seat.isEntered,
+        isReserved: seat.isReserved,
+        reservationItemId: seat.reservationItemId || null,
+      };
+      // (debug log removed)
 
-    // API 호출->상태 업데이트
-    console.log("Toggle seat status:", seat.label, !seat.isEntered);
+      // 이미 변경사항에 있는 좌석인지 확인
+      const existingIndex = changedItems.findIndex((item) => item.seat === seat.label);
+
+      if (existingIndex >= 0) {
+        // 기존 변경사항 업데이트
+        const newChangedItems = [...changedItems];
+        newChangedItems[existingIndex] = updatedSeat;
+        setChangedItems(newChangedItems);
+      } else {
+        // 새로운 변경사항 추가
+        setChangedItems([...changedItems, updatedSeat]);
+      }
+    }
+    // (debug log removed)
   };
 
   const handleRemoveSeat = (seat) => {
@@ -323,22 +360,22 @@ const ViewEntryStatus = () => {
 
   const handleCompleteEntry = () => {
     // 선택된 좌석들의 입장완료 처리
-    const seatIds = selectedSeats.map((s) => s.reservationItemId).filter(id => id);
+    const seatIds = selectedSeats.map((s) => s.reservationItemId).filter((id) => id);
     console.log("Complete entry for:", seatIds);
 
-    // 좌석 상태 업데이트
+    // 좌석 상태 업데이트 (null 체크 추가)
     const newLayout = seatLayout.map((row) =>
       row.map((s) => {
-        if (selectedSeats.find((selected) => selected.id === s.id)) {
+        // s가 null이 아니고, 선택된 좌석인 경우에만 업데이트
+        if (s && selectedSeats.find((selected) => selected.id === s.id)) {
           return { ...s, isEntered: true };
         }
         return s;
       })
     );
-
     setSeatLayout(newLayout);
 
-    // reservationData와 displayData 모두 업데이트
+    // reservationData와 displayData 모두 업데이트 (예약된 좌석에 한해)
     if (seatIds.length > 0) {
       const newData = reservationData.map((r) => {
         if (seatIds.includes(r.reservationItemId)) {
@@ -356,16 +393,33 @@ const ViewEntryStatus = () => {
 
       setReservationData(newData);
       setDisplayData(newDisplayData);
-      setIsChanged(true);
+    }
 
-      // 변경된 항목 계산
-      const changed = newDisplayData.filter((item) => {
-        const original = initialData.find(
-          (u) => u.reservationItemId === item.reservationItemId
-        );
-        return original && original.isEntered !== item.isEntered;
+    // ✅ 변경된 좌석들(예약 여부와 상관없이)을 changedItems에 반영
+    if (selectedSeats.length > 0) {
+      setIsChanged(true);
+      setChangedItems((prev) => {
+        const updated = [...prev];
+
+        selectedSeats.forEach((s) => {
+          if (!s.label) return;
+          const idx = updated.findIndex((item) => item.seat === s.label);
+          const updatedSeat = {
+            seat: s.label,
+            isEntered: true,
+            isReserved: s.isReserved,
+            reservationItemId: s.reservationItemId || null,
+          };
+
+          if (idx >= 0) {
+            updated[idx] = updatedSeat;
+          } else {
+            updated.push(updatedSeat);
+          }
+        });
+
+        return updated;
       });
-      setChangedItems(changed);
     }
 
     setSelectedSeats([]);
@@ -450,13 +504,7 @@ const ViewEntryStatus = () => {
         return original && original.isEntered !== item.isEntered;
       });
       setChangedItems(changed);
-
-      console.log(
-        "Toggle entry status for selected rows:",
-        selectedRows.length,
-        "items to",
-        !reservation.isEntered
-      );
+      // (debug log removed)
     } else {
       // 선택된 행이 없으면 단일 행만 변경
       const newDisplayData = displayData.map((r) => {
@@ -477,12 +525,7 @@ const ViewEntryStatus = () => {
         return original && original.isEntered !== item.isEntered;
       });
       setChangedItems(changed);
-
-      console.log(
-        "Toggle entry status:",
-        reservation.seat,
-        !reservation.isEntered
-      );
+      // (debug log removed)
     }
   };
 
@@ -524,36 +567,32 @@ const ViewEntryStatus = () => {
       setSelectedNames(
         selectedNames.filter((name) => name !== reservation.userName)
       );
-
-      console.log("Cancel seat:", reservation);
+      // (debug log removed)
       alert("좌석이 취소되었습니다.");
     }
   };
 
   const handleSaveChanges = async () => {
     try {
-      // API 요청 데이터 생성
+      // API 요청 데이터 생성 - 좌석명 기반으로 전송 (항상 seat, isEntered, isReserved만 포함)
       const checkinStatusUpdateRequest = changedItems.map((item) => {
-        const displayItem = displayData.find(
-          (d) => d.reservationItemId === item.reservationItemId
-        );
-
-        // displayData에 없으면 삭제된 항목
-        if (!displayItem) {
-          return {
-            reservationItemId: item.reservationItemId,
-            isReserved: false,
-            isEntered: false,
-          };
-        }
-
-        // 상태가 변경된 항목
+        const isEntered = item.isEntered;
+        const isReserved = isEntered ? true : item.isReserved;
         return {
-          reservationItemId: displayItem.reservationItemId,
-          isEntered: displayItem.isEntered,
-          isReserved: displayItem.isReserved,
+          seat: item.seat,
+          isEntered,
+          isReserved,
         };
       });
+
+      console.log('=== 저장 직전 변경 좌석 상태 ===');
+      console.table(
+        checkinStatusUpdateRequest.map((item) => ({
+          seat: item.seat,
+          isEntered: item.isEntered,
+          isReserved: item.isReserved,
+        }))
+      );
 
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin`,
@@ -563,25 +602,40 @@ const ViewEntryStatus = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ checkinStatusUpdateRequest }),
+          body: JSON.stringify({
+            showtimeId: currentShowtimeId,
+            checkinStatusUpdateRequest,
+          }),
         }
       );
 
+      console.log('PATCH /checkin 응답 상태코드:', response.status);
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('저장 실패 - 상태코드 / 응답 본문:', response.status, errorText);
         throw new Error('저장에 실패했습니다.');
       }
 
       const result = await response.json();
-
+      console.log('=== 저장 응답 JSON ===');
+      console.log(result);
       if (result.success) {
+        console.log('=== 저장 완료 - 반영된 좌석 상태(변경 요청 기준) ===');
+        console.table(
+          checkinStatusUpdateRequest.map((item) => ({
+            seat: item.seat,
+            isEntered: item.isEntered,
+            isReserved: item.isReserved,
+          }))
+        );
         alert(`${result.data.updatedCount}개 항목이 저장되었습니다.`);
 
         // 저장 시 displayData를 실제 reservationData에 반영
         setReservationData(JSON.parse(JSON.stringify(displayData)));
 
-        // 좌석 레이아웃도 업데이트
-        const newLayout = generateSeatLayout(displayData);
-        setSeatLayout(newLayout);
+        // 좌석 레이아웃 재조회 (저장 후 새로고침)
+        loadSeatData();
 
         // 저장 후 초기 데이터 업데이트 및 변경사항 리셋
         setInitialData(JSON.parse(JSON.stringify(displayData)));
@@ -606,30 +660,29 @@ const ViewEntryStatus = () => {
       <MainContent>
         {/* 상단 타이틀 섹션 */}
         <Header>
-
-          <Title>예매자 관리</Title>
-          {/* {showTimeList && showTimeList.length > 0 && (
-  <ShowtimeDropdown
- 
-    value={currentShowtimeId || showTimeList[0].showTimeId}
-    onChange={(e) => handleShowtimeChange(Number(e.target.value))}
-  >
-    {showTimeList.map((showtime) => (
-      <option key={showtime.showTimeId} value={showtime.showTimeId}>
-        <h2>{showTitle}&nbsp;&nbsp;&nbsp;&nbsp;</h2>
-        {new Date(showtime.showTime).toLocaleString("ko-KR", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </option>
-    ))}
-    
-  </ShowtimeDropdown>
-)} */}
-
+          <Title>입장 현황</Title>
+          {showTimeList.length > 0 ? (
+            <ShowtimeDropdown
+              value={currentShowtimeId || (showTimeList[0]?.showTimeId || "")}
+              onChange={(e) => handleShowtimeChange(Number(e.target.value))}
+            >
+              {showTimeList.map((showtime) => (
+                <option key={showtime.showTimeId} value={showtime.showTimeId}>
+                  {showTitle || "공연명"} · {new Date(showtime.showTime).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </option>
+              ))}
+            </ShowtimeDropdown>
+          ) : (
+            <ShowtimeDropdown disabled>
+              <option>회차 정보를 불러오는 중...</option>
+            </ShowtimeDropdown>
+          )}
         </Header>
 
         {/* 좌석 현황 헤더 */}
@@ -642,20 +695,22 @@ const ViewEntryStatus = () => {
             <OnSiteButton>현장예매 좌석 관리</OnSiteButton>
           </LeftControls>
 
-          <ViewToggle>
-            <ToggleOption
-              $active={viewMode === "seat"}
-              onClick={() => setViewMode("seat")}
-            >
-              좌석표
-            </ToggleOption>
-            <ToggleOption
-              $active={viewMode === "list"}
-              onClick={() => setViewMode("list")}
-            >
-              리스트
-            </ToggleOption>
-          </ViewToggle>
+          {hasSeatData && (
+            <ViewToggle>
+              <ToggleOption
+                $active={viewMode === "seat"}
+                onClick={() => setViewMode("seat")}
+              >
+                좌석표
+              </ToggleOption>
+              <ToggleOption
+                $active={viewMode === "list"}
+                onClick={() => setViewMode("list")}
+              >
+                리스트
+              </ToggleOption>
+            </ViewToggle>
+          )}
         </StatusHeader>
 
         {/* 선택 좌석 영역 */}
@@ -682,44 +737,56 @@ const ViewEntryStatus = () => {
         )}
 
         {/* 좌석표 뷰 */}
-        {viewMode === "seat" && (
+        {viewMode === "seat" && hasSeatData && (
           <>
             <SeatMapContainer>
-              <SeatMapGrid>
-                {seatLayout.map((row, rowIndex) => (
-                  <SeatRow key={rowIndex}>
-                    {row.map((seat, colIndex) => (
-                      <SeatCell key={colIndex}>
-                        {seat && seat.isReserved ? (
-                          <SeatButton
+              {seatLayout.length > 0 ? (
+                <SeatMapGrid>
+                  {seatLayout.map((row, rowIndex) => (
+                    <SeatRow key={rowIndex}>
+                      {row.map((seat, colIndex) => {
+                        const isEmpty = !seat;
+                        const isReserved = seat && seat.isReserved;
+                        const isSelected = seat && selectedSeats.some((s) => s.id === seat.id);
+
+                        if (isEmpty) {
+                          return <EmptySeat key={`${rowIndex}-${colIndex}`} />;
+                        }
+
+                        return (
+                          <SeatCell
+                            key={seat.id || `${rowIndex}-${colIndex}`}
+                            $isReserved={isReserved}
                             $isEntered={seat.isEntered}
-                            $isSelected={selectedSeats.some(
-                              (s) => s.id === seat.id
-                            )}
+                            $isSelected={isSelected}
                             onClick={() => handleSeatClick(seat)}
                             onDoubleClick={() => handleToggleSeatStatus(seat)}
                           >
                             {seat.label}
-                          </SeatButton>
-                        ) : (
-                          <EmptySeat>{seat ? seat.label : ""}</EmptySeat>
-                        )}
-                      </SeatCell>
-                    ))}
-                  </SeatRow>
-                ))}
-              </SeatMapGrid>
+                          </SeatCell>
+                        );
+                      })}
+                    </SeatRow>
+                  ))}
+                </SeatMapGrid>
+              ) : (
+                <div style={{ fontSize: "16px", color: "#999" }}>좌석 정보를 불러오는 중...</div>
+              )}
             </SeatMapContainer>
 
             {/* 범례 */}
             <Legend>
               <LegendItem>
-                <ColorBox color="#333333" />
-                <LegendText>입장완료</LegendText>
+                <ColorBox color="#FFB6C1" />
+                <LegendText>예약 가능</LegendText>
+              </LegendItem>
+              <LegendItem>
+                <ColorBox color="#9E5656" />
+                <LegendText>예약됨</LegendText>
               </LegendItem>
               <LegendItem>
                 <ColorBox color="#FFCC00" />
-                <LegendText>미입장</LegendText>
+                <LegendText>입장완료</LegendText>
               </LegendItem>
             </Legend>
           </>
@@ -865,12 +932,12 @@ const ViewEntryStatus = () => {
       <BottomButtons>
         <BackButton onClick={() => navigate("/manageshow")}>←이전</BackButton>
         <SaveContainer>
-          <WarningText $visible={isChanged && changedItems.length > 0}>
+          <WarningText $visible={isChanged || changedItems.length > 0}>
             변경사항이 있습니다. 저장하기를 눌러 변경상태를 확정해주세요!
           </WarningText>
           <SaveButton
             onClick={handleSaveChanges}
-            disabled={!isChanged || changedItems.length === 0}
+            disabled={changedItems.length === 0}
           >
             저장하기
           </SaveButton>
@@ -1092,77 +1159,99 @@ const CompleteButton = styled.button`
 `;
 
 const SeatMapContainer = styled.div`
+  position: relative;
   width: 100%;
   max-width: 1240px;
   margin: 0 auto;
-  background-color: #f5f5f5;
-  border-radius: 10px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
   padding: 30px;
   overflow: auto;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const SeatMapGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: center;
+  display: grid;
+  gap: 2px;
+  width: fit-content;
+  margin: auto;
 `;
 
 const SeatRow = styled.div`
   display: flex;
-  gap: 4px;
+  gap: 2px;
 `;
 
 const SeatCell = styled.div`
-  width: 50px;
-  height: 35px;
+  width: 28px;
+  height: 20px;
+  background: ${(props) => {
+    // 3가지 상태: 예약안됨(핑크), 예약됨(갈색), 입장완료(노란색)
+    if (props.$isEntered) return "#FFCC00"; // 입장완료: 노란색
+    if (props.$isReserved) return "#9E5656"; // 예약됨: 갈색
+    return "#FFB6C1"; // 예약되지 않은 좌석: 핑크색
+  }};
+  border: 0.5px solid #000000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: ${(props) => {
+    if (props.$isSelected) return 1;
+    return 0.7;
+  }};
+  font-size: 8px;
+  font-weight: 500;
+  color: ${(props) => {
+    if (props.$isEntered) return "#000000"; // 입장완료: 검정색
+    return "#FFFFFF"; // 나머지: 흰색
+  }};
   display: flex;
   align-items: center;
   justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  /* 선택된 좌석 */
+  ${(props) =>
+    props.$isSelected &&
+    `
+    outline: 2px solid #FC2847;
+    outline-offset: 1px;
+    opacity: 1;
+  `}
+
+  &:hover {
+    opacity: 1;
+    transform: scale(1.05);
+  }
 `;
 
 const SeatButton = styled.button`
   width: 100%;
   height: 100%;
   border: none;
-  border-radius: 4px;
-
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  /* 입장완료: 회색, 미입장: 노란색 */
-  background-color: ${(props) => (props.$isEntered ? "#333333" : "#FFCC00")};
-  color: ${(props) => (props.$isEntered ? "#FFFFFF" : "#000000")};
-
-  /* 선택된 좌석 */
-  ${(props) =>
-    props.$isSelected &&
-    `
-    outline: 3px solid #FC2847;
-    outline-offset: 2px;
-  `}
-
-  &:hover {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-`;
-
-const EmptySeat = styled.div`
-  width: 100%;
-  height: 100%;
+  background: transparent;
+  cursor: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  font-size: 10px;
-  color: #cccccc;
+  padding: 0;
+`;
+
+const EmptySeat = styled.div`
+  width: 28px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
 `;
 
 const Legend = styled.div`
