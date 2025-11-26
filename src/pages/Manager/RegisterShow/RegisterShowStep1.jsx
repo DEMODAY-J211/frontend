@@ -632,29 +632,32 @@ const RegisterShowStep1 = ({ viewer = false }) => {
 
                 {formData.ticketOptions.map((opt, idx) => (
                   <TicketContent key={idx}>
-                    <Input
-                      placeholder="티켓 옵션 이름 (일반예매 / 학생예매)"
+                    
+                      <Input
+                        placeholder={!viewer ? "티켓 옵션 이름 (일반예매 / 학생예매)" : "미입력"}
                       value={opt.name}
                       onChange={(e) =>
                         updateTicketOption(idx, "name", e.target.value)
                       }
                     />
-                    {!viewer && (
+                    
+                    
+                   
                       <Input
-                      placeholder="티켓 옵션 설명"
+                        placeholder={!viewer ? "티켓 옵션 설명" : "미입력"}
                       value={opt.description}
                       onChange={(e) =>
                         updateTicketOption(idx, "description", e.target.value)
                       }
                     />
-                    )}
+                
  
 
                     <PriceRow>
                       <span>판매가</span>
 <PriceInput
   type="text"
-  placeholder="0"
+  placeholder={!viewer ? "0" : "미입력"}
   value={opt.price}
   onChange={(e) => {
     // 숫자가 아닌 값이 들어오면 무시
@@ -692,7 +695,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
               <Q>
                 <Name>입금주</Name>
                 <Input
-                  placeholder="홍길동"
+                  placeholder={!viewer ? "홍길동" : "미입력"}
                   value={formData.bankMaster}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -724,7 +727,7 @@ const RegisterShowStep1 = ({ viewer = false }) => {
                   </BankSelect>
 
                   <Input
-                    placeholder="0000000000000"
+                    placeholder={!viewer ? "0000000000000" : "미입력"}
                     value={formData.bankAccount}
                     onChange={(e) => {
                     const value = e.target.value;

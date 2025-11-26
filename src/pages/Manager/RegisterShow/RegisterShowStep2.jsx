@@ -279,7 +279,7 @@ const RegisterShowStep2 = ({ viewer = false }) => {
               <p>*</p>
             </Name>
             <Input
-              placeholder="제 00회 정기공연입니다! ..."
+              placeholder={!viewer ? "제 00회 정기공연입니다! ..." : "입력이 필수인 항목입니다."}
               value={tempText}
               onChange={handleText}
             />
@@ -309,7 +309,6 @@ const Container = styled.div`
   background: #ffffff;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 `;
 
 const MainContent = styled.div`

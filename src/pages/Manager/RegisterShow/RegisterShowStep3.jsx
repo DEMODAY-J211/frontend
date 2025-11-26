@@ -429,10 +429,14 @@ const RegisterShowStep3 = ({ viewer = false }) => {
                     );
                   })}
               </ButtonGroup>
-              <InfoMessage>
+              
+                {!viewer && (
+                  <InfoMessage>
                 <InfoIcon />
                 <InfoText>좌석이 없는 공연은 스탠딩석을 골라주세요!</InfoText>
               </InfoMessage>
+                )}
+                
             </Section>
 
             {/* 판매 수량 섹션 */}
@@ -529,7 +533,6 @@ const Container = styled.div`
   background: #ffffff;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 `;
 
 const MainContent = styled.div`
@@ -682,12 +685,13 @@ const QuantityControl = styled.div`
   gap: 20px;
 `;
 
-const QuantityButtons = styled.div`
+const QuantityButtons = styled.button`
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #fc2847;
+  background: var(--color-primary);
   border-radius: 20px;
+  border: none;
   padding: 3px 10px;
 `;
 
@@ -790,7 +794,10 @@ const QuantityLabel = styled.span`
 const QuantityValue = styled.span`
   font-weight: 700;
   font-size: 24px;
-  color: #fc2847;
+  
+  color: var(--color-priamry);
+
+
 `;
 
 const Footer = styled.div`
@@ -799,6 +806,7 @@ const Footer = styled.div`
   align-items: center;
   padding: 20px;
   width: 100%;
+  margin-top: 150px;
 `;
 
 const NavButton = styled.button`
