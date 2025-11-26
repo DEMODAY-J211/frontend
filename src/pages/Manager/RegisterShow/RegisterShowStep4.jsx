@@ -51,7 +51,7 @@ const RegisterShowStep4 = ({ viewer = false }) => {
 
     bookConfirm:
       "[예매 확정 안내]\n" +
-      "안녕하세요! {공연명}의 예매가 정상적으로 완료되었습니다\n\n" +
+      "안녕하세요! {공연명}의 예매가 정상적으로 완료되었습니다.\n\n" +
       "소중한 예매 감사드리며, 공연장에서 뵙겠습니다!",
 
     showGuide:
@@ -96,7 +96,7 @@ const RegisterShowStep4 = ({ viewer = false }) => {
   };
 
   const handleCheckboxToggle = (id) => {
-    if (id === "showGuide") return; // ❗ 공연 안내는 비활성화
+   if (id === "showGuide" || id === "bookConfirm") return; // ❗ 입금확정, 공연 안내는 비활성화
     // setPreviews((prev) => ({ ...prev, [id]: !prev[id] }));
     setPreviews((prev) => {
       const next = !prev[id];
@@ -109,72 +109,85 @@ const RegisterShowStep4 = ({ viewer = false }) => {
       return { ...prev, [id]: next };
     });
   };
+  const updatedMessages = { ...messages };
+
+// 체크된 항목만 textarea에서 읽어오면 됨
+Object.keys(previews).forEach((key) => {
+  if (previews[key]) {
+    const el = document.getElementById(`textarea-${key}`);
+    if (el) {
+      updatedMessages[key] = el.innerText.trim();
+    }
+  }
+});
+
   // 임시 저장 핸들러
   const handleTempSave = async () => {
-    // 1) 기존 payload 불러오기
-    const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
-    const formData = previews;
+  // 1) 기존 payload 불러오기
+  const payload = JSON.parse(localStorage.getItem("createShowPayload")) || {};
 
-    localStorage.setItem("registerShowStep4", JSON.stringify(formData));
-    console.log("formdata", formData);
-    console.log("payload", payload);
+  // 🟢 2) 메시지 DOM에서 읽어서 messages 최신화
+  const updatedMessages = { ...messages };
 
-    const showGuideTextarea = document.getElementById("textarea-showGuide");
-    if (!showGuideTextarea) return;
-    console.log("form", formData);
+  Object.keys(previews).forEach((key) => {
+    if (previews[key]) {
+      const el = document.getElementById(`textarea-${key}`);
+      if (el) {
+        updatedMessages[key] = el.innerText.trim();
+      }
+    }
+  });
 
-    const userEditedMessage = showGuideTextarea.innerText.trim();
+  // 3) 로컬스토리지 저장
+  localStorage.setItem(
+    "registerShowStep4",
+    JSON.stringify({
+      previews,
+      messages: updatedMessages,
+    })
+  );
 
-    if (!userEditedMessage) {
-      addToast("필수 항목을 입력해주세요: 공연 안내", "error");
+  // 🔵 4) 백엔드 전송용 메시지 만들기
+  const trueKeys = Object.keys(previews).filter((key) => previews[key]);
+  const sendMessage = {};
+
+  trueKeys.forEach((key) => {
+    sendMessage[key] = convertMessageForBackend(updatedMessages[key]);
+  });
+
+  const updatedPayload = {
+    ...payload,
+    showMessage: sendMessage,
+  };
+
+  localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
+
+  // 🔴 5) API 호출
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedPayload),
+        credentials: "include",
+      }
+    );
+
+    const result = await response.json();
+    if (!response.ok) {
+      addToast(result.message || "임시저장 실패", "error");
       return;
     }
 
-    // true인 항목 필터링
-    const trueKeys = Object.keys(previews).filter((key) => previews[key]);
-
-    const sendMessage = {};
-    trueKeys.forEach((key) => {
-      sendMessage[key] = convertMessageForBackend(messages[key]);
-    });
-
-    console.log("turkey", trueKeys);
-
-    const updatedPayload = {
-      ...payload,
-      showMessage: sendMessage, // true인 메시지만 포함
-    };
-
-    console.log("updatedapyalad", updatedPayload);
-
-    localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
-
-    // navigate("/register-show/step5");
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/draft`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedPayload),
-          credentials: "include",
-        }
-      );
-
-      const result = await response.json();
-      if (!response.ok) {
-        addToast(result.message || "임시저장 실패", "error");
-        return;
-      }
-      console.log(result);
-      addToast("임시 저장되었습니다!", "success");
-    } catch (error) {
-      console.error("임시저장 오류:", error);
-      addToast("임시저장 중 오류 발생", "error");
-    }
-  };
+    addToast("임시 저장되었습니다!", "success");
+  } catch (error) {
+    console.error("임시저장 오류:", error);
+    addToast("임시저장 중 오류 발생", "error");
+  }
+};
 
   // 이전 단계로
   const handlePrevious = () => {
@@ -199,12 +212,17 @@ const RegisterShowStep4 = ({ viewer = false }) => {
   };
 
   // 기존 임시 저장 데이터 불러오기
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("registerShowStep4"));
-    if (saved?.previews) {
-      setPreviews(saved.previews);
-    }
-  }, []);
+useEffect(() => {
+  const saved = JSON.parse(localStorage.getItem("registerShowStep4"));
+  if (saved) {
+    // 체크 상태 반영
+    if (saved.previews) setPreviews(saved.previews);
+    
+    // 메시지 내용 반영
+    if (saved.messages) setMessages(saved.messages);
+  }
+}, []);
+
 
   return (
     <>
@@ -214,11 +232,13 @@ const RegisterShowStep4 = ({ viewer = false }) => {
         <MainContent>
           {/* <RegisterShowNavbar currentStep={4} /> */}
           <Flex>
-            <Name>알림 메시지 양식</Name>
+            <Name>알림 메시지 양식 
+              <p>*</p>
+            </Name>
             <Desc>
-              * 1. 회색 박스 안의 정보는 티킷타에서 자동으로 넣어주는 내용이니
+              1. 회색 박스 안의 정보는 티킷타에서 자동으로 넣어주는 내용이니
               수정하지 않으셔도 됩니다! <br />
-              &nbsp;&nbsp;&nbsp;2. 이모티콘을 넣으면 문자가 발송되지 않으니
+              2. 이모티콘을 넣으면 문자가 발송되지 않으니
               유의해주세요.
             </Desc>
           </Flex>
@@ -244,27 +264,13 @@ const RegisterShowStep4 = ({ viewer = false }) => {
                   id={`textarea-${item.id}`}
                   contentEditable
                   suppressContentEditableWarning={true}
-                  onInput={(e) => {
-                    setMessages((prev) => ({
-                      ...prev,
-                      [item.id]: e.target.innerText.trim(),
-                    }));
-                  }}
                   dangerouslySetInnerHTML={{
                     __html: renderWithMacroBox(messages[item.id]),
                   }}
                 />
               )}
 
-              {previews[item.id] && (
-                <MessageTextarea
-                  id={`textarea-${item.id}`}
-                  contentEditable
-                  dangerouslySetInnerHTML={{
-                    __html: renderWithMacroBox(defaultMessages[item.id]),
-                  }}
-                />
-              )}
+           
             </CheckboxContainer>
           ))}
         </MainContent>
@@ -344,7 +350,13 @@ const Name = styled.div`
   font-size: 25px;
   font-weight: 500;
   display: flex;
-  gap: 20px;
+  gap: 3px;
+
+      p{
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--color-primary);
+  }
 `;
 
 const Desc = styled.div`
@@ -394,13 +406,13 @@ const MessageTextarea = styled.div`
 
 const RequiredText = styled.span`
   color: #fc2847;
-  font-size: 14px;
+  font-size: 15px;
   margin-left: 5px;
-  font-weight: 700;
+  font-weight: 500;
 `;
 
 const Flex = styled.div`
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 2px;
 `;

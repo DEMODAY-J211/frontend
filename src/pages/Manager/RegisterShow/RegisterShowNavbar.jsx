@@ -13,7 +13,9 @@ const RegisterShowNavbar = ({ currentStep, setCurrentStep }) => {
 
   return (
     <>
-      <Title>공연 등록하기</Title>
+      <Title>공연 등록하기
+        <p>* 필수 항목을 모두 입력해야 임시저장할 수 있습니다.</p>
+      </Title>
       <ProgressSteps>
         <StepItem active={currentStep === 1} onClick={() => handleStepClick(1)}>
           ① 공연 기본정보
@@ -52,6 +54,14 @@ const Title = styled.h1`
   font-size: 30px;
   color: #000000;
   margin: 0;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+      p{
+    font-size: 15px;
+    font-weight: 500;
+    color: #999;
+  }
 `;
 
 const ProgressSteps = styled.div`
