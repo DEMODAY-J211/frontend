@@ -152,12 +152,15 @@ export default function MobileTicket() {
                   return ( */}
                 <QRItem
                   onClick={() =>
-                    openModal(tickets[currentIndex]?.qrCode, currentIndex)
+                    openModal(
+                      showInfo?.tickets[currentIndex]?.qrCode,
+                      currentIndex
+                    )
                   }
-                  key={tickets[currentIndex]?.ReservationItemId}
+                  key={showInfo?.tickets[currentIndex]?.ReservationItemId}
                 >
                   <img
-                    src={tickets[currentIndex]?.qrCode}
+                    src={showInfo?.tickets[currentIndex]?.qrCode}
                     alt={`QR-${currentIndex}`}
                   />
                   {/* <div className="overlay">전체 화면으로 확인하기</div>" */}
