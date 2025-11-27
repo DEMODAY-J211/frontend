@@ -115,26 +115,29 @@ const RegisterVenue3 = () => {
 
   // 행 라벨링 적용
   useEffect(() => {
-    if (!rowLabeling) {
+    // 행 라벨링도 구역 라벨링도 선택 안 했으면 원본 유지
+    if (!rowLabeling && !sectionLabeling) {
       setLabeledSeats(seatLayout);
       return;
     }
 
     let newLabeledSeats = [...seatLayout];
 
-    // 모든 층에 대해 라벨링 적용 (각 층의 설정에 따라)
-    floors.forEach((floor) => {
-      // 현재 층이면 현재 설정 사용, 아니면 저장된 설정 사용
-      const floorSetting =
-        floor === currentFloor
-          ? { rowLabeling, rowOrder, rowStart }
-          : floorSettings[floor] || {
-              rowLabeling: false,
-              rowOrder: "korean",
-              rowStart: "top",
-            };
+    // 행 라벨링 적용 (구역 라벨링이 꺼져있을 때만)
+    if (rowLabeling && !sectionLabeling) {
+      // 모든 층에 대해 라벨링 적용 (각 층의 설정에 따라)
+      floors.forEach((floor) => {
+        // 현재 층이면 현재 설정 사용, 아니면 저장된 설정 사용
+        const floorSetting =
+          floor === currentFloor
+            ? { rowLabeling, rowOrder, rowStart }
+            : floorSettings[floor] || {
+                rowLabeling: false,
+                rowOrder: "korean",
+                rowStart: "top",
+              };
 
-      if (!floorSetting.rowLabeling) return;
+        if (!floorSetting.rowLabeling) return;
 
       const floorSeats = seatLayout.filter((seat) => seat.floor === floor);
       if (floorSeats.length === 0) return;
@@ -214,10 +217,30 @@ const RegisterVenue3 = () => {
           };
         });
       }
-    });
+      });
+    }
 
-    // 구역별 라벨링 - 좌석 라벨은 변경하지 않고 section 정보만 저장
-    // (실제 라벨 표시는 유지하되, section 정보는 별도로 관리)
+    // 구역별 라벨링 적용
+    if (sectionLabeling && sections.length > 0) {
+      newLabeledSeats = newLabeledSeats.map((seat) => {
+        if (seat.type !== "seat") return seat;
+
+        // 좌석이 속한 구역 찾기
+        const section = sections.find((s) => s.seats.includes(seat.id));
+        if (!section) return seat;
+
+        // 원본 좌석 라벨에서 열 번호만 추출
+        const originalLabel = seatLayout.find((s) => s.id === seat.id)?.label || "";
+        const colMatch = originalLabel.match(/\d+$/);
+        const colNumber = colMatch ? colMatch[0] : "";
+
+        // 구역명-열번호 형태로 라벨 생성
+        return {
+          ...seat,
+          label: `${section.name}-${colNumber}`,
+        };
+      });
+    }
 
     setLabeledSeats(newLabeledSeats);
   }, [
@@ -389,6 +412,18 @@ const RegisterVenue3 = () => {
 
   // 등록하기
   const handleSubmit = async () => {
+    // 행 또는 구역 중 하나는 반드시 선택되어야 함
+    if (!rowLabeling && !sectionLabeling) {
+      addToast("행 라벨링 또는 구역 라벨링 중 하나는 필수로 선택해야 합니다.", "error");
+      return;
+    }
+
+    // 구역 라벨링을 선택했는데 구역을 생성하지 않은 경우
+    if (sectionLabeling && sections.length === 0) {
+      addToast("구역을 최소 1개 이상 생성해주세요.", "error");
+      return;
+    }
+
     // 현재 층 설정 저장
     setFloorSettings((prev) => ({
       ...prev,
@@ -643,9 +678,15 @@ const RegisterVenue3 = () => {
                     <StyledCheckbox
                       type="checkbox"
                       checked={rowLabeling}
-                      onChange={(e) => setRowLabeling(e.target.checked)}
+                      disabled={sectionLabeling}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSectionLabeling(false);
+                        }
+                        setRowLabeling(e.target.checked);
+                      }}
                     />
-                    <CheckboxLabel>행(필수)</CheckboxLabel>
+                    <CheckboxLabel disabled={sectionLabeling}>행(필수)</CheckboxLabel>
                   </CheckboxRow>
 
                   {rowLabeling && (
@@ -683,9 +724,15 @@ const RegisterVenue3 = () => {
                     <StyledCheckbox
                       type="checkbox"
                       checked={sectionLabeling}
-                      onChange={(e) => setSectionLabeling(e.target.checked)}
+                      disabled={rowLabeling}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setRowLabeling(false);
+                        }
+                        setSectionLabeling(e.target.checked);
+                      }}
                     />
-                    <CheckboxLabel>구역 별 생성</CheckboxLabel>
+                    <CheckboxLabel disabled={rowLabeling}>구역 별 생성(필수)</CheckboxLabel>
                   </CheckboxRow>
 
                   {sectionLabeling && (
@@ -988,14 +1035,16 @@ const CheckboxRow = styled.div`
 const StyledCheckbox = styled.input`
   width: 16px;
   height: 16px;
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 `;
 
 const CheckboxLabel = styled.label`
   font-weight: 500;
   font-size: 16px;
-  color: #000000;
-  cursor: pointer;
+  color: ${(props) => (props.disabled ? "#999999" : "#000000")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.disabled ? 0.6 : 1)};
 `;
 
 const OptionsPanel = styled.div`
