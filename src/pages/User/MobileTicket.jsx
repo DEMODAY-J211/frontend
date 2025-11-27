@@ -11,10 +11,10 @@ import { formatKoreanDate } from "../../utils/dateFormat";
 const MockData = [
   {
     reservationNumber: 12345,
-    showTitle: "제11회 정기공연",
+    showTitle: "공연명",
     showDateTime: "2025-09-25T15:00:00",
-    showLocation: "서강대학교 메리홀 소극장",
-    userName: "강길동",
+    showLocation: " 소극장",
+    userName: "유저명",
     ticketOption: {
       ticketOptionId: 1,
       ticketOptionName: "일반예매가",
