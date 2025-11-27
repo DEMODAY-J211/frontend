@@ -62,8 +62,8 @@ export default function CheckTicket() {
 
   const statusText = {
     PENDING_PAYMENT: "승인 대기중",
-    CANCEL_REQUESTED: "취소 완료",
-    COMPLETED: "예매 완료", // 예매완료 상태가 특정 코드라면 여기에!
+    CANCELED: "취소 완료",
+    CONFIRMED: "예매 완료", // 예매완료 상태가 특정 코드라면 여기에!
   };
 
   useEffect(() => {
