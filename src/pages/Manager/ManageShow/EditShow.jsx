@@ -132,7 +132,13 @@ console.log('show:', show);  // 이 부분을 통해 실제 show 객체의 구�
         <Title>공연 수정하기
           <p>* 상세 정보만 수정 가능합니다.</p>
         </Title>
-        <RegisterShowStep2 editor={true} initialData={show} onUpdateFormData={handleUpdateFormData}/>
+        <RegisterShowStep2 
+  viewer={false} 
+  editor={true} 
+  initialData={show} 
+  onUpdateFormData={handleUpdateFormData} 
+/>
+
 
         <Footer>
           <RightButtonGroup>

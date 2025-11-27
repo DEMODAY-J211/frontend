@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../../../components/Toast/useToast";
 import { useState, useEffect } from "react";
 
-const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpdateFormData}) => {
+const RegisterShowStep2 = ({ viewer = false, editor = false , initialData,  onUpdateFormData = () => {} }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { showId } = useParams();
@@ -13,32 +13,25 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpd
   const [images, setImages] = useState([]); // 실제 파일 리스트
   const [previews, setPreviews] = useState([]); // 미리보기 URL 리스트
   const [uploadedUrls, setUploadedUrls] = useState([]); // S3 URL
+  
 
   
 
-    useEffect(() => {
-       if (!initialData) return;
-     setFormData((prev) => ({
-      ...prev,
-      ...initialData, // API 데이터 구조에 맞게 수정 필요
-    }));
+// 초기 데이터 로드 및 localStorage 병합
+  useEffect(() => {
+    const loadInitialData = () => {
+      if (initialData) {
+        if (initialData.detailText) setTempText(initialData.detailText);
+      } else {
+        const savedData = JSON.parse(localStorage.getItem("createShowPayload")) || {};
+        if (savedData.detailText) setTempText(savedData.detailText);
+      }
+    };
 
-    // 화면 상태 업데이트
-  if (initialData.detailText) setTempText(initialData.detailText);
-  if (initialData.detailImages) {
-    setPreviews(initialData.detailImages);
-    setUploadedUrls(initialData.detailImages);
-  }
-  
-  // localStorage 업데이트
-  const prevPayload =
-    JSON.parse(localStorage.getItem("createShowPayload")) || {};
-  const updatedPayload = {
-    ...prevPayload,
-    ...initialData,
-  };
-  localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
-}, [initialData]);
+    loadInitialData();
+  }, [initialData]);
+
+ 
 
 
   useEffect(() => {
@@ -46,7 +39,7 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpd
     console.log("new", images);
   }, [images]);
   useEffect(() => {
-    console.log("previe", previews);
+    console.log("preview", previews);
   }, [previews]);
   useEffect(() => {
     console.log("uploadedUrls", uploadedUrls);
@@ -214,7 +207,7 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpd
     setTempText(value); // 화면 상태 업데이트
 
     // 부모 컴포넌트로 전달
-    onUpdateFormData({ detailText: value });
+    if (onUpdateFormData) onUpdateFormData({ detailText: value });
 
     // localStorage 업데이트
     const prevPayload =
@@ -233,10 +226,8 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpd
     // if (saved?.poster) {
     //   setPoster(saved.poster);
     // }
-    const savedData = JSON.parse(localStorage.getItem("register-show-step2"));
-    if (savedData) {
-      setPreviews(savedData.detailImages);
-      setUploadedUrls(savedData.detailImages);
+    const savedData = JSON.parse(localStorage.getItem("createShowPayload"));
+    if (savedData && savedData.detailText) {
       setTempText(savedData.detailText);
     }
   }, []);
@@ -266,7 +257,8 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpd
           {/* <RegisterShowNavbar currentStep={2} /> */}
 
           
-            {!viewer && (
+            {/* viewer 모드일 때는 업로드와 삭제 버튼을 아예 보이지 않도록 */}
+{!viewer && (
   <UpperContent>
     <Name>공연 상세이미지</Name>
     <UploadBoxWrapper>
@@ -282,13 +274,12 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpd
             <UploadBoxContent>
               <img src={previews[idx]} alt={`preview-${idx}`} />
               {!editor && (
-              <HoverOverlay 
-                onClick={(e) => editor ? e.preventDefault() : handleDelete(idx, e)} // editor일 때 삭제 비활성화
-              >
-                삭제
-              </HoverOverlay>
+                <HoverOverlay 
+                  onClick={(e) => editor ? e.preventDefault() : handleDelete(idx, e)} // editor일 때 삭제 비활성화
+                >
+                  삭제
+                </HoverOverlay>
               )}
-              
             </UploadBoxContent>
           ) : idx === previews.length && images.length < 5 ? (
             <PlusIcon>+</PlusIcon>
@@ -296,6 +287,7 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpd
             <EmptySlot>이미지 업로드</EmptySlot>
           )}
 
+          {/* Upload box를 클릭할 수 없는 상태로 만들기 */}
           <HiddenInput
             id={`upload-${idx}`}
             type="file"
@@ -308,6 +300,7 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpd
       ))}
     </UploadBoxWrapper>
 
+    {/* 아래의 HiddenInput은 항상 보이되, editor일 때만 클릭이 가능 */}
     <HiddenInput
       id="posterUpload"
       type="file"
@@ -317,6 +310,27 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData, onUpd
     />
   </UpperContent>
 )}
+
+{/* viewer 모드일 때는 업로드와 삭제 버튼을 아예 렌더링하지 않음 */}
+{viewer && (
+  <UpperContent>
+    <Name>공연 상세이미지</Name>
+    <UploadBoxWrapper>
+      {previews.length > 0 ? (
+        previews.map((preview, idx) => (
+          <UploadBox key={idx}>
+            <UploadBoxContent>
+              <img src={preview} alt={`preview-${idx}`} />
+            </UploadBoxContent>
+          </UploadBox>
+        ))
+      ) : (
+        <EmptySlot>이미지가 없습니다</EmptySlot>
+      )}
+    </UploadBoxWrapper>
+  </UpperContent>
+)}
+
 
             
 
