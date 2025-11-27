@@ -103,6 +103,55 @@ const SeatSelectionModal = ({
     setHistoryIndex(newHistory.length - 1);
   };
 
+  // 부모 컴포넌트에 실시간으로 변경사항 전달
+  const notifyParentOfChanges = (currentClearedSeats) => {
+    if (!seatMapData || !onSave) return;
+
+    let seatMapToSave;
+    let totalSeats = 0;
+    let clearedCount = currentClearedSeats.size;
+
+    if (salesMethod === "자동 배정") {
+      // VIP석을 1로 표시한 좌석표 생성
+      seatMapToSave = seatMapData.seat_map.map((row) =>
+        row.map((seat) => {
+          if (seat === -1) return -1;
+          if (typeof seat === "string") {
+            totalSeats++;
+            if (currentClearedSeats.has(seat)) {
+              return 1;
+            }
+          }
+          return typeof seat === "string" ? 0 : seat;
+        })
+      );
+    } else {
+      // 예매자 선택: clearedSeats에 있는 좌석들을 0으로 변경
+      seatMapToSave = seatMapData.seat_map.map((row) =>
+        row.map((seat) => {
+          if (typeof seat === "string") {
+            totalSeats++;
+            if (currentClearedSeats.has(seat)) {
+              return 0;
+            }
+          }
+          return seat;
+        })
+      );
+    }
+
+    const totalAvailableSeats = totalSeats - clearedCount;
+
+    // onSave 콜백으로 데이터 전달 (모달 닫지 않음)
+    onSave({
+      seatMap: seatMapToSave,
+      excludedSeats:
+        salesMethod === "예매자 선택" ? Array.from(currentClearedSeats) : [],
+      vipSeats: salesMethod === "자동 배정" ? Array.from(currentClearedSeats) : [],
+      totalAvailableSeats: totalAvailableSeats,
+    });
+  };
+
   // 좌석 클릭 (단일 선택)
   const handleSeatClick = (seatId) => {
     const newSelected = new Set(selectedSeats);
@@ -116,6 +165,8 @@ const SeatSelectionModal = ({
         const newClearedSeats = new Set(clearedSeats);
         newClearedSeats.delete(seatId);
         setClearedSeats(newClearedSeats);
+        // 좌석 취소를 해제했으므로 실시간으로 부모에 전달
+        notifyParentOfChanges(newClearedSeats);
       }
     }
 
@@ -177,6 +228,7 @@ const SeatSelectionModal = ({
     if (hasMoved && tempSelectedSeats.size > 0) {
       const newSelected = new Set(selectedSeats);
       const newClearedSeats = new Set(clearedSeats);
+      let clearedSeatsChanged = false;
 
       tempSelectedSeats.forEach((seatId) => {
         if (newSelected.has(seatId)) {
@@ -186,6 +238,7 @@ const SeatSelectionModal = ({
           // 선택된 좌석은 취소된 목록에서 제거
           if (newClearedSeats.has(seatId)) {
             newClearedSeats.delete(seatId);
+            clearedSeatsChanged = true;
           }
         }
       });
@@ -193,6 +246,11 @@ const SeatSelectionModal = ({
       setSelectedSeats(newSelected);
       setClearedSeats(newClearedSeats);
       updateHistory(newSelected);
+
+      // 취소된 좌석이 변경되었으면 실시간으로 부모에 전달
+      if (clearedSeatsChanged) {
+        notifyParentOfChanges(newClearedSeats);
+      }
     }
 
     // 항상 드래그 상태 초기화
@@ -217,7 +275,23 @@ const SeatSelectionModal = ({
   const handleUndo = () => {
     if (historyIndex > 0) {
       setHistoryIndex(historyIndex - 1);
-      setSelectedSeats(new Set(history[historyIndex - 1]));
+      const previousSelected = new Set(history[historyIndex - 1]);
+      setSelectedSeats(previousSelected);
+
+      // clearedSeats에서 되돌린 좌석들을 제거
+      const newClearedSeats = new Set(clearedSeats);
+      let changed = false;
+      previousSelected.forEach((seatId) => {
+        if (newClearedSeats.has(seatId)) {
+          newClearedSeats.delete(seatId);
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        setClearedSeats(newClearedSeats);
+        notifyParentOfChanges(newClearedSeats);
+      }
     }
   };
 
@@ -225,90 +299,80 @@ const SeatSelectionModal = ({
   const handleRedo = () => {
     if (historyIndex < history.length - 1) {
       setHistoryIndex(historyIndex + 1);
-      setSelectedSeats(new Set(history[historyIndex + 1]));
+      const nextSelected = new Set(history[historyIndex + 1]);
+      setSelectedSeats(nextSelected);
+
+      // clearedSeats에서 다시 선택된 좌석들을 제거
+      const newClearedSeats = new Set(clearedSeats);
+      let changed = false;
+      nextSelected.forEach((seatId) => {
+        if (newClearedSeats.has(seatId)) {
+          newClearedSeats.delete(seatId);
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        setClearedSeats(newClearedSeats);
+        notifyParentOfChanges(newClearedSeats);
+      }
     }
   };
 
   // 이전에 취소된 좌석들 추적
   const [clearedSeats, setClearedSeats] = useState(new Set());
 
-  // 선택 취소
+  // 좌석 제외/VIP 선택 (선택한 좌석들을 제외 목록에 추가)
   const handleClearSelection = () => {
     // 현재 선택된 좌석들을 취소된 좌석 목록에 추가
     const newClearedSeats = new Set([...clearedSeats, ...selectedSeats]);
     setClearedSeats(newClearedSeats);
     setSelectedSeats(new Set());
     updateHistory(new Set());
+
+    // 실시간으로 부모 컴포넌트에 상태 전달
+    notifyParentOfChanges(newClearedSeats);
   };
 
-  // 로컬 저장 핸들러 (API 호출 제거)
-  const handleSaveSeatChanges = () => {
-    if (!seatMapData) {
-      onClose();
-      return;
-    }
+  // 제외/VIP 좌석 변경 취소 (이미 제외된 좌석들을 다시 선택 가능하게 되돌림)
+  const handleUndoClearedSeats = () => {
+    if (clearedSeats.size === 0) return;
 
-    // 좌석표 데이터 생성
-    let seatMapToSave;
-    let totalSeats = 0;
-    let clearedCount = clearedSeats.size;
+    // 모든 제외된 좌석을 초기화
+    setClearedSeats(new Set());
 
-    if (salesMethod === "자동 배정") {
-      // VIP석을 1로 표시한 좌석표 생성
-      seatMapToSave = seatMapData.seat_map.map((row) =>
-        row.map((seat) => {
-          if (seat === -1) return -1; // 무대는 그대로
-          if (typeof seat === "string") {
-            totalSeats++;
-            if (clearedSeats.has(seat)) {
-              return 1; // VIP석은 1로 표시
-            }
-          }
-          return typeof seat === "string" ? 0 : seat; // 나머지 좌석은 0
-        })
-      );
-    } else {
-      // 예매자 선택: clearedSeats에 있는 좌석들을 0으로 변경
-      seatMapToSave = seatMapData.seat_map.map((row) =>
-        row.map((seat) => {
-          if (typeof seat === "string") {
-            totalSeats++;
-            if (clearedSeats.has(seat)) {
-              return 0; // 제외된 좌석을 0으로 변경
-            }
-          }
-          return seat;
-        })
-      );
-    }
-
-    const totalAvailableSeats = totalSeats - clearedCount;
-
-    // onSave 콜백으로 데이터 전달
-    if (onSave) {
-      onSave({
-        seatMap: seatMapToSave,
-        excludedSeats:
-          salesMethod === "예매자 선택" ? Array.from(clearedSeats) : [],
-        vipSeats: salesMethod === "자동 배정" ? Array.from(clearedSeats) : [],
-        totalAvailableSeats: totalAvailableSeats,
-      });
-    }
+    // 실시간으로 부모 컴포넌트에 상태 전달
+    notifyParentOfChanges(new Set());
 
     addToast(
       salesMethod === "자동 배정"
-        ? `${clearedCount}개의 VIP석이 선택되었습니다.`
-        : `${clearedCount}개의 좌석이 제외되었습니다.`,
-      "success"
+        ? "VIP석 선택이 취소되었습니다."
+        : "좌석 제외가 취소되었습니다.",
+      "info"
     );
+  };
+
+  // 로컬 저장 핸들러 (모달 닫기)
+  const handleSaveSeatChanges = () => {
+    // 마지막으로 한 번 더 부모에게 전달 (최종 상태 확인)
+    if (seatMapData && clearedSeats.size > 0) {
+      notifyParentOfChanges(clearedSeats);
+
+      addToast(
+        salesMethod === "자동 배정"
+          ? `${clearedSeats.size}개의 VIP석이 선택되었습니다.`
+          : `${clearedSeats.size}개의 좌석이 제외되었습니다.`,
+        "success"
+      );
+    }
 
     onClose();
   };
 
-  // 탭 전환 핸들러
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-  };
+  // 탭 전환 핸들러 (현재는 사용하지 않지만 향후 확장성을 위해 유지)
+  // const handleTabChange = (tab) => {
+  //   setActiveTab(tab);
+  // };
 
   // ... 기존 state 선언들 아래에 추가 ...
 
@@ -499,6 +563,13 @@ const SeatSelectionModal = ({
             >
               {salesMethod === "자동 배정" ? "VIP 좌석 선택" : "좌석 취소하기"}
             </ClearButton>
+            {clearedSeats.size > 0 && (
+              <UndoButton onClick={handleUndoClearedSeats}>
+                {salesMethod === "자동 배정"
+                  ? "VIP 선택 취소하기"
+                  : "좌석 변경 취소하기"}
+              </UndoButton>
+            )}
           </Toolbar>
         </BottomButtonWrapper>
       </ContentCard>
@@ -789,5 +860,24 @@ const ClearButton = styled.button`
     transform: ${(props) => (props.disabled ? "none" : "translateY(-2px)")};
     box-shadow: ${(props) =>
       props.disabled ? "none" : "0 4px 12px rgba(252, 40, 71, 0.3)"};
+  }
+`;
+
+const UndoButton = styled.button`
+  background: #6b6b6b;
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 107, 107, 0.3);
+    background: #555555;
   }
 `;
