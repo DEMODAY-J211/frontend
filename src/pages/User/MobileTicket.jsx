@@ -7,6 +7,8 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { RiArrowLeftWideFill } from "react-icons/ri";
 import { RiArrowRightWideFill } from "react-icons/ri";
 import { formatKoreanDate } from "../../utils/dateFormat";
+import { useAuth } from "../Auth/AuthContext";
+import LoginRequiredModal from "../../components/Modal/LoginRequiredModal";
 
 const MockData = [
   {
@@ -43,13 +45,23 @@ const MockData = [
 ];
 
 export default function MobileTicket() {
-  const { managerId } = useParams();
-  const { reservationId } = useParams();
+  const { managerId, reservationId } = useParams();
   const [showInfo, setShowInfo] = useState(MockData[0]);
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [IsOpen, setIsOpen] = useState(false);
   const [selectedQR, setSelectedQR] = useState("");
+  const { isLoggedIn } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  // 로그인 체크
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return; // 로그인 전에는 fetch 호출하면 안 됨
+    }
+    fetchticket();
+  }, [isLoggedIn]);
 
   function handleNext() {
     setCurrentIndex((prev) => Math.min(prev + 1, showInfo.tickets.length - 1));
@@ -101,9 +113,6 @@ export default function MobileTicket() {
     }
   };
 
-  useEffect(() => {
-    fetchticket();
-  }, []);
   useEffect(() => {
     console.log(showInfo);
   }, [showInfo]);
@@ -203,6 +212,10 @@ export default function MobileTicket() {
             </ModalContent>
           </QRModal>
         )}
+        {showLoginModal && (
+          <LoginRequiredModal onClose={() => setShowLoginModal(false)} />
+        )}
+
         <Footerbtn
           buttons={[
             {
