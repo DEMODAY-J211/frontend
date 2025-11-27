@@ -112,6 +112,10 @@ const App = () => {
             <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
             <Route path="/landing" element={<Landing />} />
             <Route path=":managerId/homeuser" element={<HomeUser />} />
+            <Route
+              path=":managerId/mobileticket/:reservationId"
+              element={<MobileTicket />}
+            />
 
             {/* 보호된 라우트: User */}
             <Route
@@ -136,11 +140,7 @@ const App = () => {
             />
             <Route
               path=":managerId/checkticket/:reservationId"
-              element={<CheckTicket />}
-            />
-            <Route
-              path=":managerId/mobileticket/:reservationId"
-              element={<ProtectedRoute element={MobileTicket} />}
+              element={<ProtectedRoute element={CheckTicket} />}
             />
             <Route
               path=":managerId/selectseat/:showId/:showtimeId"

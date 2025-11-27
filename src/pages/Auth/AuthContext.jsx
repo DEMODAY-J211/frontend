@@ -50,8 +50,14 @@ export function AuthProvider({ children }) {
         );
       } else {
         // window.history.replaceState({}, "", "/2/homeuser");
-        console.log(document.cookie);
-        navigate("/2/homeuser", { replace: true });
+        // console.log(document.cookie);
+        // navigate("/2/homeuser", { replace: true });
+
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
       }
     }
 
