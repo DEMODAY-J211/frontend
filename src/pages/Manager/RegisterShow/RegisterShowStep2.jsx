@@ -220,6 +220,23 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData,  onUp
 
     localStorage.setItem("createShowPayload", JSON.stringify(updatedPayload));
   };
+
+  // 미리보기 업데이트 함수 (editor에서 호출 가능)
+const updatePreviews = (newImages) => {
+  setPreviews(newImages);
+};
+useEffect(() => {
+  if (initialData && initialData.detailImages) {
+    // 초기 데이터에서 detailImages가 있다면 미리보기 리스트에 반영
+    updatePreviews(initialData.detailImages);
+  } else {
+    const savedData = JSON.parse(localStorage.getItem("createShowPayload")) || {};
+    if (savedData.detailImages) {
+      updatePreviews(savedData.detailImages);
+    }
+  }
+}, [initialData]);
+
   // 기존 임시 저장 데이터 불러오기
   useEffect(() => {
     // const saved = JSON.parse(localStorage.getItem("registerShowStep2"));
@@ -258,7 +275,7 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData,  onUp
 
           
             {/* viewer 모드일 때는 업로드와 삭제 버튼을 아예 보이지 않도록 */}
-{!viewer && (
+{!viewer && !editor && (
   <UpperContent>
     <Name>공연 상세이미지</Name>
     <UploadBoxWrapper>
@@ -312,7 +329,7 @@ const RegisterShowStep2 = ({ viewer = false, editor = false , initialData,  onUp
 )}
 
 {/* viewer 모드일 때는 업로드와 삭제 버튼을 아예 렌더링하지 않음 */}
-{viewer && (
+{viewer || editor && (
   <UpperContent>
     <Name>공연 상세이미지</Name>
     <UploadBoxWrapper>
