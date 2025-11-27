@@ -73,7 +73,8 @@ export function AuthProvider({ children }) {
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
     // 로그인 페이지로 이동
-    window.location.href = "/login";
+    // window.location.href = "/login";
+    console.log("logout");
   };
   return (
     <AuthContext.Provider

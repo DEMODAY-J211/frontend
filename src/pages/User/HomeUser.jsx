@@ -19,7 +19,7 @@ export default function HomeUser() {
   const currentShow = useMemo(() => shows[currentIndex], [shows, currentIndex]);
   const navigate = useNavigate();
   const [teamTitle, setTeamTitle] = useState(null);
-  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const { isLoggedIn, setIsLoggedIn, logout } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const openLoginModal = () => setIsLoginModalOpen(true);
   const closeLoginModal = () => setIsLoginModalOpen(false);
@@ -36,6 +36,14 @@ export default function HomeUser() {
     requireLogin(() => {
       navigate(`/${managerId}/myticketlist`);
     });
+  };
+
+  const handleHeaderLoginClick = () => {
+    if (!isLoggedIn) {
+      openLoginModal(); // 로그인 필요 모달 띄우기
+    } else {
+      logout(); // 로그아웃 실행
+    }
   };
 
   useEffect(() => {
@@ -109,7 +117,7 @@ export default function HomeUser() {
       );
 
       const result2 = await userresponse.json();
-
+      console.log(result2);
       if (result2.success) {
         setUserReservations(result2.data);
         console.log(
@@ -140,6 +148,7 @@ export default function HomeUser() {
           managerId={managerId}
           text={teamTitle}
           onIconClick={handleHeaderIconClick}
+          onLoginClick={handleHeaderLoginClick}
         />
         {!currentShow ? (
           <p>공연 정보를 불러오는 중입니다...</p>

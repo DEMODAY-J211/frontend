@@ -13,6 +13,9 @@ export default function KakaoLogin({ redirectUri }) {
     }/oauth2/authorization/kakao?redirect_uri=${encodeURIComponent(
       redirectUri
     )}`;
+    // const KAKAO_AUTH_URL = `/api/oauth2/authorization/kakao?redirect_uri=${encodeURIComponent(
+    //   redirectUri
+    // )}`;
 
     console.log("최종 URL:", KAKAO_AUTH_URL);
     console.log("리다이렉트 시작...");

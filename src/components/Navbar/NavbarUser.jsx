@@ -12,6 +12,7 @@ export default function NavbarUser({
   Backmode = false,
   text = "",
   onIconClick,
+  onLoginClick,
   nav = "",
 }) {
   const { managerId } = useParams();
@@ -58,7 +59,10 @@ export default function NavbarUser({
             />
           </div>
           <div className="buttoncontainer">
-            <IoMdLogIn size="24px" onClick={isLoggedIn ? logout : () => {}} />
+            <IoMdLogIn
+              size="24px"
+              onClick={isLoggedIn ? logout : onLoginClick}
+            />
           </div>
         </div>
       </TextContainer>
