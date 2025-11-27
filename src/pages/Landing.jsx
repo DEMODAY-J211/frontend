@@ -52,13 +52,16 @@ export default function Landing() {
 
         // 텍스트 응답에 따라 추가 처리
         if (textResponse.includes("role updated")) {
-          console.log("gg");
+          console.log("manager");
           if (selectedRole === "MANAGER") {
             setUser({ type: "manager" });
-            navigate("/write-teaminfo", { replace: true });
+            navigate("/write-teaminfo", {
+              state: { signup: true },
+              replace: true,
+            });
           }
         } else if (textResponse.includes("role selected")) {
-          console.log("gg");
+          console.log("user");
           if (selectedRole === "USER") {
             setUser({ type: "user" });
             navigate("/homeuser", { replace: true });

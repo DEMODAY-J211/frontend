@@ -148,14 +148,22 @@ export default function MobileTicket() {
                 <RiArrowLeftWideFill size="40px" />
               </button>
               <QrList index={currentIndex}>
-                {showInfo.tickets.map((ticket) => {
-                  return (
-                    <QRItem onClick={() => openModal(ticket.qrCode)}>
-                      <img src={ticket?.qrCode} alt={`QR-${currentIndex}`} />
-                      {/* <div className="overlay">전체 화면으로 확인하기</div>" */}
-                    </QRItem>
-                  );
-                })}
+                {/* {showInfo.tickets.map((ticket, index) => {
+                  return ( */}
+                <QRItem
+                  onClick={() =>
+                    openModal(tickets[currentIndex]?.qrCode, currentIndex)
+                  }
+                  key={tickets[currentIndex]?.ReservationItemId}
+                >
+                  <img
+                    src={tickets[currentIndex]?.qrCode}
+                    alt={`QR-${currentIndex}`}
+                  />
+                  {/* <div className="overlay">전체 화면으로 확인하기</div>" */}
+                </QRItem>
+                {/* );
+                })} */}
               </QrList>
 
               <button
@@ -207,7 +215,10 @@ export default function MobileTicket() {
                 </p>
               </ShowContainer>
               {showInfo?.tickets && (
-                <img src={showInfo.tickets[0]?.qrCode} alt="QR Modal" />
+                <img
+                  src={showInfo.tickets[currentIndex]?.qrCode}
+                  alt="QR Modal"
+                />
               )}
             </ModalContent>
           </QRModal>
@@ -333,6 +344,7 @@ const QrList = styled.div`
   width: 100%;
   overflow: hidden;
   gap: 15px;
+  transform: translateX(-${(props) => props.index * 100}%);
 `;
 
 const QRItem = styled.div`
