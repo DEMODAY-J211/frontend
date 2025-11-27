@@ -176,7 +176,7 @@ const RegisterShowStep3 = ({ viewer = false , initialData}) => {
     }
   };
 
-  // 모달에서 좌석 저장 (로컬에만 저장)
+  // 모달에서 좌석 저장 (실시간 업데이트 - 모달을 닫지 않음)
   const handleSaveSeats = (seatData) => {
     // 좌석표 데이터 저장
     setSeatMapData(seatData.seatMap);
@@ -191,23 +191,11 @@ const RegisterShowStep3 = ({ viewer = false , initialData}) => {
     if (selectedMethod === "예매자 선택") {
       setExcludedSeats(seatData.excludedSeats || []);
       setUpdatedSeatCount(seatData.excludedSeats?.length || 0);
-      addToast(
-        `제외된 좌석: ${
-          seatData.excludedSeats?.length || 0
-        }개 / 판매 가능 좌석: ${seatData.totalAvailableSeats || 0}개`,
-        "success"
-      );
     }
     // 자동 배정인 경우
     else if (selectedMethod === "자동 배정") {
       setExcludedSeats(seatData.vipSeats || []);
       setUpdatedSeatCount(seatData.vipSeats?.length || 0);
-      addToast(
-        `VIP석: ${seatData.vipSeats?.length || 0}개 / 판매 가능 좌석: ${
-          seatData.totalAvailableSeats || 0
-        }개`,
-        "success"
-      );
     }
   };
 
