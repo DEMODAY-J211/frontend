@@ -127,7 +127,7 @@ export default function ViewShowDetail() {
                   <a>공연 날짜·회차</a>
                   {showData.showtimeList?.map((show, idx) => (
                     <b key={show.showtimeId}>
-                      {idx + 1}회차 {formatKoreanDate(showData.showStartDate)}
+                      {idx + 1}회차 {formatKoreanDate(show.showtimeStart)}
                     </b>
                   ))}
                 </div>

@@ -5,7 +5,7 @@ import { BsUpload, BsInstagram, BsFacebook } from "react-icons/bs";
 import { BiLogoYoutube } from "react-icons/bi";
 import { IoTicket } from "react-icons/io5";
 import NavbarLanding from "../../components/Navbar/NavbarLanding";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const WriteTeamInfo = () => {
   const navigate = useNavigate();
@@ -21,6 +21,9 @@ const WriteTeamInfo = () => {
     },
   });
   const [url, setUrl] = useState(null);
+  const location = useLocation();
+  const signup = location.state?.signup ?? false;
+  console.log("받아온 signup:", signup);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -372,6 +375,7 @@ const Right = styled.div`
   gap: 20px;
 `;
 const InputField = styled.input`
+  width: 100%;
   background: white;
   border: 1px solid #c5c5c5;
   border-radius: 12px;

@@ -148,14 +148,25 @@ export default function MobileTicket() {
                 <RiArrowLeftWideFill size="40px" />
               </button>
               <QrList index={currentIndex}>
-                {showInfo.tickets.map((ticket) => {
-                  return (
-                    <QRItem onClick={() => openModal(ticket.qrCode)}>
-                      <img src={ticket?.qrCode} alt={`QR-${currentIndex}`} />
-                      {/* <div className="overlay">전체 화면으로 확인하기</div>" */}
-                    </QRItem>
-                  );
-                })}
+                {/* {showInfo.tickets.map((ticket, index) => {
+                  return ( */}
+                <QRItem
+                  onClick={() =>
+                    openModal(
+                      showInfo?.tickets[currentIndex]?.qrCode,
+                      currentIndex
+                    )
+                  }
+                  key={showInfo?.tickets[currentIndex]?.ReservationItemId}
+                >
+                  <img
+                    src={showInfo?.tickets[currentIndex]?.qrCode}
+                    alt={`QR-${currentIndex}`}
+                  />
+                  {/* <div className="overlay">전체 화면으로 확인하기</div>" */}
+                </QRItem>
+                {/* );
+                })} */}
               </QrList>
 
               <button
@@ -207,7 +218,10 @@ export default function MobileTicket() {
                 </p>
               </ShowContainer>
               {showInfo?.tickets && (
-                <img src={showInfo.tickets[0]?.qrCode} alt="QR Modal" />
+                <img
+                  src={showInfo.tickets[currentIndex]?.qrCode}
+                  alt="QR Modal"
+                />
               )}
             </ModalContent>
           </QRModal>
@@ -326,14 +340,28 @@ const Pagination_container = styled.div`
     background-color: #555;
   }
 `;
+
 const QrList = styled.div`
-  // align-items: center;
-  // align-self: stretch;
   display: flex;
-  width: 100%;
-  overflow: hidden;
   gap: 15px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory; /* 스냅 효과 추가 */
+  -webkit-overflow-scrolling: touch;
+
+  & > div {
+    scroll-snap-align: center; /* 각 QR 이미지가 중앙에 맞게 스냅 */
+  }
 `;
+
+// const QrList = styled.div`
+//   // align-items: center;
+//   // align-self: stretch;
+//   display: flex;
+//   width: 100%;
+//   overflow: hidden;
+//   gap: 15px;
+//   transform: translateX(-${(props) => props.index * 100}%);
+// `;
 
 const QRItem = styled.div`
   position: relative;
