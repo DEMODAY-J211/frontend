@@ -136,7 +136,7 @@ const App = () => {
             />
             <Route
               path=":managerId/checkticket/:reservationId"
-              element={<ProtectedRoute element={CheckTicket} />}
+              element={<CheckTicket />}
             />
             <Route
               path=":managerId/mobileticket/:reservationId"
