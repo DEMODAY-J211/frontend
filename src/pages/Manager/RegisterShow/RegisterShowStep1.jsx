@@ -75,77 +75,78 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
   const [formData, setFormData] = useState(getBasePayload);
 
   useEffect(() => {
-  if (!initialData) return;
+  if (initialData) {
+    // 1️⃣ initialData가 있으면 formData 세팅
+    setFormData((prev) => ({
+      ...prev,
+      ...initialData,
+      title: initialData.title || prev.title,
+      ticketOptions: initialData.ticketOptions || prev.ticketOptions,
+      bankMaster: initialData.bankMaster || "",
+      bankName: initialData.bankName || "",
+      bankAccount: initialData.bankAccount || "",
+      poster: initialData.poster || prev.poster,
+    }));
 
-  // 1️⃣ formData 세팅
-  setFormData((prev) => ({
-    ...prev,
-    ...initialData,
-    title: initialData.title || prev.title,
-    ticketOptions: initialData.ticketOptions || prev.ticketOptions,
-    bankMaster: initialData.bankMaster || "",
-    bankName: initialData.bankName || "",
-    bankAccount: initialData.bankAccount || "",
-    poster: initialData.poster || "",
-  }));
+    // 2️⃣ showTimes, bookStartDate/Time 세팅
+    if (initialData.showTimes?.length > 0) {
+      const converted = initialData.showTimes.map((t) => {
+        const [startDate, startTime] = t.showStart.split("T");
+        const [endDate, endTime] = t.showEnd.split("T");
+        return {
+          showStartDate: startDate,
+          showStartTime: startTime?.slice(0, 5),
+          showEndTime: endTime?.slice(0, 5),
+        };
+      });
+      setShowTimes(converted);
+    }
 
-  // 2️⃣ showTimes, bookStartDate/Time state 세팅
-  if (initialData.showTimes?.length > 0) {
-    const converted = initialData.showTimes.map((t) => {
-      const [startDate, startTime] = t.showStart.split("T");
-      const [endDate, endTime] = t.showEnd.split("T");
-      return {
-        showStartDate: startDate,
-        showStartTime: startTime?.slice(0, 5),
-        showEndTime: endTime?.slice(0, 5),
-      };
-    });
-    setShowTimes(converted);
-  }
+    if (initialData.bookStart) {
+      const [date, time] = initialData.bookStart.split("T");
+      setBookStartDate(date);
+      setBookStartTime(time?.slice(0, 5) || "00:00");
+    }
 
-  if (initialData.bookStart) {
-    const [date, time] = initialData.bookStart.split("T");
-    setBookStartDate(date);
-    setBookStartTime(time?.slice(0, 5) || "00:00");
-  }
-
-  // 3️⃣ poster 세팅
-  if (initialData.poster) {
-    setPoster(initialData.poster);
-    setPosterFile(initialData.poster);
-  }
-
-  // 4️⃣ localStorage 존재하면 병합 (초기 데이터 우선)
-  const saved = localStorage.getItem("createShowPayload");
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      setFormData((prev) => ({
-        ...prev,
-        ...parsed,
-      }));
-      if (parsed.showTimes?.length > 0) {
-        const converted = parsed.showTimes.map((t) => {
-          const [startDate, startTime] = t.showStart.split("T");
-          const [endDate, endTime] = t.showEnd.split("T");
-          return {
-            showStartDate: startDate,
-            showStartTime: startTime?.slice(0, 5),
-            showEndTime: endTime?.slice(0, 5),
-          };
-        });
-        setShowTimes(converted);
+    // 3️⃣ 포스터 세팅
+    if (initialData.poster) {
+      setPoster(initialData.poster);
+      setPosterFile(initialData.poster);
+    }
+  } else {
+    // 4️⃣ initialData가 없으면 로컬스토리지에서 데이터 불러오기
+    const saved = localStorage.getItem("createShowPayload");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setFormData((prev) => ({
+          ...prev,
+          ...parsed,
+        }));
+        if (parsed.showTimes?.length > 0) {
+          const converted = parsed.showTimes.map((t) => {
+            const [startDate, startTime] = t.showStart.split("T");
+            const [endDate, endTime] = t.showEnd.split("T");
+            return {
+              showStartDate: startDate,
+              showStartTime: startTime?.slice(0, 5),
+              showEndTime: endTime?.slice(0, 5),
+            };
+          });
+          setShowTimes(converted);
+        }
+        if (parsed.bookStart) {
+          const [date, time] = parsed.bookStart.split("T");
+          setBookStartDate(date);
+          setBookStartTime(time?.slice(0, 5) || "00:00");
+        }
+      } catch (e) {
+        console.error("JSON parse error:", e);
       }
-      if (parsed.bookStart) {
-        const [date, time] = parsed.bookStart.split("T");
-        setBookStartDate(date);
-        setBookStartTime(time?.slice(0, 5) || "00:00");
-      }
-    } catch (e) {
-      console.error("JSON parse error:", e);
     }
   }
-}, [initialData]);
+}, [initialData]); // 의존성 배열에서 initialData가 변경될 때마다 이 로직 실행
+
 
 
   const [posterFile, setPosterFile] = useState(null); // 파일
@@ -154,20 +155,20 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
   // 공연 날짜/회차
   const [showTimes, setShowTimes] = useState([
     {
-      showStartDate: "YYYY/MM/DD", // 기본 오늘 날짜
-      showStartTime: "--:--",
-      showEndTime: "--:--",
+      showStartDate: "", // 기본 오늘 날짜
+      showStartTime: "",
+      showEndTime: "",
     },
   ]);
   // 예매 시작(bookStart)
-  const [bookStartDate, setBookStartDate] = useState("YYYY/MM/DD");
-  const [bookStartTime, setBookStartTime] = useState("--:--");
+  const [bookStartDate, setBookStartDate] = useState("");
+  const [bookStartTime, setBookStartTime] = useState("");
 
   const addShowTime = () => {
     setShowTimes([
       ...showTimes,
       {
-        showStartDate: today(),
+        showStartDate: "",
         showStartTime: "--:--",
         showEndTime: "--:--",
       },
@@ -545,7 +546,7 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
                     {/* 시작 시간 */}
                     <Column>
                       <TimeSelect
-                        value={t.showStartTime}
+                        value={t.showStartTime || "--:--"}
                         onChange={(e) => {
                           updateShowTime(idx, "showStartTime", e.target.value);
                           if (e.target.value.trim() !== "")
@@ -571,7 +572,7 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
                     {/* 종료 시간 */}
                     <Column>
                       <TimeSelect
-                        value={t.showEndTime}
+                        value={t.showEndTime || "--:--"}
                         onChange={(e) => {
                           updateShowTime(idx, "showEndTime", e.target.value);
                           if (e.target.value.trim() !== "")
@@ -592,7 +593,7 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
                       )}
                     </Column>
 
-                    {formData.showTimes.length > 1 && (
+                    {showTimes.length > 1 && (
                       (!viewer && 
                       <DeleteIcon onClick={() => removeShowTime(idx)} />)
                     )}
@@ -629,7 +630,7 @@ const RegisterShowStep1 = ({ viewer = false, initialData }) => {
                   {/* bookStartTime */}
                   <Column>
                     <TimeSelect
-                      value={bookStartTime}
+                      value={bookStartTime || "--:--"}
                       onChange={(e) => {
                         setBookStartTime(e.target.value);
                         if (e.target.value.trim() !== "")
