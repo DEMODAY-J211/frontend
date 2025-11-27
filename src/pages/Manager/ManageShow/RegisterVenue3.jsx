@@ -686,7 +686,7 @@ const RegisterVenue3 = () => {
                         setRowLabeling(e.target.checked);
                       }}
                     />
-                    <CheckboxLabel disabled={sectionLabeling}>행(필수)</CheckboxLabel>
+                    <CheckboxLabel disabled={sectionLabeling}>행</CheckboxLabel>
                   </CheckboxRow>
 
                   {rowLabeling && (
@@ -732,7 +732,7 @@ const RegisterVenue3 = () => {
                         setSectionLabeling(e.target.checked);
                       }}
                     />
-                    <CheckboxLabel disabled={rowLabeling}>구역 별 생성(필수)</CheckboxLabel>
+                    <CheckboxLabel disabled={rowLabeling}>구역 별 생성</CheckboxLabel>
                   </CheckboxRow>
 
                   {sectionLabeling && (
