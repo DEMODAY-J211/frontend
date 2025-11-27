@@ -334,22 +334,22 @@ const SeatSelectionModal = ({
     notifyParentOfChanges(newClearedSeats);
   };
 
-  // 제외/VIP 좌석 변경 취소 (이미 제외된 좌석들을 다시 선택 가능하게 되돌림)
+  // 제외/VIP 좌석 변경 취소 (선택한 제외 좌석들만 다시 되돌림)
   const handleUndoClearedSeats = () => {
-    if (clearedSeats.size === 0) return;
+    if (selectedSeats.size === 0) return;
 
-    // 모든 제외된 좌석을 초기화
-    setClearedSeats(new Set());
+    // 선택된 좌석들을 clearedSeats에서 제거
+    const newClearedSeats = new Set(clearedSeats);
+    selectedSeats.forEach((seatId) => {
+      newClearedSeats.delete(seatId);
+    });
+
+    setClearedSeats(newClearedSeats);
+    setSelectedSeats(new Set());
+    updateHistory(new Set());
 
     // 실시간으로 부모 컴포넌트에 상태 전달
-    notifyParentOfChanges(new Set());
-
-    addToast(
-      salesMethod === "자동 배정"
-        ? "VIP석 선택이 취소되었습니다."
-        : "좌석 제외가 취소되었습니다.",
-      "info"
-    );
+    notifyParentOfChanges(newClearedSeats);
   };
 
   // 로컬 저장 핸들러 (모달 닫기)
@@ -563,8 +563,11 @@ const SeatSelectionModal = ({
             >
               {salesMethod === "자동 배정" ? "VIP 좌석 선택" : "좌석 취소하기"}
             </ClearButton>
-            {clearedSeats.size > 0 && (
-              <UndoButton onClick={handleUndoClearedSeats}>
+            {selectedSeats.size > 0 && clearedSeats.size > 0 && (
+              <UndoButton
+                onClick={handleUndoClearedSeats}
+                disabled={selectedSeats.size === 0}
+              >
                 {salesMethod === "자동 배정"
                   ? "VIP 선택 취소하기"
                   : "좌석 변경 취소하기"}
