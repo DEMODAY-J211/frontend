@@ -9,13 +9,12 @@ import { BiSearch } from "react-icons/bi";
 
 import { MdOutlineUnfoldMore } from "react-icons/md";
 
-
 const ViewEntryStatus = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("seat");
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [showSelected, setShowSelected] = useState(false);
-  
+
   const [showTitle, setShowTitle] = useState("");
   const [showTimeList, setShowTimeList] = useState([]);
 
@@ -68,37 +67,46 @@ const ViewEntryStatus = () => {
       setLoading(true);
 
       // Query parameter 구성 (ManageUser와 동일한 방식)
-      const queryParams = currentShowtimeId ? `?showtimeId=${currentShowtimeId}` : '';
+      const queryParams = currentShowtimeId
+        ? `?showtimeId=${currentShowtimeId}`
+        : "";
 
       // (debug log removed)
 
       // 세션 기반 로그인: 쿠키로 인증
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin${queryParams}`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/manager/shows/${showId}/checkin${queryParams}`,
         {
-          credentials: 'include', // 세션 쿠키 자동 전송
+          credentials: "include", // 세션 쿠키 자동 전송
           headers: {
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
       // 401 Unauthorized - 세션 만료 또는 인증 실패
       if (response.status === 401) {
-        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
         return;
       }
 
       if (!response.ok) {
-        throw new Error('예매 데이터를 불러오는데 실패했습니다.');
+        throw new Error("예매 데이터를 불러오는데 실패했습니다.");
       }
 
       const result = await response.json();
       // (debug log removed)
       // showTitle, showTimeList, seat 레이아웃, reservation 추출
-      const { showTitle: apiShowTitle = "", showTimeList = [], reservation = [], seat: seatLayoutFromAPI = [] } = result.data;
+      const {
+        showTitle: apiShowTitle = "",
+        showTimeList = [],
+        reservation = [],
+        seat: seatLayoutFromAPI = [],
+      } = result.data;
 
       // 좌석 데이터 존재 여부 확인
       const hasSeatLayout = seatLayoutFromAPI && seatLayoutFromAPI.length > 0;
@@ -119,22 +127,27 @@ const ViewEntryStatus = () => {
         isEntered: item.entered ?? item.isEntered ?? false,
         isReserved: item.reserved ?? item.isReserved ?? true,
         // 전화번호 포맷팅
-        phone: item.phone && item.phone.includes('-')
-          ? item.phone
-          : (item.phone ? item.phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3') : ''),
+        phone:
+          item.phone && item.phone.includes("-")
+            ? item.phone
+            : item.phone
+            ? item.phone.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3")
+            : "",
       }));
 
       // seat 배열과 reservation 배열을 조합하여 좌석 레이아웃 생성
-      const newSeatLayout = generateSeatLayoutFromAPI(seatLayoutFromAPI, formattedData);
+      const newSeatLayout = generateSeatLayoutFromAPI(
+        seatLayoutFromAPI,
+        formattedData
+      );
 
       setReservationData(formattedData);
       setDisplayData(JSON.parse(JSON.stringify(formattedData))); // displayData 초기화
       setSeatLayout(newSeatLayout);
       setInitialData(JSON.parse(JSON.stringify(formattedData))); // 깊은 복사로 초기 데이터 저장
-
     } catch (error) {
-      console.error('좌석 데이터 조회 실패:', error);
-      alert('좌석 데이터를 불러오는데 실패했습니다. Mock 데이터를 사용합니다.');
+      console.error("좌석 데이터 조회 실패:", error);
+      alert("좌석 데이터를 불러오는데 실패했습니다. Mock 데이터를 사용합니다.");
 
       // 에러 발생 시 Mock 데이터 사용
       const mockReservationData = [
@@ -228,7 +241,7 @@ const ViewEntryStatus = () => {
 
     // reservation 데이터를 seat 이름으로 빠르게 찾기 위한 Map 생성
     const reservationMap = new Map();
-    reservations.forEach(reservation => {
+    reservations.forEach((reservation) => {
       if (reservation.seat) {
         reservationMap.set(reservation.seat, reservation);
       }
@@ -261,8 +274,6 @@ const ViewEntryStatus = () => {
         };
       });
     });
-
-   
 
     return layout;
   };
@@ -336,7 +347,9 @@ const ViewEntryStatus = () => {
       // (debug log removed)
 
       // 이미 변경사항에 있는 좌석인지 확인
-      const existingIndex = changedItems.findIndex((item) => item.seat === seat.label);
+      const existingIndex = changedItems.findIndex(
+        (item) => item.seat === seat.label
+      );
 
       if (existingIndex >= 0) {
         // 기존 변경사항 업데이트
@@ -360,7 +373,9 @@ const ViewEntryStatus = () => {
 
   const handleCompleteEntry = () => {
     // 선택된 좌석들의 입장완료 처리
-    const seatIds = selectedSeats.map((s) => s.reservationItemId).filter((id) => id);
+    const seatIds = selectedSeats
+      .map((s) => s.reservationItemId)
+      .filter((id) => id);
     console.log("Complete entry for:", seatIds);
 
     // 좌석 상태 업데이트 (null 체크 추가)
@@ -585,7 +600,7 @@ const ViewEntryStatus = () => {
         };
       });
 
-      console.log('=== 저장 직전 변경 좌석 상태 ===');
+      console.log("=== 저장 직전 변경 좌석 상태 ===");
       console.table(
         checkinStatusUpdateRequest.map((item) => ({
           seat: item.seat,
@@ -597,10 +612,10 @@ const ViewEntryStatus = () => {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/manager/shows/${showId}/checkin`,
         {
-          method: 'PATCH',
-          credentials: 'include', // 세션 쿠키 자동 전송
+          method: "PATCH",
+          credentials: "include", // 세션 쿠키 자동 전송
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             showtimeId: currentShowtimeId,
@@ -609,19 +624,23 @@ const ViewEntryStatus = () => {
         }
       );
 
-      console.log('PATCH /checkin 응답 상태코드:', response.status);
+      console.log("PATCH /checkin 응답 상태코드:", response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('저장 실패 - 상태코드 / 응답 본문:', response.status, errorText);
-        throw new Error('저장에 실패했습니다.');
+        console.error(
+          "저장 실패 - 상태코드 / 응답 본문:",
+          response.status,
+          errorText
+        );
+        throw new Error("저장에 실패했습니다.");
       }
 
       const result = await response.json();
-      console.log('=== 저장 응답 JSON ===');
+      console.log("=== 저장 응답 JSON ===");
       console.log(result);
       if (result.success) {
-        console.log('=== 저장 완료 - 반영된 좌석 상태(변경 요청 기준) ===');
+        console.log("=== 저장 완료 - 반영된 좌석 상태(변경 요청 기준) ===");
         console.table(
           checkinStatusUpdateRequest.map((item) => ({
             seat: item.seat,
@@ -644,12 +663,16 @@ const ViewEntryStatus = () => {
 
         // 실패한 항목이 있으면 알림
         if (result.data.failedIds && result.data.failedIds.length > 0) {
-          alert(`일부 항목 저장에 실패했습니다. 실패한 ID: ${result.data.failedIds.join(', ')}`);
+          alert(
+            `일부 항목 저장에 실패했습니다. 실패한 ID: ${result.data.failedIds.join(
+              ", "
+            )}`
+          );
         }
       }
     } catch (error) {
-      console.error('저장 실패:', error);
-      alert('저장에 실패했습니다. 다시 시도해주세요.');
+      console.error("저장 실패:", error);
+      alert("저장에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -663,12 +686,13 @@ const ViewEntryStatus = () => {
           <Title>입장 현황</Title>
           {showTimeList.length > 0 ? (
             <ShowtimeDropdown
-              value={currentShowtimeId || (showTimeList[0]?.showTimeId || "")}
+              value={currentShowtimeId || showTimeList[0]?.showTimeId || ""}
               onChange={(e) => handleShowtimeChange(Number(e.target.value))}
             >
               {showTimeList.map((showtime) => (
                 <option key={showtime.showTimeId} value={showtime.showTimeId}>
-                  {showTitle || "공연명"} · {new Date(showtime.showTime).toLocaleString("ko-KR", {
+                  {showTitle || "공연명"} ·{" "}
+                  {new Date(showtime.showTime).toLocaleString("ko-KR", {
                     year: "numeric",
                     month: "2-digit",
                     day: "2-digit",
@@ -747,7 +771,8 @@ const ViewEntryStatus = () => {
                       {row.map((seat, colIndex) => {
                         const isEmpty = !seat;
                         const isReserved = seat && seat.isReserved;
-                        const isSelected = seat && selectedSeats.some((s) => s.id === seat.id);
+                        const isSelected =
+                          seat && selectedSeats.some((s) => s.id === seat.id);
 
                         if (isEmpty) {
                           return <EmptySeat key={`${rowIndex}-${colIndex}`} />;
@@ -770,7 +795,9 @@ const ViewEntryStatus = () => {
                   ))}
                 </SeatMapGrid>
               ) : (
-                <div style={{ fontSize: "16px", color: "#999" }}>좌석 정보를 불러오는 중...</div>
+                <div style={{ fontSize: "16px", color: "#999" }}>
+                  좌석 정보를 불러오는 중...
+                </div>
               )}
             </SeatMapContainer>
 
@@ -859,8 +886,7 @@ const ViewEntryStatus = () => {
                         type="checkbox"
                         onChange={(e) => handleSelectAllRows(e.target.checked)}
                         checked={
-                          selectedRows.length ===
-                            filteredReservations.length &&
+                          selectedRows.length === filteredReservations.length &&
                           filteredReservations.length > 0
                         }
                       />
@@ -978,7 +1004,6 @@ const Title = styled.div`
 `;
 
 const SelectTime = styled.div`
-
   display: flex;
   border-radius: 15px;
   border: 1px solid var(--color-primary);
@@ -1006,13 +1031,12 @@ const Time = styled.div`
   cursor: pointer;
 `;
 
-
 const ShowtimeDropdown = styled.select`
   padding: 8px 16px;
   border-radius: 15px;
   border: 1px solid var(--color-primary);
-    background: ${({ $active }) => ($active ? 'var(--color-primary)' : '#fff')};
-  color: ${({ $active }) => ($active ? '#fff' : 'var(--color-primary)')};
+  background: ${({ $active }) => ($active ? "var(--color-primary)" : "#fff")};
+  color: ${({ $active }) => ($active ? "#fff" : "var(--color-primary)")};
   font-size: 18px;
   font-weight: 500;
   cursor: pointer;
@@ -1023,7 +1047,6 @@ const ShowtimeDropdown = styled.select`
     box-shadow: 0 0 0 2px rgba(252, 40, 71, 0.2);
   }
 `;
-
 
 const StatusHeader = styled.div`
   display: flex;
@@ -1038,7 +1061,6 @@ const LeftControls = styled.div`
 `;
 
 const StatusTitle = styled.h2`
-  
   font-size: 25px;
   font-weight: 500;
   color: #000000;
@@ -1064,7 +1086,7 @@ const RefreshButton = styled.button`
 const OnSiteButton = styled.button`
   background-color: #fc2847;
   color: #ffffff;
-  
+
   font-size: 15px;
   font-weight: 300;
   padding: 7px 15px;
@@ -1098,7 +1120,8 @@ const ToggleOption = styled.div`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${(props) => (props.$active ? "#FC2847" : "rgba(252, 40, 71, 0.1)")};
+    background-color: ${(props) =>
+      props.$active ? "#FC2847" : "rgba(252, 40, 71, 0.1)"};
   }
 `;
 
@@ -1113,7 +1136,6 @@ const SelectedSeatsArea = styled.div`
 `;
 
 const SelectedLabel = styled.span`
-  
   font-size: 15px;
   font-weight: 500;
   color: #000000;
@@ -1135,7 +1157,7 @@ const SeatTag = styled.div`
   padding: 3px 7px;
   background-color: #fff1f0;
   color: #d60033;
-  
+
   font-size: 13px;
   font-weight: 300;
   border-radius: 10px;
@@ -1145,7 +1167,7 @@ const CompleteButton = styled.button`
   padding: 3px 7px;
   background-color: #fc2847;
   color: #ffffff;
-  
+
   font-size: 13px;
   font-weight: 300;
   border: none;
@@ -1274,7 +1296,6 @@ const ColorBox = styled.div`
 `;
 
 const LegendText = styled.span`
-  
   font-size: 15px;
   font-weight: 300;
   color: #000000;
@@ -1322,8 +1343,7 @@ const WarningText = styled.div`
 
 const SaveButton = styled.button`
   padding: 10px 20px;
-  background-color: ${({ disabled }) =>
-    disabled ? "#d3d3d3" : "#fc2847"};
+  background-color: ${({ disabled }) => (disabled ? "#d3d3d3" : "#fc2847")};
   color: #fffffe;
   font-size: 20px;
   font-weight: 300;
@@ -1332,8 +1352,7 @@ const SaveButton = styled.button`
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 
   &:hover {
-    background-color: ${({ disabled }) =>
-      disabled ? "#d3d3d3" : "#d60033"};
+    background-color: ${({ disabled }) => (disabled ? "#d3d3d3" : "#d60033")};
   }
 
   transition: all 0.3s ease;
@@ -1358,7 +1377,7 @@ const TabFilters = styled.div`
 
 const TabButton = styled.button`
   padding: 0;
-  
+
   font-size: 20px;
   font-weight: ${(props) => (props.active ? "500" : "300")};
   color: ${(props) => (props.active ? "#FC2847" : "#737373")};
@@ -1439,7 +1458,7 @@ const FilterTag = styled.div`
   padding: 7px 10px;
   background-color: #fff1f0;
   color: #d60033;
-  
+
   font-size: 13px;
   font-weight: 500;
   border-radius: 10px;
@@ -1463,7 +1482,7 @@ const HeaderRow = styled.tr``;
 const HeaderCell = styled.th`
   width: ${(props) => props.width || "auto"};
   padding: 15px 10px;
-  
+
   font-size: 20px;
   font-weight: 300;
   color: #000000;
@@ -1484,7 +1503,7 @@ const TableRow = styled.tr`
 
 const TableCell = styled.td`
   padding: 15px 10px;
-  
+
   font-size: 20px;
   font-weight: 300;
   color: #000000;
@@ -1507,7 +1526,7 @@ const StatusButtonGroup = styled.div`
 
 const StatusButton = styled.button`
   padding: 7px 10px;
-  
+
   font-size: 13px;
   font-weight: 300;
   border: none;
@@ -1533,7 +1552,7 @@ const StatusButton = styled.button`
 
 const CancelButton = styled.button`
   padding: 7px 10px;
-  
+
   font-size: 13px;
   font-weight: 300;
   background-color: #fffefb;

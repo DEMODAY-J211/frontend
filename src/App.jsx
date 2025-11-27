@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Route,
   Routes,
@@ -70,6 +70,8 @@ const ProtectedRoute = ({ element: Element, ...rest }) => {
   );
 };
 
+// ESA52Bhyr -> 여전히 jession2개
+
 // 루트 경로 처리 컴포넌트
 const RootRedirect = () => {
   const location = useLocation();
@@ -80,97 +82,21 @@ const RootRedirect = () => {
     const urlParams = new URLSearchParams(location.search);
     const loginSuccess = urlParams.get("login");
 
-    // if (loginSuccess === "success") {
-    //   console.log("✅ 루트 경로에서 로그인 성공 감지");
-    //   setIsLoggedIn(true);
-    //   localStorage.setItem("isLoggedIn", "true");
-    //   // URL 파라미터 제거하고 /homemanager 또는 /homeuser로 이동
-    //   // 임시로 /homemanager로 이동 (나중에 role 기반으로 변경 가능)
-    //   // navigate("/homemanager", { replace: true });
-    //   navigate("/homemanager", { replace: true });
-    // } else {
-    //   // 로그인 성공 파라미터가 없으면 로그인 페이지로
-    //   navigate("/login", { replace: true });
-    // }
-    const role = urlParams.get("role"); // role 파라미터 가져오기
-
     if (loginSuccess === "success") {
-      console.log("✅ 로그인 성공 감지, role:", role);
+      console.log("✅ 루트 경로에서 로그인 성공 감지");
       setIsLoggedIn(true);
       localStorage.setItem("isLoggedIn", "true");
-
-      // URL 파라미터 제거
-      const cleanPath = window.location.pathname;
-      window.history.replaceState({}, document.title, cleanPath);
-
-      // role 기반 리다이렉트
-      if (role === "MANAGER") {
-        navigate("/homemanager", { replace: true });
-      } else if (role === "USER") {
-        navigate("/homeuser", { replace: true });
-      } else if (role === "NO") {
-        navigate("/landing", { replace: true });
-      } else {
-        navigate("/landing", { replace: true });
-      }
+      // URL 파라미터 제거하고 /homemanager 또는 /homeuser로 이동
+      // 임시로 /homemanager로 이동 (나중에 role 기반으로 변경 가능)
+      // navigate("/homemanager", { replace: true });
+      // navigate("/homemanager", { replace: true });
     } else {
+      // 로그인 성공 파라미터가 없으면 로그인 페이지로
       navigate("/login", { replace: true });
     }
   }, [location, navigate, setIsLoggedIn]);
-
   return null;
 };
-// // 루트 경로 처리 컴포넌트
-// const RootRedirect = () => {
-//   const location = useLocation();
-//   const navigate = useNavigate();
-//   const { setIsLoggedIn } = useAuth();
-
-//   React.useEffect(() => {
-//     const urlParams = new URLSearchParams(location.search);
-//     const loginSuccess = urlParams.get("login");
-
-//     if (loginSuccess === "success") {
-//       console.log("✅ 루트 경로에서 로그인 성공 감지");
-//       setIsLoggedIn(true);
-//       localStorage.setItem("isLoggedIn", "true");
-//       // URL 파라미터 제거하고 /homemanager 또는 /homeuser로 이동
-//       // 임시로 /homemanager로 이동 (나중에 role 기반으로 변경 가능)
-//       // navigate("/homemanager", { replace: true });
-//       // navigate("/homemanager", { replace: true });
-//     } else {
-//       // 로그인 성공 파라미터가 없으면 로그인 페이지로
-//       navigate("/login", { replace: true });
-//     }
-
-//     // const role = urlParams.get("role"); // role 파라미터 가져오기
-
-//     // if (loginSuccess === "success") {
-//     //   console.log("✅ 로그인 성공 감지, role:", role);
-//     //   setIsLoggedIn(true);
-//     //   localStorage.setItem("isLoggedIn", "true");
-
-//     //   // URL 파라미터 제거
-//     //   const cleanPath = window.location.pathname;
-//     //   window.history.replaceState({}, document.title, cleanPath);
-
-//     //   // role 기반 리다이렉트
-//     //   if (role === "MANAGER") {
-//     //     navigate("/homemanager", { replace: true });
-//     //   } else if (role === "USER") {
-//     //     navigate("/homeuser", { replace: true });
-//     //   } else if (role === "NO") {
-//     //     navigate("/landing", { replace: true });
-//     //   } else {
-//     //     navigate("/landing", { replace: true });
-//     //   }
-//     // } else {
-//     //   navigate("/login", { replace: true });
-//     // }
-//   }, [location, navigate, setIsLoggedIn]);
-
-//   return null;
-// };
 
 const App = () => {
   return (

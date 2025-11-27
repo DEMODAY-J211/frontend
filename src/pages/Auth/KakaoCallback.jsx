@@ -2,82 +2,84 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
+// 사용안함!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 const KakaoCallback = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  // const navigate = useNavigate();
+  // const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    const handleKakaoCallback = async () => {
-      try {
-        // URL에서 code 파라미터 가져오기
-        const code = searchParams.get("code");
+  // useEffect(() => {
+  //   const handleKakaoCallback = async () => {
+  //     try {
+  //       // URL에서 code 파라미터 가져오기
+  //       const code = searchParams.get("code");
 
-        if (!code) {
-          throw new Error("인증 코드가 없습니다.");
-        }
+  //       if (!code) {
+  //         throw new Error("인증 코드가 없습니다.");
+  //       }
 
-        // 백엔드로 code 전송하여 카카오 로그인 처리
-        // const response = await fetch(
-        //   `${import.meta.env.VITE_API_URL}/kakao/callback?code=${code}`,
-        //   {
-        //     method: "GET",
-        //     headers: { credentials: "include" },
-        //   }
-        // );
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/kakao/callback?code=${code}`,
-          {
-            method: "GET",
-            credentials: "include", // 여기로 옮겨야 함
-          }
-        );
+  //       // 백엔드로 code 전송하여 카카오 로그인 처리
+  //       // const response = await fetch(
+  //       //   `${import.meta.env.VITE_API_URL}/kakao/callback?code=${code}`,
+  //       //   {
+  //       //     method: "GET",
+  //       //     headers: { credentials: "include" },
+  //       //   }
+  //       // );
 
-        if (!response.ok) {
-          throw new Error("로그인에 실패했습니다.");
-        }
+  //       const response = await fetch(
+  //         `${import.meta.env.VITE_API_URL}/kakao/callback?code=${code}`,
+  //         {
+  //           method: "GET",
+  //           credentials: "include", // 여기로 옮겨야 함
+  //         }
+  //       );
 
-        const result = await response.json();
-        console.log("result입니다", result);
-        // API 응답 확인
-        if (!result.success) {
-          throw new Error(result.message || "로그인에 실패했습니다.");
-        }
+  //       if (!response.ok) {
+  //         throw new Error("로그인에 실패했습니다.");
+  //       }
 
-        const { isNewUser, user } = result.data;
-        // 세션 기반 로그인: 쿠키는 credentials: 'include'로 자동 저장됨
+  //       const result = await response.json();
+  //       console.log("result입니다", result);
+  //       // API 응답 확인
+  //       if (!result.success) {
+  //         throw new Error(result.message || "로그인에 실패했습니다.");
+  //       }
 
-        // 신규 유저인 경우
-        if (isNewUser) {
-          // 사용자 정보 임시 저장
-          localStorage.setItem("tempUser", JSON.stringify(user));
-          alert("회원가입이 필요합니다. 추가 정보를 입력해주세요.");
-          navigate("/signup"); // 회원가입 페이지로 이동
-          return;
-        }
+  //       const { isNewUser, user } = result.data;
+  //       // 세션 기반 로그인: 쿠키는 credentials: 'include'로 자동 저장됨
 
-        // 기존 유저인 경우 - 로그인 성공
+  //       // 신규 유저인 경우
+  //       if (isNewUser) {
+  //         // 사용자 정보 임시 저장
+  //         localStorage.setItem("tempUser", JSON.stringify(user));
+  //         alert("회원가입이 필요합니다. 추가 정보를 입력해주세요.");
+  //         navigate("/signup"); // 회원가입 페이지로 이동
+  //         return;
+  //       }
 
-        // 사용자 정보만 저장 (UI 표시용)
-        if (user) {
-          localStorage.setItem("user", JSON.stringify(user));
-        }
+  //       // 기존 유저인 경우 - 로그인 성공
 
-        // role에 따라 다른 페이지로 이동
-        alert(`${user.name}님, 환영합니다!`);
-        if (user.role === "manager") {
-          navigate("/homemanager");
-        } else {
-          navigate("/homeuser");
-        }
-      } catch (error) {
-        console.error("카카오 로그인 실패:", error);
-        alert(`로그인에 실패했습니다: ${error.message}`);
-        navigate("/login");
-      }
-    };
+  //       // 사용자 정보만 저장 (UI 표시용)
+  //       if (user) {
+  //         localStorage.setItem("user", JSON.stringify(user));
+  //       }
 
-    handleKakaoCallback();
-  }, [navigate, searchParams]);
+  //       // role에 따라 다른 페이지로 이동
+  //       alert(`${user.name}님, 환영합니다!`);
+  //       if (user.role === "manager") {
+  //         navigate("/homemanager");
+  //       } else {
+  //         navigate("/homeuser");
+  //       }
+  //     } catch (error) {
+  //       console.error("카카오 로그인 실패:", error);
+  //       alert(`로그인에 실패했습니다: ${error.message}`);
+  //       navigate("/login");
+  //     }
+  //   };
+
+  //   handleKakaoCallback();
+  // }, [navigate, searchParams]);
 
   return (
     <Container>

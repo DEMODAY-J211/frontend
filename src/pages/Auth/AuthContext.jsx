@@ -1,5 +1,6 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
@@ -16,6 +17,7 @@ export function AuthProvider({ children }) {
 
   const [user, setUser] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const navigate = useNavigate();
 
   // ✅ 로그인 상태 확인: URL 파라미터 또는 localStorage
   useEffect(() => {
@@ -40,7 +42,17 @@ export function AuthProvider({ children }) {
         localStorage.setItem("userRole", role.toLowerCase()); // 선택: 로컬에도 저장
       }
       // URL에서 파라미터 제거 (깔끔하게)
-      window.history.replaceState({}, document.title, window.location.pathname);
+      if (role === "MANAGER") {
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+      } else {
+        // window.history.replaceState({}, "", "/2/homeuser");
+        console.log(document.cookie);
+        navigate("/2/homeuser", { replace: true });
+      }
     }
 
     // 초기화 완료
