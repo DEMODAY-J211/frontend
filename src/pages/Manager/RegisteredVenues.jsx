@@ -263,8 +263,8 @@ const RegisteredVenues = () => {
                     </VenueDetailHeader>
 
                     <VenueDetailInfo>
-                      <InfoLabel>좌석 수</InfoLabel>
-                      <InfoContent>{selectedVenue.capacity}</InfoContent>
+                      {/* <InfoLabel>좌석 수</InfoLabel> */}
+                      {/* <InfoContent>{selectedVenue.capacity}</InfoContent> */}
                     </VenueDetailInfo>
                   </VenueDetailSection>
                 </>
