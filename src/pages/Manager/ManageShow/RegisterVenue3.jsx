@@ -645,7 +645,7 @@ const RegisterVenue3 = () => {
                       checked={rowLabeling}
                       onChange={(e) => setRowLabeling(e.target.checked)}
                     />
-                    <CheckboxLabel>행</CheckboxLabel>
+                    <CheckboxLabel>행(필수)</CheckboxLabel>
                   </CheckboxRow>
 
                   {rowLabeling && (
