@@ -114,7 +114,7 @@ const RegisterShowStep5 = () => {
         {/* <RegisterShowNavbar currentStep={5} /> */}
         <ViewerBlock viewer={true}>
         <RegisterShowStep1  viewer={true}/>
-        <RegisterShowStep2 viewer={true} />
+        <RegisterShowStep2 viewer={true} editor={false}/>
         <RegisterShowStep3 viewer={true}/>
         <RegisterShowStep4 viewer={true}/>
         </ViewerBlock>
