@@ -340,15 +340,28 @@ const Pagination_container = styled.div`
     background-color: #555;
   }
 `;
+
 const QrList = styled.div`
-  // align-items: center;
-  // align-self: stretch;
   display: flex;
-  width: 100%;
-  overflow: hidden;
   gap: 15px;
-  transform: translateX(-${(props) => props.index * 100}%);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory; /* 스냅 효과 추가 */
+  -webkit-overflow-scrolling: touch;
+
+  & > div {
+    scroll-snap-align: center; /* 각 QR 이미지가 중앙에 맞게 스냅 */
+  }
 `;
+
+// const QrList = styled.div`
+//   // align-items: center;
+//   // align-self: stretch;
+//   display: flex;
+//   width: 100%;
+//   overflow: hidden;
+//   gap: 15px;
+//   transform: translateX(-${(props) => props.index * 100}%);
+// `;
 
 const QRItem = styled.div`
   position: relative;
