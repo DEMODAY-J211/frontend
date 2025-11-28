@@ -14,7 +14,7 @@ const serverUrl = import.meta.env.VITE_API_URL;
 export default function BuyTicket() {
   const location = useLocation();
   const { managerId, showId } = useParams();
-  const { selectedShowtime, selectedOption, quantity, showData } =
+  const { selectedShowtime, selectedOption, quantity, showData, showidx } =
     location.state || {};
   console.log(selectedShowtime, selectedOption, quantity, showData);
   // const [name, setName] = useState("");
@@ -27,17 +27,6 @@ export default function BuyTicket() {
   const [isComplete, setIsComplete] = useState(false);
   const [selectedBank, setSelectedBank] = useState(null);
   const [isOptionOpen, setIsOptionOpen] = useState(false);
-  // const bankOptions = [
-  //   { id: 1, name: "국민은행" },
-  //   { id: 2, name: "기업은행" },
-  //   { id: 3, name: "농협은행" },
-  //   { id: 4, name: "신한은행" },
-  //   { id: 5, name: "하나은행" },
-  //   { id: 6, name: "우리은행" },
-  //   { id: 7, name: "우체국" },
-  //   { id: 8, name: "카카오뱅크" },
-  //   { id: 9, name: "토스뱅크" },
-  // ];
 
   const bankOptions = [
     { id: 1, name: "국민은행", code: "KB" },
@@ -110,7 +99,7 @@ export default function BuyTicket() {
             <ShowInfoHeader>
               <ShowTitle>{showData.showTitle}</ShowTitle>
               <ShowTime>
-                {selectedShowtime.showtimeId}회차(
+                {showidx}회차(
                 {formatKoreanDate(selectedShowtime.showtimeStart).split(" ")[1]}
                 )
               </ShowTime>
@@ -219,7 +208,7 @@ export default function BuyTicket() {
             <ShowInfoHeader>
               <ShowTitle>내 티켓 확인하기</ShowTitle>
               <ShowTime>
-                {selectedShowtime.showtimeId}회차(
+                {showidx}회차(
                 {formatKoreanDate(selectedShowtime.showtimeStart).split(" ")[1]}
                 )
               </ShowTime>

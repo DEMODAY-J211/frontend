@@ -8,5 +8,9 @@ export function formatKoreanDate(dateString) {
   const hours = String(koreaTime.getHours()).padStart(2, "0");
   const minutes = String(koreaTime.getMinutes()).padStart(2, "0");
 
-  return `${year}.${month}.${day} ${hours}:${minutes}`;
+  // 요일 배열
+  const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+  const weekday = weekdays[koreaTime.getDay()];
+
+  return `${year}.${month}.${day}(${weekday}) ${hours}:${minutes}`;
 }

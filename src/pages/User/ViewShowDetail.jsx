@@ -88,7 +88,7 @@ export default function ViewShowDetail() {
   return (
     <PageWrapper>
       <HomeUserContainer>
-        <NavbarUser Backmode={true} text="제12회 정기공연" />
+        <NavbarUser Backmode={true} text="" />
         {!showData ? (
           <ShowContainer>
             <p

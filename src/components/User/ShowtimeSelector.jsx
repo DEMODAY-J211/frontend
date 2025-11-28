@@ -15,29 +15,21 @@ export default function ShowtimeSelector({
   quantity,
   setQuantity,
   handlebtn,
+  showidx,
+  setShowidx,
 }) {
   const [isShowtimeOpen, setIsShowtimeOpen] = useState(false);
   const [isOptionOpen, setIsOptionOpen] = useState(false);
   console.log("showtime", showtimes);
   console.log("ticketoptionlist", ticketOptionList);
   console.log("selectedoption", selectedOption);
-  // const showtimes = [
-  //   { id: 1, time: "2025-11-10 18:00" },
-  //   { id: 2, time: "2025-11-11 19:00" },
-  //   { id: 3, time: "2025-11-12 19:00" },
-  // ];
 
-  // const ticketOptions = [
-  //   { id: 1, name: "일반", price: 20000 },
-  //   { id: 2, name: "중/고등학생", price: 10000 },
-  //   { id: 3, name: "대학생", price: 15000 },
-  // ];
-
-  const handleSelectShowtime = (show) => {
+  const handleSelectShowtime = (show, idx) => {
     console.log("선택된 회차:", show);
     setSelectedShowtime(show);
     setIsShowtimeOpen(false);
     setSelectedOption(null);
+    setShowidx(idx);
   };
 
   const handleSelectOption = (option) => {
@@ -60,6 +52,7 @@ export default function ShowtimeSelector({
     setQuantity(1);
     setIsShowtimeOpen(false);
     setIsOptionOpen(false);
+    setShowidx(null);
   };
 
   useEffect(() => {
@@ -88,10 +81,10 @@ export default function ShowtimeSelector({
                 transition={{ duration: 0.25 }}
               >
                 <DropdownList>
-                  {showtimes?.map((show) => (
+                  {showtimes?.map((show, idx) => (
                     <DropdownItem
                       key={show.showtimeId}
-                      onClick={() => handleSelectShowtime(show)}
+                      onClick={() => handleSelectShowtime(show, idx + 1)}
                       selected={
                         selectedShowtime?.showtimeId === show.showtimeId
                       }
@@ -150,20 +143,6 @@ export default function ShowtimeSelector({
                           </DropdownItem>
                         );
                       })}
-                      {/* 
-                      {ticketOptionList.map((option, idx) => (
-                        <DropdownItem
-                          key={idx}
-                          onClick={() => handleSelectOption({ idx, option })}
-                          selected={
-                            selectedOption?.ticketOptionName ===
-                            option.ticketOptionName
-                          }
-                        >
-                          {option.ticketOptionName} ({option.ticketOptionPrice}
-                          원)
-                        </DropdownItem>
-                      ))} */}
                     </DropdownList>
                   </motion.div>
                 )}
@@ -171,13 +150,14 @@ export default function ShowtimeSelector({
             </Container>
           </>
         )}
+
         {selectedShowtime && selectedOption && (
           <>
             <h3 style={{ marginTop: "16px" }}>매수 선택</h3>
             <TicketContainer>
               <TotalPrice>
+                <strong>{showidx}회차 </strong>
                 <strong>
-                  {selectedShowtime.showtimeId}회차{" "}
                   {formatKoreanDate(selectedShowtime.showtimeStart)}
                 </strong>
                 <strong>{selectedOption.ticketOptionName}</strong>

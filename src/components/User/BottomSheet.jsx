@@ -3,37 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Base from "./Base";
 import ShowtimeSelector from "./ShowtimeSelector";
 
-// const MockData = [
-//   {
-//     showId: 12,
-//     showTitle: "제11회 정기공연",
-//     showtimeList: [
-//       {
-//         showtimeId: 1,
-//         showtimeStart: "2025-10-28T15:00",
-//         availableSeats: 0,
-//       },
-//       {
-//         showtimeId: 2,
-//         showtimeStart: "2025-10-28T15:00",
-//         availableSeats: 20,
-//       },
-//     ],
-//     ticketOptionList: [
-//       {
-//         ticketoptionName: "학생할인",
-//         ticketoptionPrice: 8000,
-//       },
-//       {
-//         ticketoptionName: "학생할인",
-//         ticketoptionPrice: 8000,
-//       },
-//     ],
-//   },
-// ];
-// const managerId = 1;
 const serverUrl = import.meta.env.VITE_API_URL;
-// const serverUrl = "http://15.164.218.55:8080";
 
 export default function BottomSheet({ onClose, onNeedModal, tempData }) {
   const navigate = useNavigate();
@@ -72,6 +42,7 @@ export default function BottomSheet({ onClose, onNeedModal, tempData }) {
   };
 
   const [options, setOptions] = useState(null);
+  const [showidx, setShowidx] = useState(false);
   useEffect(() => {
     const loadOptions = async () => {
       const tmp = await fetchOptions();
@@ -125,6 +96,7 @@ export default function BottomSheet({ onClose, onNeedModal, tempData }) {
               selectedOption,
               quantity,
               showData,
+              showidx,
             },
           }
         );
@@ -135,21 +107,13 @@ export default function BottomSheet({ onClose, onNeedModal, tempData }) {
             selectedOption,
             quantity,
             showData,
+            showidx,
           },
         });
       }
     } catch (error) {
       console.error("예약 요청 실패:", error);
       alert("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
-      // 연결하고 지우기
-      // navigate(`../payment`, {
-      //   state: {
-      //     selectedShowtime,
-      //     selectedOption,
-      //     quantity,
-      //     showData,
-      //   },
-      // });
     }
   };
   console.log("showtickeoptionist", showData.ticketOptionList);
@@ -167,9 +131,10 @@ export default function BottomSheet({ onClose, onNeedModal, tempData }) {
           quantity={quantity}
           setQuantity={setQuantity}
           handlebtn={handleNext}
+          showidx={showidx}
+          setShowidx={setShowidx}
         />
       )}
-      {/* <Footerbtn onClick={handleNext} /> */}
     </Base>
   );
 }

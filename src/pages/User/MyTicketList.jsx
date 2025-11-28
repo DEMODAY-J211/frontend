@@ -51,7 +51,11 @@ export default function MyTicketList() {
   return (
     <PageWrapper>
       <HomeUserContainer>
-        <NavbarUser Backmode={true} text="내 예매 내역" />
+        <NavbarUser
+          Backmode={true}
+          text="내 예매 내역"
+          nav={`/${managerId}/homeuser`}
+        />
         <TabWrapper>
           <TabContainer>
             {tabs.map((tab) => (

@@ -84,11 +84,12 @@ export default function HomeUser() {
         }
       );
       const result = await response.json();
-      console.log("managerId의 등록된 공연 Data", result);
-      setTeamTitle(result.data.managerName);
       if (result.success) {
         // setManagerData(result.data);
         setShows(result.data.showList);
+        console.log("managerId의 등록된 공연 Data", result);
+        setTeamTitle(result.data.managerName);
+        localStorage.setItem("Manager_Data", JSON.stringify(result.data));
       }
     } catch (error) {
       console.error("공연 조회 실패:", error);
@@ -142,11 +143,9 @@ export default function HomeUser() {
   return (
     <PageWrapper>
       <HomeUserContainer>
-        {isLoginModalOpen && <LoginRequiredModal close={closeLoginModal} />}
+        {isLoginModalOpen && <LoginRequiredModal onClose={closeLoginModal} />}
 
         <NavbarUser
-          managerId={managerId}
-          text={teamTitle}
           onIconClick={handleHeaderIconClick}
           onLoginClick={handleHeaderLoginClick}
         />

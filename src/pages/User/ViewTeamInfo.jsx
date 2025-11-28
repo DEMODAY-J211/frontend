@@ -12,7 +12,9 @@ export default function ViewTeamInfo() {
   return (
     <PageWrapper>
       <HomeUserContainer>
-        <NavbarUser />
+        <NavbarUser
+          onIconClick={() => navigate(`/${managerId}/myticketlist`)}
+        />
         <TeamInfo />
         <Footerbtn
           buttons={[
@@ -23,7 +25,6 @@ export default function ViewTeamInfo() {
     </PageWrapper>
   );
 }
-
 const PageWrapper = styled.div`
   display: flex;
   justify-content: center;
