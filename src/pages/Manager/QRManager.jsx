@@ -132,57 +132,6 @@ const QRManager = () => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   const init = async () => {
-  //     const container = document.getElementById(qrcodeId);
-  //     if (!container) return;
-  //     // if (!currentShowId || !currentShowtimeId) return;
-
-  //     if (!html5QrCodeRef.current) {
-  //       html5QrCodeRef.current = new Html5Qrcode(qrcodeId);
-
-  //       const qrCodeSuccessCallback = (decodedText) => {
-  //         console.log("QR detected:", decodedText);
-
-  //         // if (decodedText === lastScannedCode) return;
-
-  //         setLastScannedCode(decodedText);
-  //         validateQRCode(decodedText, currentShowId, currentShowtimeId);
-  //       };
-
-  //       const config = {
-  //         fps: 10,
-  //         qrbox: { width: 250, height: 250 },
-  //         aspectRatio: 1.77778,
-  //       };
-
-  //       try {
-  //         await html5QrCodeRef.current.start(
-  //           { facingMode: "environment" },
-  //           config,
-  //           qrCodeSuccessCallback
-  //         );
-  //       } catch (err) {
-  //         console.error("QR 초기화 실패:", err);
-  //       }
-  //     }
-  //   };
-
-  //   init();
-
-  //   return () => {
-  //     if (html5QrCodeRef.current) {
-  //       const state = html5QrCodeRef.current.getState();
-  //       if (state === 2) {
-  //         html5QrCodeRef.current
-  //           .stop()
-  //           .then(() => html5QrCodeRef.current.clear())
-  //           .catch(console.error);
-  //       }
-  //     }
-  //   };
-  // }, [currentShowId, currentShowtimeId]);
-
   useEffect(() => {
     console.log("selected", currentShowId, currentShowtimeId);
   }, [currentShowId, currentShowtimeId]);
@@ -291,100 +240,87 @@ const Content = styled.div``;
 const QRManagerContent = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 50px 100px;
-  justify-content: space-between;
+  padding: 50px 20px; // 모바일은 padding 줄여서 꽉 차게
+  justify-content: flex-start;
   align-items: center;
-  flex: 1 0 0;
-  align-self: stretch;
   gap: 45px;
-`;
-/* ---------------- 제목 + 시간 ---------------- */
-
-const Header = styled.div`
-  display: flex;
+  flex: 1 0 auto;
   align-self: stretch;
-  gap: 30px;
+  min-height: 100vh; // 모바일에서 전체 높이 확보
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
 `;
+
+/* ---------------- 제목 + 시간 ---------------- */
 
 const Title = styled.div`
   align-self: stretch;
   font-size: 30px;
   font-weight: 500;
   padding-left: 5px;
+  width: 100%;
 `;
 
-const SelectTime = styled.div`
+const Header = styled.div`
   display: flex;
-  border-radius: 15px;
-  border: 1px solid var(--color-primary);
-  background: #fff;
-  padding: 5px 20px;
-  gap: 40px;
-`;
+  flex-direction: column; // 모바일에서는 세로로
+  align-self: stretch;
+  gap: 15px;
 
-const ShowName = styled.div`
-  color: var(--color-primary);
-  font-size: 20px;
-  font-weight: 500;
-`;
-
-const ShowTime = styled.div`
-  color: var(--color-primary);
-  font-size: 20px;
-  font-weight: 500;
-`;
-
-const Time = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
+  @media (min-width: 1024px) {
+    flex-direction: row; // PC에서는 가로
+    gap: 30px;
+  }
 `;
 
 const QRContainer = styled.div`
   display: flex;
-  padding: 25px 41px;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  flex: 1 0 0;
   align-self: stretch;
   background-color: var(--color-tertiary);
-  border-radius: 20px;
 
-  /* QR 스캐너 영역 추가 */
-  #reader {
+  @media (min-width: 1024px) {
+    max-width: 600px; // 데스크탑에서 최대 크기
   }
 `;
 
 const Prompt = styled.div`
-  font-size: 35px;
-  font-weight: 500;
+  padding: 10px 0px;
+
+  @media (min-width: 1024px) {
+    font-size: 35px;
+    font-weight: 500;
+  }
 `;
 
 const TextContainer = styled.div`
-  gap: 24px;
+  // gap: 24px;
   text-align: center;
+  padding: 10px 41px;
 `;
 
 const Info = styled.div`
+  @media (min-width: 1024px) {
+    font-size: 20px;
+    font-weight: 300;
+  }
   color: var(--color-primary);
-  font-size: 20px;
-  font-weight: 300;
 `;
 
 const ScannerContainer = styled.div`
-  width: 100%;
-  max-width: 1200px;
-  background-color: #b5b5b5;
-  background: #fff;
-  border-radius: 15px;
-  overflow: hidden;
+  width: 100%; // 부모 폭에 맞춤
+  }
 `;
 
 const ShowtimeDropdown = styled.select`
   padding: 8px 16px;
   border-radius: 15px;
+  height: 100%;
   border: 1px solid var(--color-primary);
   background: ${({ $active }) => ($active ? "var(--color-primary)" : "#fff")};
   color: ${({ $active }) => ($active ? "#fff" : "var(--color-primary)")};
