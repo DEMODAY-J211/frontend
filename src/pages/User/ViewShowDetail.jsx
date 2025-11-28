@@ -12,6 +12,12 @@ import { useAuth } from "../Auth/AuthContext";
 // s01001
 
 const serverUrl = import.meta.env.VITE_API_URL;
+const seatTypeLabels = {
+  EVENTHOST: "현장예매",
+  SCHEDULING: "자동석",
+  STANDING: "스탠딩석",
+  SELECTBYUSER: "좌석선택형",
+};
 
 export default function ViewShowDetail() {
   const { managerId, showId } = useParams();
@@ -118,7 +124,8 @@ export default function ViewShowDetail() {
                       {formatKoreanDate(showData.showStartDate)} ~{" "}
                       {formatKoreanDate(showData.showtimeEndDate)}
                       <br />
-                      {showData.showLocation}
+                      {showData.showLocation} (
+                      {seatTypeLabels[showData?.saleMethod]})
                     </b>
                   </div>
                 </div>
@@ -149,7 +156,8 @@ export default function ViewShowDetail() {
                 <div className="wrapper">
                   <a>공연 장소</a>
                   <b>
-                    {showData.showLocation}({showData?.saleMethod})
+                    {showData.showLocation} (
+                    {seatTypeLabels[showData?.saleMethod]})
                   </b>
                 </div>
                 <div className="wrapper">
