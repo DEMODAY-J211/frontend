@@ -38,7 +38,10 @@ export default function NavbarUser({
       <div className="buttoncontainer" onClick={navi}>
         <RiArrowLeftSLine size="32px" />
       </div>
-      <MainContainer>{text ? text : ""}</MainContainer>
+      <TitleContainer>{text ? text : ""}</TitleContainer>
+      <div>
+        <RiArrowLeftSLine size="32px" style={{ visibility: "hidden" }} />
+      </div>
     </HeaderContainer>
   ) : (
     // 메인 헤더 (기본값) ex. <NavbarUser/>, <NavbarUser Backmode={false} />
@@ -106,6 +109,7 @@ const MainContainer = styled.div`
   left: 50%;
   transform: translateX(-50%);
   user-select: none;
+  display: flex;
 `;
 
 const TextContainer = styled.div`
@@ -122,4 +126,13 @@ const TextContainer = styled.div`
     display: flex;
     gap: 5px;
   }
+`;
+
+const TitleContainer = styled.div`
+  flex: 1; /* 가능한 공간 최대한 채움 */
+  text-align: center; /* 가운데 정렬 */
+  font-size: 20px;
+  font-weight: 500;
+  line-height: normal;
+  overflow-wrap: break-word; /* 줄바꿈 허용 */
 `;
