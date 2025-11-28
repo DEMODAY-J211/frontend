@@ -1,24 +1,22 @@
 import styled from "styled-components";
 import { AiOutlineClose } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-const managerId = 5;
 export default function CancelModal({ onClose, reservationId }) {
   const navigate = useNavigate();
   const [status, setStatus] = useState(false);
-
+  const { managerId } = useParams();
   const onClick = () => {
-    fetchCancel();
+    if (!status) {
+      fetchCancel();
+    } else {
+      onClose();
+    }
   };
 
   const fetchCancel = async () => {
     try {
-      // const token = localStorage.getItem("accessToken");
-      // const response = await fetch(`${serverUrl}/user/${managerId}/myshow`, {
-      //   credentials: "include",
-      //   header: { "Content-Type": "application/json" },
-      // });
       const response = await fetch(
         `${
           import.meta.env.VITE_API_URL
@@ -34,17 +32,6 @@ export default function CancelModal({ onClose, reservationId }) {
         }
       );
 
-      // const response = await fetch(
-      //   `${serverUrl}/user/myshow?managerId=${managerId}&status=upcoming`,
-      //   {
-      //     method: "GET",
-      //     credentials: "include",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       "Access-Control-Allow-Credentials": "true",
-      //     },
-      //   }
-      // );
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
       }
@@ -53,7 +40,7 @@ export default function CancelModal({ onClose, reservationId }) {
       if (data.success) {
         console.log("response의 data", data);
         setStatus(true);
-        navigate(-1);
+        // navigate(-1, { state: { cancelled: true } });
       }
     } catch (error) {
       console.error("예매한 공연 조회 실패:", error);

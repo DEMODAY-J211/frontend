@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import NavbarUser from "../../components/Navbar/NavbarUser";
 import Footerbtn from "../../components/Save/Footerbtn";
 import CancelModal from "../../components/Modal/CancelModal";
 import { formatKoreanDate } from "../../utils/dateFormat";
+import { useToast } from "../../components/Toast/useToast";
 
 // s01201
 const serverUrl = import.meta.env.VITE_API_URL;
-// const serverUrl = "http://15.164.218.55:8080";
 const bankOptions = [
   { id: 1, name: "국민은행", code: "KB" },
   { id: 2, name: "기업은행", code: "IBK" },
@@ -30,8 +30,12 @@ export default function CheckTicket() {
   const [isCancel, setIsCancel] = useState(false);
   const [showData, setShowData] = useState([]);
   const { managerId, reservationId } = useParams();
+  const { addToast } = useToast();
+  const location = useLocation();
   const handleSelectSeat = () => {
-    navigate(`${managerId}/selectseat/${showid}`);
+    navigate(`/${managerId}/selectseat/${showData?.showTimeId}`, {
+      state: { change: true, showData: showData, reservationId: reservationId },
+    });
   };
   const handleCancel = () => {
     setIsCancel(true);
@@ -59,7 +63,7 @@ export default function CheckTicket() {
       alert("해당 공연 단체를 찾을 수 없습니다.");
     }
   };
-
+  // const [status, setStatus] = false;
   const statusText = {
     PENDING_PAYMENT: "승인 대기중",
     CANCELED: "취소 완료",
@@ -69,16 +73,13 @@ export default function CheckTicket() {
   useEffect(() => {
     fetchShowData();
   }, []);
-
-  useEffect(() => {
-    console.log("showData 업데이트:", showData);
-  }, [showData]);
-
   return (
     <PageWrapper>
       {isCancel && (
         <CancelModal
-          onClose={() => setIsCancel(false)}
+          onClose={() => {
+            setIsCancel(false);
+          }}
           reservationId={reservationId}
         />
       )}
@@ -155,7 +156,7 @@ export default function CheckTicket() {
             </Content>
           </Wrapper>
         </TicketWrapper>
-        {showData?.reservationstatus !== "CANCEL_REQUESTED" &&
+        {(isCancel || showData?.reservationstatus !== "CANCEL_REQUESTED") &&
           (showData?.saleMethod === "SELECTBYUSER" ? (
             <Footerbtn
               buttons={[
