@@ -23,6 +23,8 @@ export default function HomeUser() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const openLoginModal = () => setIsLoginModalOpen(true);
   const closeLoginModal = () => setIsLoginModalOpen(false);
+  const now = new Date();
+  const [curshowTime, setCurshowTime] = useState(false);
 
   const requireLogin = (action) => {
     if (!isLoggedIn) {
@@ -56,6 +58,7 @@ export default function HomeUser() {
 
   function handleNext() {
     setCurrentIndex((prev) => Math.min(prev + 1, shows.length - 1));
+    setCurshowTime(shows[currentIndex]?.showTimes);
   }
   function handlePrev() {
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
@@ -67,6 +70,13 @@ export default function HomeUser() {
       navigate(`/${managerId}/viewshowdetail/${currentShow.showId}`);
     });
   };
+
+  // 로그인 여부 + 공연 상태 + 오늘 기준 1시간 전 체크
+  const ReservableDate =
+    !isLoggedIn ||
+    (isLoggedIn &&
+      currentShow?.reservable &&
+      new Date(currentShow.showTimes).getTime() > now.getTime() - 3600 * 1000);
 
   // console.log("currentshow manaerId", currentShow.managerId);
   const fetchShows = async () => {
@@ -85,9 +95,29 @@ export default function HomeUser() {
       );
       const result = await response.json();
       if (result.success) {
-        // setManagerData(result.data);
-        setShows(result.data.showList);
-        console.log("managerId의 등록된 공연 Data", result);
+        let sortedShows = [...result.data.showList];
+
+        const now = new Date();
+
+        // 1시간 전까지 공연은 종료로 판단
+        sortedShows.sort((a, b) => {
+          const showA = new Date(a.showTimes);
+          const showB = new Date(b.showTimes);
+
+          const isAReservable =
+            a.reservable && showA.getTime() > now.getTime() - 3600 * 1000;
+          const isBReservable =
+            b.reservable && showB.getTime() > now.getTime() - 3600 * 1000;
+
+          // 예매 가능한 공연 먼저
+          if (isAReservable && !isBReservable) return -1;
+          if (!isAReservable && isBReservable) return 1;
+
+          // 둘 다 같은 상태일 때 showTimes 역순(늦은 공연 먼저)
+          return showB - showA;
+        });
+
+        setShows(sortedShows);
         setTeamTitle(result.data.managerName);
         localStorage.setItem("Manager_Data", JSON.stringify(result.data));
       }
@@ -180,12 +210,12 @@ export default function HomeUser() {
                 })}
               </ShowItemSlider>
               <Buyticketbtn
-                reservable={
-                  !isLoggedIn || (isLoggedIn && currentShow.reservable)
-                }
+                reservable={ReservableDate}
                 onClick={handleBuyTicket}
               >
-                {userReservations.includes(currentShow.showId)
+                {!ReservableDate
+                  ? "예매 종료"
+                  : userReservations.includes(currentShow.showId)
                   ? "예매 내역 확인하기"
                   : "예매하기"}
               </Buyticketbtn>

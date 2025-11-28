@@ -88,20 +88,17 @@ export default function BottomSheet({ onClose, onNeedModal, tempData }) {
       console.log("서버 응답:", result);
       // console.log("서버응답 selec", result.data.saleMethod);
       if (tempData.saleMethod === "SELECTBYUSER") {
-        navigate(
-          `/${managerId}/selectseat/${tempData.showId}/${selectedShowtime.showtimeId}`,
-          {
-            state: {
-              selectedShowtime,
-              selectedOption,
-              quantity,
-              showData,
-              showidx,
-            },
-          }
-        );
+        navigate(`/${managerId}/selectseat/${selectedShowtime.showtimeId}`, {
+          state: {
+            selectedShowtime,
+            selectedOption,
+            quantity,
+            showData,
+            showidx,
+          },
+        });
       } else {
-        navigate(`/${managerId}/payment/${showData.showId}`, {
+        navigate(`/${managerId}/payment`, {
           state: {
             selectedShowtime,
             selectedOption,

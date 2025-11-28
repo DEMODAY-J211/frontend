@@ -13,7 +13,7 @@ const serverUrl = import.meta.env.VITE_API_URL;
 
 export default function BuyTicket() {
   const location = useLocation();
-  const { managerId, showId } = useParams();
+  const { managerId } = useParams();
   const { selectedShowtime, selectedOption, quantity, showData, showidx } =
     location.state || {};
   console.log(selectedShowtime, selectedOption, quantity, showData);
@@ -168,16 +168,7 @@ export default function BuyTicket() {
               onChange={(e) => setAccountHolder(e.target.value)}
             />
           </InfoSection>
-          {/* 결제 정보 */}
-          {/* <InfoSection>
-            <Title>결제정보</Title>
-            <Subtitle>입금자명은 {"강길동"}으로 해주세요.</Subtitle>
-            <TicketInfo>
-              <Title>입금 계좌</Title>
-              <Toggle>계좌복사</Toggle>
-            </TicketInfo>
-            <Subtitle>우리 0000-000-000000 (예금주) 홍길동</Subtitle>
-          </InfoSection> */}
+
           {/* 판매 정보 */}
           <InfoSection className="gray">
             <Title>판매정보</Title>

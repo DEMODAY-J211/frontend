@@ -68,11 +68,21 @@ export default function MyTicketList() {
               </Tab>
             ))}
           </TabContainer>
-          <div>
+          <ScrollableContent>
             {activeTab === "예매확인/취소" && (
               <ShowListContainer>
                 {reservationlist
                   ?.filter((r) => new Date(r.showtimeStart) > new Date()) // 현재 이후 공연만
+                  .sort((a, b) => {
+                    // 1. 취소 여부 비교
+                    if (a.status !== "CANCELED" && b.status === "CANCELED")
+                      return -1;
+                    if (a.status === "CANCELED" && b.status !== "CANCELED")
+                      return 1;
+
+                    // 2. 같은 그룹 내에서 reservationId 역순 정렬
+                    return b.reservationId - a.reservationId;
+                  })
                   .map((r) => (
                     <ShowListItem
                       key={r.reservationId}
@@ -88,6 +98,16 @@ export default function MyTicketList() {
               <ShowListContainer>
                 {reservationlist
                   .filter((r) => new Date(r.showtimeStart) <= new Date()) // 현재 이전 공연만
+                  .sort((a, b) => {
+                    // 1. 취소 여부 비교
+                    if (a.status !== "CANCELED" && b.status === "CANCELED")
+                      return -1;
+                    if (a.status === "CANCELED" && b.status !== "CANCELED")
+                      return 1;
+
+                    // 2. 같은 그룹 내에서 reservationId 역순 정렬
+                    return b.reservationId - a.reservationId;
+                  })
                   .map((r) => (
                     <ShowListItem
                       key={r.reservationId}
@@ -97,7 +117,7 @@ export default function MyTicketList() {
                   ))}
               </ShowListContainer>
             )}
-          </div>
+          </ScrollableContent>
         </TabWrapper>
       </HomeUserContainer>
     </PageWrapper>
@@ -107,11 +127,10 @@ export default function MyTicketList() {
 const PageWrapper = styled.div`
   display: flex;
   justify-content: center;
-  min-height: 100vh;
+  // min-height: 100vh;
   // background-color: #fff;
   background-color: ${(props) => (props.$dimmed ? "rgba(0,0,0,0.2)" : "#fff")};
   transition: background-color 0.3s ease;
-
   color: #000;
   font-size: 20px;
   font-style: normal;
@@ -136,9 +155,17 @@ const HomeUserContainer = styled.div`
 const TabWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  align-self: stretch;
-  height: 100vh;
+  flex: 1; // 남은 공간을 차지
+  width: 100%;
+`;
+
+const ScrollableContent = styled.div`
+  flex: 1; // TabWrapper 내 남은 공간
+  min-height: 100vh;
+  overflow-y: auto; // 스크롤 가능
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const TabContainer = styled.div`

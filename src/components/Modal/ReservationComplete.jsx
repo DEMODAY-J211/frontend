@@ -11,7 +11,7 @@ const serverUrl = import.meta.env.VITE_API_URL;
 export default function ReservationComplete({ onClose }) {
   const navigate = useNavigate();
   const [resData, setResData] = useState([]);
-  const { managerId } = useParams();
+  const { managerId, showId } = useParams();
   const fetchResData = async () => {
     try {
       // const token = localStorage.getItem('accessToken');
@@ -64,7 +64,9 @@ export default function ReservationComplete({ onClose }) {
     const reservationId = data.data;
     console.log("예매 완료 응답:", data);
 
-    navigate(`/${managerId}/checkticket/${reservationId}`, { replace: true });
+    navigate(`/${managerId}/checkticket/${reservationId}`, {
+      replace: true,
+    });
   };
 
   useEffect(() => {

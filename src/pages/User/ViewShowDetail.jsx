@@ -88,7 +88,7 @@ export default function ViewShowDetail() {
   return (
     <PageWrapper>
       <HomeUserContainer>
-        <NavbarUser Backmode={true} text="" />
+        <NavbarUser Backmode={true} text={showData?.showTitle} />
         {!showData ? (
           <ShowContainer>
             <p
@@ -148,7 +148,9 @@ export default function ViewShowDetail() {
                 </div>
                 <div className="wrapper">
                   <a>공연 장소</a>
-                  <b>{showData.showLocation}</b>
+                  <b>
+                    {showData.showLocation}({showData?.saleMethod})
+                  </b>
                 </div>
                 <div className="wrapper">
                   <a>공연 단체</a>

@@ -127,7 +127,7 @@ const App = () => {
               element={<ProtectedRoute element={ViewShowDetail} />}
             />
             <Route
-              path=":managerId/payment/:showId"
+              path=":managerId/payment"
               element={<ProtectedRoute element={BuyTicket} />}
             />
             <Route
@@ -143,7 +143,7 @@ const App = () => {
               element={<ProtectedRoute element={CheckTicket} />}
             />
             <Route
-              path=":managerId/selectseat/:showId/:showtimeId"
+              path=":managerId/selectseat/:showtimeId"
               element={<ProtectedRoute element={SelectSeat} />}
             />
 
@@ -184,26 +184,6 @@ const App = () => {
               <Route path="step5" element={<RegisterShowStep5 />} />
             </Route>
 
-            {/* <Route
-              path="/register-show/step1"
-              element={<ProtectedRoute element={RegisterShowStep1} />}
-            />
-            <Route
-              path="/register-show/step2"
-              element={<ProtectedRoute element={RegisterShowStep2} />}
-            />
-            <Route
-              path="/register-show/step3"
-              element={<ProtectedRoute element={RegisterShowStep3} />}
-            />
-            <Route
-              path="/register-show/step4"
-              element={<ProtectedRoute element={RegisterShowStep4} />}
-            />
-            <Route
-              path="/register-show/step5"
-              element={<ProtectedRoute element={RegisterShowStep5} />}
-            /> */}
             <Route
               path="/register-venue/step1"
               element={<ProtectedRoute element={RegisterVenue1} />}
