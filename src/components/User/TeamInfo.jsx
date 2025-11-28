@@ -1,30 +1,22 @@
 import styled from "styled-components";
 import { BsInstagram, BsFacebook } from "react-icons/bs";
+import tikitta_logo from "../../assets/tikitta_white_small.svg";
 import { BiLogoYoutube } from "react-icons/bi";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-// const managerId = 1;
 const serverUrl = import.meta.env.VITE_API_URL;
-// const serverUrl = "http://15.164.218.55:8080";
-
-// const mockData = {
-//   managerId: 1,
-//   managerName: "멋쟁이 연극회",
-//   managerPicture: "https://example.com/profile.png",
-//   managerIntro: "멋쟁이 연극회입니다.",
-//   managerText:
-//     "이런 멋쟁이연극회 좋아할래 이런 멋쟁이연극회 좋아할래 이런 멋쟁이연극회 좋아할래...",
-//   managerUrl: [
-//     "https://instagram.com/example",
-//     "https://youtube.com/example",
-//     "https://facebook.com/example",
-//   ],
-// };
 
 export default function TeamInfo() {
   const { managerId } = useParams();
   const [managerData, setManagerData] = useState([]);
+  const managerUrls = managerData?.managerUrl || [];
+
+  const platformIcons = [
+    { name: "youtube", match: "youtube", icon: BiLogoYoutube, size: 32 },
+    { name: "facebook", match: "facebook", icon: BsFacebook, size: 24 },
+    { name: "instagram", match: "instagram", icon: BsInstagram, size: 24 },
+  ];
 
   useEffect(() => {
     fetch(`${serverUrl}/user/${managerId}/organization`, {
@@ -52,18 +44,38 @@ export default function TeamInfo() {
         <img className="team_img" src={managerData.managerPicture} />
         <h2>{managerData.managerName}</h2>
         <LinkContainer>
-          <BsInstagram
-            size={24}
-            onClick={() => window.open(managerData.managerUrl[0])}
-          />
-          <BiLogoYoutube
-            size={32}
-            onClick={() => window.open(managerData.managerUrl[2])}
-          />
-          <BsFacebook
-            size={24}
-            onClick={() => window.open(managerData.managerUrl[1])}
-          />
+          {managerUrls.map((url, idx) => {
+            const platform = platformIcons.find((p) => url.includes(p.match));
+
+            if (platform) {
+              const Icon = platform.icon;
+              return (
+                <Icon
+                  key={idx}
+                  size={platform.size}
+                  onClick={() => window.open(url)}
+                />
+              );
+            }
+
+            // 매칭 안 되는 경우 = tikittalogo 표시
+            return (
+              <img
+                key={idx}
+                src={tikitta_logo}
+                alt="tikitta_logo"
+                onClick={() => window.open(url)}
+                style={{
+                  width: 24,
+                  height: 24,
+                  cursor: "pointer",
+                  backgroundColor: "var(--color-primary)",
+                  borderRadius: "5px",
+                  padding: "3px",
+                }}
+              />
+            );
+          })}
         </LinkContainer>
       </div>
       <p>한줄 소개</p>

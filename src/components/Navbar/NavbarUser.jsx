@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -18,7 +18,10 @@ export default function NavbarUser({
   const { managerId } = useParams();
   const navigate = useNavigate();
   const { isLoggedIn, logout } = useAuth();
-  // console.log("managerId,", managerId);
+  const [managerData, setManagerData] = useState(() => {
+    const saved = localStorage.getItem("Manager_Data");
+    return saved ? JSON.parse(saved) : null;
+  });
   const navi = () => {
     console.log("nav 값:", nav);
 
@@ -29,16 +32,13 @@ export default function NavbarUser({
 
     navigate(nav, { replace: true });
   };
-
-  console.log("nav prop:", nav);
-  console.log("managerId:", managerId);
   return Backmode ? (
     // 예매하기(서브 헤더) 헤더 ex. <NavbarUser Backmode={true} text="예매하기" />
     <HeaderContainer>
       <div className="buttoncontainer" onClick={navi}>
         <RiArrowLeftSLine size="32px" />
       </div>
-      <MainContainer>{text ? text : "제11회 정기공연"}</MainContainer>
+      <MainContainer>{text ? text : ""}</MainContainer>
     </HeaderContainer>
   ) : (
     // 메인 헤더 (기본값) ex. <NavbarUser/>, <NavbarUser Backmode={false} />
@@ -50,7 +50,7 @@ export default function NavbarUser({
         style={{ cursor: "pointer" }}
       />
       <TextContainer>
-        {text ? text : "연극회"}
+        {text ? text : managerData?.managerName}
         <div className="button">
           <div className="buttoncontainer">
             <RiInformationLine
